@@ -1,0 +1,19 @@
+using Microsoft.AspNetCore.Http;
+
+namespace VidaAnimal.API.DTOs
+{
+    public class ProductoCreateDTO
+    {
+        public string Codigo { get; set; }
+        public string Nombre { get; set; }
+        public string? Descripcion { get; set; }
+        public int CategoriaID { get; set; }
+        public int? ProveedorID { get; set; }
+        public string UnidadMedida { get; set; }
+        public decimal PrecioCosto { get; set; }
+        public decimal PrecioVenta { get; set; }
+        public decimal StockMinimo { get; set; }
+
+        public IFormFile? ImagenFoto { get; set; }
+    }
+}

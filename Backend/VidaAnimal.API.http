@@ -1,0 +1,6 @@
+@VidaAnimal.API_HostAddress = http://localhost:5044
+
+GET {{VidaAnimal.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
