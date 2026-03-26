@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Threading.Tasks;
 using System;
@@ -19,6 +20,14 @@ namespace VidaAnimal.API.Controllers
         {
             _context = context;
             _env = env;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetProductos()
+        {
+            // Omitimos include de relaciones para hacer la petición rápida y sencilla por ahora
+            var productos = await _context.Productos.ToListAsync();
+            return Ok(new { success = true, data = productos });
         }
 
         [HttpPost]
@@ -53,12 +62,11 @@ namespace VidaAnimal.API.Controllers
                     Codigo = modelo.Codigo,
                     Nombre = modelo.Nombre,
                     Descripcion = modelo.Descripcion,
-                    CategoriaID = modelo.CategoriaID,
                     ProveedorID = modelo.ProveedorID,
                     UnidadMedida = modelo.UnidadMedida,
                     PrecioCosto = modelo.PrecioCosto,
                     PrecioVenta = modelo.PrecioVenta,
-                    StockActual = 0, // Al crearlo el stock inicia en 0 (segun DB), luego se ingresa en Compras
+                    StockActual = modelo.StockActual, 
                     StockMinimo = modelo.StockMinimo,
                     Activo = true,
                     FechaCreacion = DateTime.Now,
@@ -68,12 +76,58 @@ namespace VidaAnimal.API.Controllers
                 _context.Productos.Add(nuevoProducto);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { success = true, mensaje = "Producto creado exitosamente.", data = nuevoProducto });
+                return Ok(new { success = true, mensaje = "Producto creado.", data = nuevoProducto });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, mensaje = "Error al crear producto: " + ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditarProducto(int id, [FromForm] ProductoCreateDTO modelo)
+        {
+            var p = await _context.Productos.FindAsync(id);
+            if (p == null) return NotFound(new { success = false, mensaje = "No encontrado" });
+
+            if (modelo.ImagenFoto != null && modelo.ImagenFoto.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "productos");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                string nm = Guid.NewGuid().ToString() + "_" + modelo.ImagenFoto.FileName;
+                string rc = Path.Combine(uploadsFolder, nm);
+
+                using (var fs = new FileStream(rc, FileMode.Create))
+                {
+                    await modelo.ImagenFoto.CopyToAsync(fs);
+                }
+                p.ImagenURL = $"/uploads/productos/{nm}";
+            }
+
+            p.Codigo = modelo.Codigo;
+            p.Nombre = modelo.Nombre;
+            p.Descripcion = modelo.Descripcion;
+            p.ProveedorID = modelo.ProveedorID;
+            p.UnidadMedida = modelo.UnidadMedida;
+            p.PrecioCosto = modelo.PrecioCosto;
+            p.PrecioVenta = modelo.PrecioVenta;
+            p.StockActual = modelo.StockActual;
+            p.StockMinimo = modelo.StockMinimo;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, mensaje = "Actualizado" });
+        }
+
+        [HttpPatch("{id}/toggle-activo")]
+        public async Task<IActionResult> ToggleActivo(int id)
+        {
+            var p = await _context.Productos.FindAsync(id);
+            if (p == null) return NotFound(new { success = false });
+
+            p.Activo = !p.Activo;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
         }
     }
 }

@@ -10,9 +10,11 @@ namespace VidaAnimal.API.Data
         }
 
         public DbSet<Producto> Productos { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<Usuario> Usuarios { get; set; } // Agregado para el login
+        public DbSet<Cliente> Clientes { get; set; } // Nuevo dominio Clientes
+        public DbSet<Compra> Compras { get; set; }
+        public DbSet<CompraDetalle> CompraDetalles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

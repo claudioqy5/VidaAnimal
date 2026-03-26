@@ -8,7 +8,6 @@ namespace VidaAnimal.API.Models
         public string Codigo { get; set; }
         public string Nombre { get; set; }
         public string? Descripcion { get; set; }
-        public int CategoriaID { get; set; }
         public int? ProveedorID { get; set; }
         public string UnidadMedida { get; set; }
         public decimal PrecioCosto { get; set; }
