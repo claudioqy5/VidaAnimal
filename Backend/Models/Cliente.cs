@@ -25,6 +25,8 @@ namespace VidaAnimal.API.Models
         [MaxLength(200)]
         public string? Direccion { get; set; }
         
+        public DateTime? FechaNacimiento { get; set; }
+        
         public bool Activo { get; set; } = true;
         
         public DateTime FechaRegistro { get; set; } = DateTime.Now;

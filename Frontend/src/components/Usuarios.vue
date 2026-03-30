@@ -118,6 +118,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
+const API_URL = import.meta.env.VITE_API_URL
+const getToken = () => localStorage.getItem('jwt_token')
+
 const usuarios = ref([])
 const cargando = ref(true)
 const guardando = ref(false)
@@ -136,13 +139,11 @@ const formUser = ref({
 })
 
 // Obtener Token para peticiones (si activas el Authorize en el controlador después)
-const getToken = () => localStorage.getItem('jwt_token')
-
 const cargarUsuarios = async () => {
   cargando.value = true
   errorGlobal.value = ''
   try {
-    const res = await fetch('http://localhost:5044/api/Usuarios', {
+    const res = await fetch(`${API_URL}/Usuarios`, {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const data = await res.json()
@@ -192,12 +193,12 @@ const guardarUsuario = async () => {
   errorFormulario.value = ''
 
   try {
-    let url = 'http://localhost:5044/api/Auth/registrar'
+    let url = `${API_URL}/Auth/registrar`
     let method = 'POST'
     let bodyData = { ...formUser.value }
 
     if (modoEdicion.value) {
-      url = `http://localhost:5044/api/Usuarios/${formUser.value.usuarioID}`
+      url = `${API_URL}/Usuarios/${formUser.value.usuarioID}`
       method = 'PUT'
       // El backend espera PasswordHash en caso de edición
       bodyData.passwordHash = formUser.value.password 

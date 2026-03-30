@@ -36,12 +36,20 @@ const props = defineProps({
 defineEmits(['change-tab'])
 
 const menu = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊', roles: ['ADMINISTRADOR', 'CAJERO'] },
-  { id: 'users', label: 'Usuarios', icon: '👥', roles: ['ADMINISTRADOR'] },
-  { id: 'productos', label: 'Productos', icon: '🐾', roles: ['ADMINISTRADOR', 'CAJERO'] },
-  { id: 'compras', label: 'Compras (Reponer Stock)', icon: '📦', roles: ['ADMINISTRADOR'] },
-  { id: 'pos', label: 'Punto de Venta', icon: '🛒', roles: ['ADMINISTRADOR', 'CAJERO'] },
-  { id: 'proveedores', label: 'Proveedores', icon: '🏢', roles: ['ADMINISTRADOR'] }
+  { id: 'inicio',          label: 'Inicio',              icon: '🏠', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'dashboard',       label: 'Dashboard',            icon: '📊', roles: ['ADMINISTRADOR'] },
+
+  { id: 'pos',             label: 'Punto de Venta',       icon: '🛒', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'ventas-cliente',  label: 'Historial de Ventas',  icon: '📅', roles: ['ADMINISTRADOR', 'CAJERO'] },
+
+  { id: 'users',           label: 'Usuarios',             icon: '👥', roles: ['ADMINISTRADOR'] },
+  { id: 'clientes',        label: 'Clientes',             icon: '👨‍👩‍👧', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'productos',       label: 'Productos',            icon: '🐾', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'proveedores',     label: 'Proveedores',          icon: '🏢', roles: ['ADMINISTRADOR'] },
+
+  { id: 'compras',         label: 'Compras (Reponer Stock)', icon: '📦', roles: ['ADMINISTRADOR'] },  
+  { id: 'kardex',          label: 'Historial de Inventario',    icon: '📓', roles: ['ADMINISTRADOR'] }
+  
 ]
 
 const filteredMenu = computed(() => {
@@ -54,21 +62,34 @@ const filteredMenu = computed(() => {
 .sidebar {
   width: var(--sidebar-w, 16rem);
   height: 100vh;
-  background-color: white; /* Clean background */
-  border-right: 1px solid #E2E8F0;
+  background-image: url('../assets/fondosidebar.jpg');  
+  background-size: cover;
+  background-position: center;
+  border-right: none;
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 10;
+  /* Overlay oscuro para bajar brillo y dar look minimalista */
+  isolation: isolate;
+}
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.93);
+  z-index: 0;
 }
 .logo {
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  z-index: 1;
 }
 .logo-icon {
   font-size: 1.5rem;
@@ -83,9 +104,12 @@ const filteredMenu = computed(() => {
   border: none;
 }
 .logo h2 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #2D3748;
+  font-family: 'Syncopate', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 .nav-menu {
   flex: 1;
@@ -93,6 +117,8 @@ const filteredMenu = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
+  z-index: 1;
 }
 .nav-item {
   display: flex;
@@ -100,8 +126,10 @@ const filteredMenu = computed(() => {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-radius: 12px;
-  color: #718096;
-  font-weight: 500;
+  color: #4A5568;
+  font-family: 'Poiret One', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   background: transparent;
   width: 100%;
   text-align: left;
@@ -110,43 +138,49 @@ const filteredMenu = computed(() => {
   transition: all 0.2s ease;
 }
 .nav-item:hover {
-  background-color: #F7FAFC;
+  background-color: rgba(0, 0, 0, 0.05);
   color: #2D3748;
 }
 .nav-item.active {
-  background-color: rgba(195, 177, 225, 0.15); /* Pastel purple tint */
-  color: #553C9A;
-  font-weight: 600;
+  background-color: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-weight: 700;
+  box-shadow: none;
 }
 .nav-item .icon {
   font-size: 1.25rem;
 }
 .user-profile {
   padding: 1.5rem;
-  border-top: 1px solid #E2E8F0;
+  border-top: 1px solid rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
+  position: relative;
+  z-index: 1;
 }
 .avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #EDF2F7;
+  background-color: rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  border: 1px solid #E2E8F0;
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #2D3748;
 }
 .info p { margin: 0; }
 .info .name {
   font-weight: 600;
   font-size: 0.875rem;
   color: #2D3748;
+  letter-spacing: 0.12em;
 }
 .info .role {
   color: #718096;
   font-size: 0.75rem;
+  letter-spacing: 0.12em;
 }
 </style>

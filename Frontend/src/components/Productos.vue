@@ -8,6 +8,7 @@
     </div>
 
     <div v-if="errorGlobal" class="error-banner">{{ errorGlobal }}</div>
+    <div v-if="successGlobal" class="success-banner">{{ successGlobal }}</div>
 
     <div class="filters-bar">
       <div class="search-box">
@@ -45,14 +46,14 @@
         <tbody>
           <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': (prod.activo && prod.precioVenta < prod.precioCosto) }">
             <td class="img-cell">
-              <img v-if="prod.imagenURL" :src="'http://localhost:5044' + prod.imagenURL" class="prod-thumb" alt="Product thumbnail" />
+              <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-thumb" alt="Product thumbnail" />
               <div v-else class="img-placeholder">🐾</div>
             </td>
             <td class="font-medium text-muted">{{ prod.codigo }}</td>
             <td class="font-medium">
               <div class="prod-name">
                 {{ prod.nombre }}
-                <span v-if="prod.stockActual <= prod.stockMinimo" class="alert-badge" title="Stock Bajo">⚠️</span>
+                <span v-if="prod.stockActual <= prod.stockMinimo" class="alert-badge stock-badge" title="Stock Bajo">⚠️ Bajo Stock</span>
                 <span v-if="prod.activo && prod.precioVenta < prod.precioCosto" class="alert-badge loss-badge" title="Venta por debajo del costo">🚨 Pérdida</span>
               </div>
             </td>
@@ -69,8 +70,11 @@
             </td>
             <td class="actions-cell">
               <button class="action-btn edit-btn" @click="abrirModalEditar(prod)" title="Editar">✏️</button>
-              <button class="action-btn toggle-btn" @click="toggleEstado(prod.productoID)" :title="prod.activo ? 'Desactivar' : 'Activar'">
+              <button class="action-btn toggle-btn" @click="abrirModalToggle(prod)" :title="prod.activo ? 'Desactivar' : 'Activar'">
                 {{ prod.activo ? '🚫' : '✅' }}
+              </button>
+              <button class="action-btn delete-btn" @click="abrirModalEliminar(prod)" title="Eliminar definitivamente">
+                🗑️
               </button>
             </td>
           </tr>
@@ -150,7 +154,7 @@
                 </div>
                 <div class="form-group">
                   <label>Stock Actual</label>
-                  <input type="number" min="0" v-model="formProd.stockActual" required />
+                  <input type="number" min="0" v-model="formProd.stockActual" disabled title="El stock físico solo puede actualizarse a través de Módulo de Compras (Ingreso) o POS (Salida)." style="cursor: not-allowed; background-color: #EDF2F7;" />
                 </div>
                 <div class="form-group">
                   <label>Stock Mínimo</label>
@@ -182,11 +186,72 @@
         </form>
       </div>
     </div>
+    <!-- Modal de Eliminación Segura -->
+    <div v-if="mostrarModalEliminar" class="modal-overlay" @click.self="cerrarModalEliminar">
+      <div class="modal-content" style="max-width: 450px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div class="modal-header" style="background-color: #FFF5F5; border-bottom: 2px solid #FED7D7; border-radius: 20px 20px 0 0;">
+          <h3 style="color: #C53030;">⚠️ Alerta Crítica</h3>
+          <button class="close-btn" @click="cerrarModalEliminar">✕</button>
+        </div>
+        
+        <form @submit.prevent="confirmarEliminar" class="modal-form">
+          <p style="font-weight: 700; color: #2D3748; margin-bottom: 0.5rem; text-align: center;">¿Estás completamente seguro?</p>
+          <p style="color: #4A5568; font-size: 0.95rem; line-height: 1.5; text-align: center; margin-top: 0; margin-bottom: 1.5rem;">
+            Se va a eliminar definitivamente el producto <strong style="color: #E53E3E;">{{ prodAEliminar?.nombre }}</strong> y todos sus datos del sistema. Para recuperarlo tendrás que crearlo nuevamente desde cero.
+          </p>
+          
+          <div v-if="errorEliminar" class="form-error" style="text-align: center;">{{ errorEliminar }}</div>
+
+          <div class="form-group" style="background: #F7FAFC; padding: 1rem; border-radius: 10px; border: 1px dashed #CBD5E0;">
+            <label style="text-align: center; color: #4A5568;">Por seguridad, ingresa tu contraseña para confirmar:</label>
+            <input type="password" v-model="passwordEliminar" required placeholder="Tu contraseña de usuario" style="text-align: center; margin-top: 0.5rem;" />
+          </div>
+
+          <div class="modal-footer" style="justify-content: center; gap: 1rem;">
+            <button type="button" class="cancel-btn" @click="cerrarModalEliminar">Cancelar</button>
+            <button type="submit" class="primary-btn" :disabled="eliminando" style="background-color: #E53E3E; color: white;">
+              {{ eliminando ? 'Verificando...' : 'Sí, Eliminar Definitivamente' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Cambio de Estado (Activar/Desactivar) -->
+    <div v-if="mostrarModalToggle" class="modal-overlay" @click.self="cerrarModalToggle">
+      <div class="modal-content" style="max-width: 400px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div class="modal-header" :style="prodAToggle?.activo ? 'background-color: #FFF5F5; border-bottom: 2px solid #FED7D7;' : 'background-color: #F0FFF4; border-bottom: 2px solid #C6F6D5;'">
+          <h3 :style="prodAToggle?.activo ? 'color: #C53030;' : 'color: #2F855A;'">
+            {{ prodAToggle?.activo ? '🚫 Desactivar Producto' : '✅ Activar Producto' }}
+          </h3>
+          <button class="close-btn" @click="cerrarModalToggle">✕</button>
+        </div>
+        
+        <div class="modal-form">
+          <p style="color: #4A5568; font-size: 1rem; line-height: 1.5; text-align: center; margin-bottom: 1.5rem;">
+            Se cambiará el estado del producto <strong>{{ prodAToggle?.nombre }}</strong>.
+            <br/><br/>
+            <span v-if="prodAToggle?.activo">Pasará a estado Inactivo y ya no podrá ser utilizado para registros de ventas o compras.</span>
+            <span v-else>Volverá a estar Activo y disponible para comercializar.</span>
+          </p>
+
+          <div class="modal-footer" style="justify-content: center; gap: 1rem; padding-top: 0; border-top: none;">
+            <button type="button" class="cancel-btn" @click="cerrarModalToggle">Cancelar</button>
+            <button type="button" class="primary-btn" @click="confirmarToggle" :disabled="togglando" :style="prodAToggle?.activo ? 'background-color: #E53E3E; color: white;' : 'background-color: #48BB78; color: white;'">
+              {{ togglando ? 'Procesando...' : 'Confirmar Cambio' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+
+const API_URL = import.meta.env.VITE_API_URL
+const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL
 
 const productos = ref([])
 const categorias = ref([])
@@ -195,7 +260,20 @@ const proveedores = ref([])
 const cargando = ref(true)
 const guardando = ref(false)
 const errorGlobal = ref('')
+const successGlobal = ref('')
 const errorFormulario = ref('')
+
+// Para eliminación
+const mostrarModalEliminar = ref(false)
+const prodAEliminar = ref(null)
+const passwordEliminar = ref('')
+const errorEliminar = ref('')
+const eliminando = ref(false)
+
+// Para Cambiar Estado
+const mostrarModalToggle = ref(false)
+const prodAToggle = ref(null)
+const togglando = ref(false)
 
 const mostrarModal = ref(false)
 const modoEdicion = ref(false)
@@ -252,7 +330,7 @@ const cargarDatos = async () => {
     // Concurrent requests for fast load
     const [resProd, resProv] = await Promise.all([
       fetch('http://localhost:5044/api/Productos', { headers }),
-      fetch('http://localhost:5044/api/Proveedores', { headers })
+      fetch(`${API_URL}/Proveedores`, { headers })
     ])
 
     const dProd = await resProd.json()
@@ -296,7 +374,7 @@ const abrirModalEditar = (prod) => {
   productToEditId.value = prod.productoID
   errorFormulario.value = ''
   archivoSeleccionado.value = null
-  filePreview.value = prod.imagenURL ? 'http://localhost:5044' + prod.imagenURL : null
+  filePreview.value = prod.imagenURL ? IMAGE_BASE + prod.imagenURL : null
   formProd.value = { ...prod } // Copiamos info
   mostrarModal.value = true
 }
@@ -326,10 +404,10 @@ const guardarProducto = async () => {
   }
 
   try {
-    let url = 'http://localhost:5044/api/Productos'
+    let url = `${API_URL}/Productos`
     let method = 'POST'
     if (modoEdicion.value) {
-      url = `http://localhost:5044/api/Productos/${productToEditId.value}`
+      url = `${API_URL}/Productos/${productToEditId.value}`
       method = 'PUT'
     }
 
@@ -358,6 +436,8 @@ const guardarProducto = async () => {
     const data = await res.json()
     if (data.success) {
       cerrarModal()
+      successGlobal.value = modoEdicion.value ? '¡Producto actualizado correctamente!' : '¡Producto creado correctamente!'
+      setTimeout(() => { successGlobal.value = '' }, 3000)
       cargarDatos()
     } else {
       errorFormulario.value = data.mensaje || 'Error interno al guardar.';
@@ -369,17 +449,77 @@ const guardarProducto = async () => {
   }
 }
 
-const toggleEstado = async (id) => {
-  if(!confirm('¿Deseas cambiar el estado del producto? No estará disponible para ventas.')) return;
+// LOGICA DE ELIMINACION DEFINITIVA
+const abrirModalEliminar = (prod) => {
+  prodAEliminar.value = prod
+  passwordEliminar.value = ''
+  errorEliminar.value = ''
+  mostrarModalEliminar.value = true
+}
+
+const cerrarModalEliminar = () => {
+  mostrarModalEliminar.value = false
+  prodAEliminar.value = null
+}
+
+const confirmarEliminar = async () => {
+  if (!passwordEliminar.value) {
+    errorEliminar.value = 'Debes ingresar tu contraseña de usuario.'
+    return
+  }
+
+  eliminando.value = true
+  errorEliminar.value = ''
+
+  try {
+    const res = await fetch(`${API_URL}/Productos/${prodAEliminar.value.productoID}/eliminar`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getToken()}` 
+      },
+      body: JSON.stringify({ password: passwordEliminar.value })
+    })
+    const data = await res.json()
+    if (data.success) {
+      cerrarModalEliminar()
+      cargarDatos()
+    } else {
+      errorEliminar.value = data.mensaje || 'Error al validar contraseña o eliminar el producto.'
+    }
+  } catch (err) {
+    errorEliminar.value = 'Fallo de red al intentar eliminar.'
+  } finally {
+    eliminando.value = false
+  }
+}
+const abrirModalToggle = (prod) => {
+  prodAToggle.value = prod
+  mostrarModalToggle.value = true
+}
+const cerrarModalToggle = () => {
+  mostrarModalToggle.value = false
+  prodAToggle.value = null
+}
+
+const confirmarToggle = async () => {
+  if (!prodAToggle.value) return;
+  togglando.value = true;
   
   try {
-    const res = await fetch(`http://localhost:5044/api/Productos/${id}/toggle-activo`, {
+    const res = await fetch(`${API_URL}/Productos/${prodAToggle.value.productoID}/toggle-activo`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
-    if ((await res.json()).success) cargarDatos()
+    if ((await res.json()).success) {
+      cargarDatos()
+      cerrarModalToggle()
+    }
   } catch (err) {
-    alert('Error al desactivar')
+    errorGlobal.value = 'Error al cambiar el estado del producto.'
+    cerrarModalToggle()
+  } finally {
+    togglando.value = false
   }
 }
 </script>
@@ -428,8 +568,9 @@ const toggleEstado = async (id) => {
 .price-text { font-weight: 700; color: #2F855A; }
 .text-danger { color: #E53E3E; font-weight: 600; }
 .text-success { color: #38A169; font-weight: 600; }
-.alert-badge { background: #FFF5F5; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.75rem; margin-left: 0.5rem; display: inline-flex; align-items: center; }
-.loss-badge { color: #C53030; font-weight: 700; border: 1px solid #FEB2B2; background-color: #FEFCBF; /* Yellow background to strike attention */ }
+.alert-badge { background: #FFF5F5; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.75rem; margin-left: 0.5rem; display: inline-flex; align-items: center; gap: 0.2rem; }
+.stock-badge { color: #9C4221; font-weight: 700; border: 1px solid #FBD38D; background-color: #FFFAF0; }
+.loss-badge { color: #C53030; font-weight: 700; border: 1px solid #FEB2B2; background-color: #FEFCBF; }
 
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .dot-active { background-color: #48BB78; }
@@ -445,8 +586,9 @@ const toggleEstado = async (id) => {
 .spinner { width: 40px; height: 40px; border: 4px solid #E2E8F0; border-top-color: #A3E4D7; border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Error Banner */
+/* Error y Success Banner */
 .error-banner { background-color: #FFF5F5; color: #C53030; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; }
+.success-banner { background-color: #F0FFF4; color: #2F855A; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; border: 1px solid #C6F6D5; animation: fadeIn 0.3s; }
 
 /* MODAL GRANDE (Dos columnas) */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.2s ease; }

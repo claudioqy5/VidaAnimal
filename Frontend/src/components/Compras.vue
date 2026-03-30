@@ -3,7 +3,7 @@
     <div class="module-header">
       <div>
         <h2 class="title">Abastecimiento / Compras</h2>
-        <p class="subtitle">Registra la llegada de mercadería y aumenta tu stock automáticamente</p>
+        <p class="subtitle">Registra la llegada de mercadería y aumenta tu stock</p>
       </div>
     </div>
 
@@ -40,36 +40,43 @@
 
         <div class="divider"></div>
 
-        <h3 class="panel-title">2. Agregar Productos al Lote</h3>
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label>Producto a ingresar *</label>
-          <div class="select-with-button">
-            <select v-model="detalleTemp.productoID">
-              <option value="0" disabled>Selecciona un producto del catálogo...</option>
-              <option v-for="prod in productos" :key="prod.productoID" :value="prod.productoID">
-                [{{ prod.codigo }}] {{ prod.nombre }} - Costo ref: S/ {{ prod.precioCosto }}
-              </option>
-            </select>
-            <button class="quick-btn" @click="abrirModalProducto" title="Crear Producto Nuevo">
-              ➕
-            </button>
-          </div>
-        </div>
+        <h3 class="panel-title" :style="{ opacity: puedeUsarPanelSecundario ? 1 : 0.5 }">2. Agregar Productos al Lote</h3>
+        <fieldset :disabled="!puedeUsarPanelSecundario" class="fieldset-no-border">
+          <p v-if="!puedeUsarPanelSecundario" style="color: #E53E3E; font-size: 0.85rem; margin-top: -10px; margin-bottom: 1rem;">
+            * Completa los datos del paso 1 para habilitar este panel.
+          </p>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Cantidad *</label>
-            <input type="number" min="1" step="0.01" v-model="detalleTemp.cantidad" />
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Producto a ingresar *</label>
+            <div class="select-with-button">
+              <select v-model="detalleTemp.productoID">
+                <option value="0" disabled>Selecciona un producto del catálogo...</option>
+                <option v-for="prod in productos" :key="prod.productoID" :value="prod.productoID">
+                  [{{ prod.codigo }}] {{ prod.nombre }} - Costo ref: S/ {{ prod.precioCosto }}
+                </option>
+              </select>
+              <!-- Deshabilitar la creación rápida si no se ha completado paso 1 está manejado por el fieldset -->
+              <button class="quick-btn" @click.prevent="abrirModalProducto" title="Crear Producto Nuevo">
+                ➕
+              </button>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Precio Costo Unitario (S/) *</label>
-            <input type="number" min="0" step="0.01" v-model="detalleTemp.precioCostoUnitario" />
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cantidad *</label>
+              <input type="number" min="1" step="0.01" v-model="detalleTemp.cantidad" :disabled="detalleTemp.productoID === 0" :placeholder="detalleTemp.productoID === 0 ? 'Selecciona un prod. primero' : '0'" />
+            </div>
+            <div class="form-group">
+              <label>Precio Costo Unitario (S/) *</label>
+              <input type="number" min="0" step="0.01" v-model="detalleTemp.precioCostoUnitario" :disabled="detalleTemp.productoID === 0" :placeholder="detalleTemp.productoID === 0 ? 'Selecciona un prod. primero' : '0.00'" />
+            </div>
           </div>
-        </div>
-        
-        <button class="add-btn" @click="agregarAlCarrito" :disabled="!puedeAgregarAlCarrito">
-          <span>⬇️</span> Añadir a la lista
-        </button>
+          
+          <button class="add-btn" @click="agregarAlCarrito" :disabled="!puedeAgregarAlCarrito">
+            <span>⬇️</span> Añadir a la lista
+          </button>
+        </fieldset>
       </div>
 
       <!-- Panel Derecho: Lista de la Compra -->
@@ -231,6 +238,24 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal de xito de Compra -->
+    <div v-if="mostrarModalExitoCompra" class="modal-overlay" @click.self="cerrarModalExito">
+      <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+        </div>
+        
+        <div class="modal-form" style="padding-top: 0; align-items: center;">
+          <h3 style="color: #2F855A; font-weight: 800; margin: 0 0 1rem 0; font-size: 1.4rem;">¡Compra Registrada!</h3>
+          <p style="color: #4A5568; margin: 0 0 1.5rem 0; line-height: 1.5;">El inventario de todos los productos y los precios de costo han sido actualizados exitosamente en la base de datos.</p>
+          
+          <button type="button" class="primary-btn" @click="cerrarModalExito" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 0.8rem;">
+            Aceptar y Continuar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -243,6 +268,11 @@ const cargando = ref(true)
 const guardando = ref(false)
 const errorGlobal = ref('')
 const successGlobal = ref('')
+
+const mostrarModalExitoCompra = ref(false)
+const cerrarModalExito = () => {
+  mostrarModalExitoCompra.value = false
+}
 
 // Headers del formulario
 const compraHeader = ref({
@@ -259,6 +289,10 @@ const detalleTemp = ref({
 
 // Lista que va llenandose
 const carrito = ref([])
+
+const puedeUsarPanelSecundario = computed(() => {
+  return compraHeader.value.proveedorID !== 0 && compraHeader.value.numeroComprobante.trim() !== ''
+})
 
 const getToken = () => localStorage.getItem('jwt_token')
 
@@ -488,11 +522,11 @@ const registrarCompra = async () => {
     
     const data = await res.json()
     if (data.success) {
-      successGlobal.value = "¡Compra registrada! El stock de todos los productos fue actualizado correctamente."
       // Limpiar todo después de éxito
       compraHeader.value = { proveedorID: 0, numeroComprobante: '' }
       carrito.value = []
-      setTimeout(() => { successGlobal.value = '' }, 5000)
+      // Mostrar modal animado
+      mostrarModalExitoCompra.value = true;
     } else {
       errorGlobal.value = data.mensaje
     }
@@ -524,6 +558,8 @@ const registrarCompra = async () => {
 .form-group label { font-size: 0.85rem; font-weight: 600; color: #4A5568; }
 .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 0.85rem 1rem; border: 1.5px solid #E2E8F0; border-radius: 10px; color: #2D3748; font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s;}
 .form-group input:focus, .form-group select:focus { border-color: #F6AD55; box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.2); outline: none; }
+.fieldset-no-border { border: none; padding: 0; margin: 0; }
+.fieldset-no-border:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .add-btn { width: 100%; padding: 1rem; background-color: #EDF2F7; color: #2D3748; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
 .add-btn:hover:not(:disabled) { background-color: #E2E8F0; }

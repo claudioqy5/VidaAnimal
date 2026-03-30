@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.Security.Claims;
 using VidaAnimal.API.Data;
 using VidaAnimal.API.Models;
 using VidaAnimal.API.DTOs;
@@ -11,6 +12,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ComprasController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -37,6 +39,10 @@ namespace VidaAnimal.API.Controllers
 
             try
             {
+                // Extraer el ID del usuario del Token JWT autenticado
+                var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                int? parsedUsuarioId = int.TryParse(claimUsuarioId, out int uid) ? uid : (int?)null;
+
                 // 1. Crear el encabezado de la Compra
                 var nuevaCompra = new Compra
                 {
@@ -44,17 +50,21 @@ namespace VidaAnimal.API.Controllers
                     NumeroComprobante = modelo.NumeroComprobante,
                     FechaCompra = DateTime.Now,
                     Total = modelo.Total,
-                    UsuarioID = null // Se corregirá a futuro con el token real
+                    UsuarioID = parsedUsuarioId // ID del que hizo login en el navegador
                 };
 
                 _context.Compras.Add(nuevaCompra);
                 await _context.SaveChangesAsync();
 
-                // 2. Procesar Detalles y Actualizar Stock Físico
+                // 2. Procesar Detalles, Actualizar Stock y registrar en Kardex
+                var itemsCompra = new List<(Producto producto, decimal cantidad, decimal stockAnterior)>();
+
                 foreach (var det in modelo.Detalles)
                 {
                     var productoDb = await _context.Productos.FindAsync(det.ProductoID);
                     if (productoDb == null) throw new Exception($"Producto ID {det.ProductoID} no existe.");
+
+                    decimal stockAnterior = productoDb.StockActual;
 
                     // Insertar en la tabla Detalle
                     var nuevoDetalle = new CompraDetalle
@@ -69,8 +79,28 @@ namespace VidaAnimal.API.Controllers
 
                     // LOGÍSTICA: Actualizar el Stock del Producto
                     productoDb.StockActual += det.Cantidad;
-                    // Opcional: Actualizar el Precio Costo oficial del producto a la alza/baja (último costo)
-                    productoDb.PrecioCosto = det.PrecioCostoUnitario; 
+                    productoDb.PrecioCosto = det.PrecioCostoUnitario;
+
+                    itemsCompra.Add((productoDb, det.Cantidad, stockAnterior));
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Registrar en Kardex con el CompraID ya generado
+                foreach (var (prod, cantidad, stockAnterior) in itemsCompra)
+                {
+                    _context.MovimientosInventario.Add(new MovimientoInventario
+                    {
+                        Fecha = DateTime.Now,
+                        Tipo = "ENTRADA",
+                        ProductoID = prod.ProductoID,
+                        Cantidad = cantidad,
+                        UsuarioID = parsedUsuarioId ?? 1,
+                        StockAnterior = stockAnterior,
+                        StockNuevo = stockAnterior + cantidad,
+                        ReferenciaID = nuevaCompra.CompraID,
+                        Observaciones = $"Compra #{nuevaCompra.CompraID} - {nuevaCompra.NumeroComprobante}"
+                    });
                 }
 
                 await _context.SaveChangesAsync();

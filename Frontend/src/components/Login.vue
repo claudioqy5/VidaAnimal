@@ -1,16 +1,14 @@
 <template>
   <div class="login-wrapper">
-    <!-- Círculos decorativos de fondo -->
-    <div class="blob blob-blue"></div>
-    <div class="blob blob-pink"></div>
-    <div class="blob blob-purple"></div>
+    <!-- Fondo animado con scroll horizontal -->
+    <div class="animated-bg"></div>
+    <!-- Overlay oscuro -->
+    <div class="bg-overlay"></div>
 
     <div class="login-card">
       <div class="login-header">
         <div class="logo-box">
-          <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path>
-          </svg>
+          <img src="../assets/logoVidaAnimal.png" alt="Vida Animal" class="logo-img" />
         </div>
         <h1 class="login-title">Vida Animal</h1>
         <p class="login-subtitle">Sistema de Gestión y Punto de Venta</p>
@@ -63,17 +61,21 @@ import { ref } from 'vue'
 
 const emit = defineEmits(['login-success'])
 
+const API_URL = import.meta.env.VITE_API_URL;
 const correo = ref('')
 const password = ref('')
 const error = ref('')
 const cargando = ref(false)
+
+const API_BASE = import.meta.env.VITE_API_URL;
+const getToken = () => localStorage.getItem('jwt_token');
 
 const handleLogin = async () => {
   error.value = ''
   cargando.value = true
 
   try {
-    const response = await fetch('http://localhost:5044/api/Auth/login', {
+    const response = await fetch(`${API_URL}/Auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -105,8 +107,9 @@ const handleLogin = async () => {
 /* Reset base */
 * {
   box-sizing: border-box;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Poiret One', 'Segoe UI', sans-serif;
 }
+
 
 .login-wrapper {
   position: relative;
@@ -114,9 +117,37 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #FAFAFA;
+  background-color: #1a1a2e;
   overflow: hidden;
 }
+
+/* Fondo animado con scroll horizontal infinito */
+.animated-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-image: url('../assets/fondologin.png');
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  animation: moveBackground 100s linear infinite;
+  z-index: 1;
+}
+
+@keyframes moveBackground {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Overlay oscuro semitransparente */
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
 
 /* Glassmorphism Card */
 .login-card {
@@ -124,13 +155,13 @@ const handleLogin = async () => {
   z-index: 10;
   width: 100%;
   max-width: 420px;
-  padding: 2.5rem 2rem;
-  background: rgba(255, 255, 255, 0.85);
+  padding: 2.5rem 2rem;  
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);  
   margin: 1rem;
+  letter-spacing: 0.155em;
 }
 
 .login-header {
@@ -139,16 +170,19 @@ const handleLogin = async () => {
 }
 
 .logo-box {
-  width: 64px;
-  height: 64px;
+  width: 90px;
+  height: 90px;
   margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #FFD1DC 0%, #C3B1E1 100%);
-  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: rotate(4deg);
-  box-shadow: 0 10px 20px rgba(195, 177, 225, 0.4);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .logo-icon {
@@ -158,17 +192,20 @@ const handleLogin = async () => {
 }
 
 .login-title {
-  font-size: 1.8rem;
+  font-size: 2.3rem;
   font-weight: 700;
-  color: #2D3748;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
+  color: #FFFFFF;
+  margin: 0 0 0.5rem 0;  
+  letter-spacing: 0em;
+  font-family: 'Syncopate', sans-serif;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
 }
 
 .login-subtitle {
   font-size: 0.9rem;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
+  
 }
 
 .login-form {
@@ -186,37 +223,39 @@ const handleLogin = async () => {
 .form-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4A5568;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .form-input {
   width: 100%;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  background-color: #FFFFFF;
-  border: 1.5px solid #E2E8F0;
+  background-color: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   transition: all 0.2s ease;
   outline: none;
-  color: #2D3748;
+  color: #FFFFFF;
 }
 
 .form-input::placeholder {
-  color: #A0AEC0;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .form-input:focus {
-  border-color: #C3B1E1;
-  box-shadow: 0 0 0 4px rgba(195, 177, 225, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 .submit-btn {
   width: 100%;
   padding: 0.9rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
-  background-color: #2D3748;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -224,7 +263,8 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(45, 55, 72, 0.2);
+  box-shadow: 0 4px 18px rgba(102, 126, 234, 0.5);  
+  letter-spacing: 0.18em;
 }
 
 .submit-btn:hover:not(:disabled) {

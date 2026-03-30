@@ -129,5 +129,39 @@ namespace VidaAnimal.API.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true });
         }
+
+        [HttpPost("{id}/eliminar")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> EliminarProducto(int id, [FromBody] DeleteVerifyRequest req)
+        {
+            var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            if (claimUsuarioId == null || !int.TryParse(claimUsuarioId, out int uid)) 
+                return Unauthorized(new { success = false, mensaje = "Sesión inválida." });
+
+            var usuario = await _context.Usuarios.FindAsync(uid);
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(req.Password, usuario.PasswordHash))
+            {
+                return BadRequest(new { success = false, mensaje = "Contraseña de seguridad incorrecta. Operación denegada." });
+            }
+
+            var p = await _context.Productos.FindAsync(id);
+            if (p == null) return NotFound(new { success = false, mensaje = "Producto no encontrado." });
+
+            try 
+            {
+                _context.Productos.Remove(p);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, mensaje = "Producto eliminado definitivamente." });
+            } 
+            catch(Exception) 
+            {
+                return BadRequest(new { success = false, mensaje = "No se puede eliminar el producto porque ya tiene compras o ventas registradas en el historial. Intenta desactivarlo mejor." });
+            }
+        }
+    }
+
+    public class DeleteVerifyRequest 
+    {
+        public string Password { get; set; } = string.Empty;
     }
 }

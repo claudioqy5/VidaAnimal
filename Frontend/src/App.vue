@@ -25,11 +25,15 @@
       </header>
 
       <Dashboard v-if="currentTab === 'dashboard'" />
+      <Inicio v-else-if="currentTab === 'inicio'" />
       <POS v-else-if="currentTab === 'pos'" />
       <Usuarios v-else-if="currentTab === 'users'" />
       <Proveedores v-else-if="currentTab === 'proveedores'" />
       <Productos v-else-if="currentTab === 'productos'" />
       <Compras v-else-if="currentTab === 'compras'" />
+      <Clientes v-else-if="currentTab === 'clientes'" />
+      <Kardex v-else-if="currentTab === 'kardex'" />
+      <VentasCliente v-else-if="currentTab === 'ventas-cliente'" />
       <div v-else class="placeholder-view fade-in">
         <h2 class="placeholder-title">Próximamente 🚧</h2>
         <p class="placeholder-text">El módulo de {{ currentTab }} estará disponible próximamente.</p>
@@ -48,16 +52,28 @@ import Usuarios from './components/Usuarios.vue'
 import Proveedores from './components/Proveedores.vue'
 import Productos from './components/Productos.vue'
 import Compras from './components/Compras.vue'
+import Clientes from './components/Clientes.vue'
+import Kardex from './components/Kardex.vue'
+import VentasCliente from './components/VentasCliente.vue'
+import Inicio from './components/Inicio.vue'
 
 // Estado global de la aplicación
-const currentTab = ref('dashboard')
+const currentTab = ref('inicio')
 const usuarioLogueado = ref(null)
 
-// Al cargar la app, revisamos si ya se había logueado antes
+// Al cargar la app, verificamos si hay sesión previa
 onMounted(() => {
-  const guardado = localStorage.getItem('usuario')
-  if (guardado) {
-    usuarioLogueado.value = JSON.parse(guardado)
+  const userStored = localStorage.getItem('usuario');
+  const tokenStored = localStorage.getItem('jwt_token');
+  
+  if (userStored && tokenStored) {
+    try {
+      usuarioLogueado.value = JSON.parse(userStored);
+    } catch (e) {
+      usuarioLogueado.value = null;
+    }
+  } else {
+    usuarioLogueado.value = null;
   }
 })
 

@@ -164,3 +164,4 @@ C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Debug\net9.0\BCrypt
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Debug\net9.0\Scalar.AspNetCore.dll
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Debug\net9.0\VidaAnimal.API.staticwebassets.runtime.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\obj\Debug\net9.0\VidaAnimal.API.sourcelink.json

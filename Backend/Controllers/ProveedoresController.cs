@@ -70,5 +70,34 @@ namespace VidaAnimal.API.Controllers
             string estadoTxt = p.Activo ? "activado" : "desactivado";
             return Ok(new { success = true, mensaje = $"Proveedor {estadoTxt}." });
         }
+
+        [HttpPost("{id}/eliminar")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> EliminarProveedor(int id, [FromBody] DeleteVerifyRequest req)
+        {
+            var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            if (claimUsuarioId == null || !int.TryParse(claimUsuarioId, out int uid)) 
+                return Unauthorized(new { success = false, mensaje = "Sesión inválida." });
+
+            var usuario = await _context.Usuarios.FindAsync(uid);
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(req.Password, usuario.PasswordHash))
+            {
+                return BadRequest(new { success = false, mensaje = "Contraseña de seguridad incorrecta. Operación denegada." });
+            }
+
+            var p = await _context.Proveedores.FindAsync(id);
+            if (p == null) return NotFound(new { success = false, mensaje = "Proveedor no encontrado." });
+
+            try 
+            {
+                _context.Proveedores.Remove(p);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, mensaje = "Proveedor eliminado sumamente de la base de datos." });
+            } 
+            catch(System.Exception) 
+            {
+                return BadRequest(new { success = false, mensaje = "No se puede eliminar el proveedor. Probablemente ya está amarrado a ingresos de mercadería o productos." });
+            }
+        }
     }
 }

@@ -15,6 +15,9 @@ namespace VidaAnimal.API.Data
         public DbSet<Cliente> Clientes { get; set; } // Nuevo dominio Clientes
         public DbSet<Compra> Compras { get; set; }
         public DbSet<CompraDetalle> CompraDetalles { get; set; }
+        public DbSet<Venta> Ventas { get; set; }
+        public DbSet<VentaDetalle> VentaDetalles { get; set; }
+        public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +38,8 @@ namespace VidaAnimal.API.Data
             modelBuilder.Entity<Producto>()
                 .Property(p => p.StockMinimo)
                 .HasColumnType("decimal(12,3)");
+
+            // Trigger TR_ReducirStock fue eliminado. El backend gestiona el stock directamente.
         }
     }
 }

@@ -11,7 +11,8 @@ namespace VidaAnimal.API.Models
         public int CompraID { get; set; }
         
         public int ProveedorID { get; set; }
-        public int? UsuarioID { get; set; } // Opcional por ahora si no enviamos sesion estricta
+        public virtual Proveedor? Proveedor { get; set; }
+        public int? UsuarioID { get; set; }
         
         [Required]
         [MaxLength(50)]
