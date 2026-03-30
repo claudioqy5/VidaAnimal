@@ -12,7 +12,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "ADMINISTRADOR")]
     public class ComprasController : ControllerBase
     {
         private readonly AppDbContext _context;

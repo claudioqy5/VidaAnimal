@@ -55,6 +55,7 @@ namespace VidaAnimal.API.Controllers
         }
 
         [HttpPost("registrar")]
+        [Authorize(Roles = "ADMINISTRADOR")]
         public async Task<IActionResult> Registrar([FromBody] UsuarioCreateDTO registro)
         {
             // Verificar si el correo o DNI ya existen

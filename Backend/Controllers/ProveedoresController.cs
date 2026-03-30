@@ -10,7 +10,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(Roles = "ADMINISTRADOR")] // Descomentar para asegurar
+    [Authorize(Roles = "ADMINISTRADOR")] // Descomentar para asegurar
     public class ProveedoresController : ControllerBase
     {
         private readonly AppDbContext _context;

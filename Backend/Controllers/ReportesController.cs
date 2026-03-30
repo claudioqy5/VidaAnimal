@@ -92,6 +92,7 @@ namespace VidaAnimal.API.Controllers
         // GET /api/reportes/dashboard  →  Resumen SEMANA y MES
         // ──────────────────────────────────────────────────────────
         [HttpGet("dashboard")]
+        [Authorize(Roles = "ADMINISTRADOR")]
         public async Task<IActionResult> GetDashboard()
         {
             try {

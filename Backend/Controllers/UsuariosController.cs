@@ -11,7 +11,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize(Roles = "ADMINISTRADOR")] // Protege todos los métodos para que solo el Admin ingrese
+    [Authorize(Roles = "ADMINISTRADOR")] // Protege todos los métodos para que solo el Admin ingrese
     public class UsuariosController : ControllerBase
     {
         private readonly AppDbContext _context;

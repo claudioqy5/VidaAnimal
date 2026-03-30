@@ -23,9 +23,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVueApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:3000") // Puertos de Vite
+        policy.SetIsOriginAllowed(origin => true) // Permitir cualquier origen en producción para evitar bloqueos de IP
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -35,6 +36,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // En producción, se recomienda usar una variable de entorno "JWT_KEY"
+        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? builder.Configuration["Jwt:Key"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -43,7 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
         };
     });
 
@@ -53,14 +56,10 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    // Mapear documento JSON de OpenAPI
     app.MapOpenApi();
-    
-    // Habilitar Interfaz Visual moderna (Scalar)
     app.MapScalarApiReference(options => {
         options.WithTitle("Vida Animal API")
-               .WithTheme(ScalarTheme.Mars)
-               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+               .WithTheme(ScalarTheme.Mars);
     });
 }
 

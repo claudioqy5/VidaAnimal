@@ -8,7 +8,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/kardex")]
-    [Authorize]
+    [Authorize(Roles = "ADMINISTRADOR")]
     public class KardexController : ControllerBase
     {
         private readonly AppDbContext _context;

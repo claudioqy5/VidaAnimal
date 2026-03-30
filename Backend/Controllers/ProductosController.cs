@@ -11,6 +11,7 @@ namespace VidaAnimal.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly AppDbContext _context;

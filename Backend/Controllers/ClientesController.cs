@@ -23,7 +23,7 @@ namespace VidaAnimal.API.Controllers
 
     [ApiController]
     [Route("api/clientes")]
-    // [Authorize]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly AppDbContext _context;
