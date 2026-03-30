@@ -272,7 +272,9 @@ const getToken = () => localStorage.getItem('jwt_token')
 const cargarDatos = async () => {
   errorGlobal.value = ''
   try {
-    const resP = await fetch(`${API_URL}/Productos`)
+    const resP = await fetch(`${API_URL}/Productos`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    })
     const resC = await fetch(`${API_URL}/Clientes`, {
         headers: { 'Authorization': `Bearer ${getToken()}` }
     });
