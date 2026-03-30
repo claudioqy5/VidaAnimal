@@ -54,6 +54,13 @@ builder.Services.AddAuthorization(); // Activa los roles en los endpoints
 
 var app = builder.Build();
 
+// Auto-crear la base de datos y tablas si no existen (producción)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
