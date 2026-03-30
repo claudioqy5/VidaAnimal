@@ -6,6 +6,7 @@ using System;
 using VidaAnimal.API.DTOs;
 using VidaAnimal.API.Data;
 using VidaAnimal.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VidaAnimal.API.Controllers
 {

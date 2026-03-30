@@ -11,6 +11,7 @@ using VidaAnimal.API.Data;
 using VidaAnimal.API.DTOs;
 using VidaAnimal.API.Models;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VidaAnimal.API.Controllers
 {

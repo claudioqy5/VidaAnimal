@@ -7,6 +7,7 @@ using VidaAnimal.API.Data;
 using VidaAnimal.API.Models;
 using BCrypt.Net;
 
+
 namespace VidaAnimal.API.Controllers
 {
     [ApiController]

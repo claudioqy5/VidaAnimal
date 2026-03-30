@@ -7,6 +7,7 @@ using System.Security.Claims;
 using VidaAnimal.API.Data;
 using VidaAnimal.API.Models;
 using VidaAnimal.API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VidaAnimal.API.Controllers
 {
