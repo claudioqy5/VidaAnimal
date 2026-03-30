@@ -8,7 +8,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="logo-box">
-          <img src="../assets/logoVidaAnimal.png" alt="Vida Animal" class="logo-img" />
+          <img src="../assets/logovidaanimal.png" alt="Vida Animal" class="logo-img" />
         </div>
         <h1 class="login-title">Vida Animal</h1>
         <p class="login-subtitle">Sistema de Gestión y Punto de Venta</p>
