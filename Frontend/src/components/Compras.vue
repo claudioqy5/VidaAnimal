@@ -301,8 +301,8 @@ const cargarDatos = async () => {
   try {
     const headers = { 'Authorization': `Bearer ${getToken()}` }
     const [resProv, resProd] = await Promise.all([
-      fetch('http://localhost:5044/api/Proveedores', { headers }),
-      fetch('http://localhost:5044/api/Productos', { headers })
+      fetch('/api/Proveedores', { headers }),
+      fetch('/api/Productos', { headers })
     ])
     const dProv = await resProv.json()
     const dProd = await resProd.json()
@@ -511,7 +511,7 @@ const registrarCompra = async () => {
   }
 
   try {
-    const res = await fetch('http://localhost:5044/api/Compras', {
+    const res = await fetch('/api/Compras', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

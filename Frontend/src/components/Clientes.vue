@@ -138,7 +138,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 
-const API_BASE = 'http://localhost:5044/api';
+const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
 
 const apiFetch = async (endpoint, options = {}) => {

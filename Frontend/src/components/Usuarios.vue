@@ -118,7 +118,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = '/api'
 const getToken = () => localStorage.getItem('jwt_token')
 
 const usuarios = ref([])
@@ -232,7 +232,7 @@ const toggleEstado = async (id) => {
   if(!confirm('¿Estás seguro de cambiar el estado de este usuario?')) return;
   
   try {
-    const res = await fetch(`http://localhost:5044/api/Usuarios/${id}/toggle-activo`, {
+    const res = await fetch(`/api/Usuarios/${id}/toggle-activo`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })

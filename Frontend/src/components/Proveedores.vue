@@ -237,7 +237,7 @@ const cargarProveedores = async () => {
   cargando.value = true
   errorGlobal.value = ''
   try {
-    const res = await fetch('http://localhost:5044/api/Proveedores', {
+    const res = await fetch('/api/Proveedores', {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const data = await res.json()
@@ -275,11 +275,11 @@ const guardarProveedor = async () => {
   guardando.value = true
   errorFormulario.value = ''
 
-  let url = 'http://localhost:5044/api/Proveedores'
+  let url = '/api/Proveedores'
   let method = 'POST'
 
   if (modoEdicion.value) {
-    url = `http://localhost:5044/api/Proveedores/${formProv.value.proveedorID}`
+    url = `/api/Proveedores/${formProv.value.proveedorID}`
     method = 'PUT'
   }
 
@@ -331,7 +331,7 @@ const confirmarEliminar = async () => {
   errorEliminar.value = ''
 
   try {
-    const res = await fetch(`http://localhost:5044/api/Proveedores/${provAEliminar.value.proveedorID}/eliminar`, {
+    const res = await fetch(`/api/Proveedores/${provAEliminar.value.proveedorID}/eliminar`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -370,7 +370,7 @@ const confirmarToggle = async () => {
   togglando.value = true;
   
   try {
-    const res = await fetch(`http://localhost:5044/api/Proveedores/${provAToggle.value.proveedorID}/toggle-activo`, {
+    const res = await fetch(`/api/Proveedores/${provAToggle.value.proveedorID}/toggle-activo`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })

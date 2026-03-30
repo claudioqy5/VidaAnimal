@@ -152,7 +152,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 
-const API_BASE = 'http://localhost:5044/api';
+const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
 
 const loading = ref(true);

@@ -250,8 +250,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-const API_URL = import.meta.env.VITE_API_URL
-const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL
+const API_URL = '/api'
+const IMAGE_BASE = '/'
 
 const productos = ref([])
 const categorias = ref([])
@@ -329,7 +329,7 @@ const cargarDatos = async () => {
     
     // Concurrent requests for fast load
     const [resProd, resProv] = await Promise.all([
-      fetch('http://localhost:5044/api/Productos', { headers }),
+      fetch('/api/Productos', { headers }),
       fetch(`${API_URL}/Proveedores`, { headers })
     ])
 
