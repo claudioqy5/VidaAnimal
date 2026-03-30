@@ -114,7 +114,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
 
 const loading = ref(false);

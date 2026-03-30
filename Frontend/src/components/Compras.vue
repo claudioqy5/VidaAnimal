@@ -369,7 +369,7 @@ const guardarProveedorRapido = async () => {
   errorModalProv.value = ''
 
   try {
-    const res = await fetch('http://localhost:5044/api/Proveedores', {
+    const res = await fetch('/api/Proveedores', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -444,7 +444,7 @@ const guardarProductoRapido = async () => {
   }
 
   try {
-    const res = await fetch('http://localhost:5044/api/Productos', {
+    const res = await fetch('/api/Productos', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}` },
       body: formData

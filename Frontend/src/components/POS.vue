@@ -228,8 +228,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 
-const API_URL = import.meta.env.VITE_API_URL
-const IMAGE_BASE = import.meta.env.VITE_IMAGE_BASE_URL
+const API_URL = '/api'
+const IMAGE_BASE = ''
 
 const productos = ref([])
 const clientes = ref([])
