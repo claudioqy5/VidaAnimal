@@ -61,13 +61,13 @@ import { ref } from 'vue'
 
 const emit = defineEmits(['login-success'])
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = '/api';
 const correo = ref('')
 const password = ref('')
 const error = ref('')
 const cargando = ref(false)
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
 
 const handleLogin = async () => {
