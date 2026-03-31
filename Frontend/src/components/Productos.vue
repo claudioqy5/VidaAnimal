@@ -632,11 +632,11 @@ const confirmarToggle = async () => {
 /* MODAL PRO REDESIGN */
 .modal-content.modal-large {
   background: white;
-  width: 100%;
+  width: 95%;
   max-width: 900px;
-  max-height: 95vh;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 90vh; /* Ajustado para laptops pequeñas */
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -698,15 +698,59 @@ const confirmarToggle = async () => {
   margin-bottom: 1rem;
 }
 
-/* Grid Compacto y Alineado */
+/* Grid y Grupos de Formulario (Limpieza Total) */
 .compact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #334155;
+  margin: 0;
+  text-align: left;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background-color: #FDFDFD;
+  box-sizing: border-box;
+  color: #1E293B;
+  outline: none;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  border-color: #2D3748;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(45, 55, 72, 0.08);
 }
 
 .form-group.lg {
   grid-column: span 2;
+}
+
+.form-group textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
 /* Footer Fijo */
@@ -717,7 +761,7 @@ const confirmarToggle = async () => {
   justify-content: flex-end;
   gap: 1rem;
   background: #F8FAFC;
-  border-radius: 0 0 20px 20px;
+  border-radius: 0 0 24px 24px;
 }
 
 .primary-btn-pro {
@@ -725,7 +769,7 @@ const confirmarToggle = async () => {
   color: white;
   border: none;
   padding: 0.75rem 2rem;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -735,6 +779,44 @@ const confirmarToggle = async () => {
 .primary-btn-pro:hover:not(:disabled) {
   background-color: #1A202C;
   transform: translateY(-1px);
+}
+
+/* Header Estilizado */
+.modal-header {
+  padding: 1.75rem 2rem;
+  background: white;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0;
+}
+
+.close-btn {
+  background: #F1F5F9;
+  border: none;
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #64748B;
+}
+
+.close-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+  transform: rotate(90deg);
 }
 
 /* Imagen Upload Wrapper */
