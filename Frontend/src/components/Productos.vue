@@ -93,23 +93,23 @@
           <button class="close-btn" @click="cerrarModal">✕</button>
         </div>
         
-        <form @submit.prevent="guardarProducto" class="modal-form">
+        <form @submit.prevent="guardarProducto" class="modal-form-pro">
           <div v-if="errorFormulario" class="form-error">{{ errorFormulario }}</div>
 
-          <div class="form-grid">
-            <!-- Primera columna -->
-            <div class="col-left">
-              <div class="form-group">
-                <label>Código de Barras / SKU *</label>
-                <input type="text" v-model="formProd.codigo" required placeholder="Ej. 1029384" />
-              </div>
-              
-              <div class="form-group">
-                <label>Nombre del Producto *</label>
-                <input type="text" v-model="formProd.nombre" required placeholder="Ej. Ricocan Adultos 15Kg" />
-              </div>
-
-              <div class="form-row">
+          <!-- CONTENIDO SCROLLABLE -->
+          <div class="modal-body-scroll">
+            
+            <div class="form-section">
+              <h4 class="section-badge">📦 Información General</h4>
+              <div class="compact-grid">
+                <div class="form-group lg">
+                  <label>Nombre del Producto *</label>
+                  <input type="text" v-model="formProd.nombre" required placeholder="Ej. Ricocan Adultos 15Kg" />
+                </div>
+                <div class="form-group">
+                  <label>Código / SKU *</label>
+                  <input type="text" v-model="formProd.codigo" required placeholder="Ej. 1029384" />
+                </div>
                 <div class="form-group">
                   <label>Proveedor *</label>
                   <select v-model="formProd.proveedorID" required>
@@ -117,17 +117,16 @@
                     <option v-for="p in proveedores" :key="p.proveedorID" :value="p.proveedorID">{{ p.nombre }}</option>
                   </select>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label>Descripción</label>
-                <textarea v-model="formProd.descripcion" rows="2" placeholder="Características..."></textarea>
+                <div class="form-group lg">
+                  <label>Descripción</label>
+                  <textarea v-model="formProd.descripcion" rows="2" placeholder="Características..."></textarea>
+                </div>
               </div>
             </div>
 
-            <!-- Segunda columna -->
-            <div class="col-right">
-              <div class="form-row">
+            <div class="form-section">
+              <h4 class="section-badge color-price">💰 Precios e Inventario</h4>
+              <div class="compact-grid">
                 <div class="form-group">
                   <label>Precio Costo (S/)</label>
                   <input type="number" step="0.01" min="0" v-model="formProd.precioCosto" required />
@@ -136,70 +135,62 @@
                   <label>Precio Venta (S/)</label>
                   <input type="number" step="0.01" min="0" v-model="formProd.precioVenta" required />
                 </div>
-              </div>
-
-              <div class="form-row">
                 <div class="form-group">
                   <label>Unidad Medida</label>
                   <select v-model="formProd.unidadMedida" required>
                     <option value="UND">Unidad</option>
                     <option value="KG">Kilogramos</option>
-                    <option value="GR">Gramos</option>
-                    <option value="LTS">Litros</option>
-                    <option value="ML">Mililitros</option>
                     <option value="SACO">Saco</option>
+                    <option value="LTS">Litros</option>
                     <option value="PQTE">Paquete</option>
-                    <option value="LATA">Lata</option>
                   </select>
-                </div>
-                <div class="form-group">
-                  <label>Stock Actual</label>
-                  <input type="number" min="0" v-model="formProd.stockActual" disabled title="El stock físico solo puede actualizarse a través de Módulo de Compras (Ingreso) o POS (Salida)." style="cursor: not-allowed; background-color: #EDF2F7;" />
                 </div>
                 <div class="form-group">
                   <label>Stock Mínimo</label>
                   <input type="number" min="0" v-model="formProd.stockMinimo" required />
                 </div>
               </div>
+            </div>
 
-              <!-- Sección Venta por Mayor -->
-              <div class="wholesale-section">
-                <h4 class="section-title">Venta por Mayor (Opcional)</h4>
-                <div class="form-row">
-                  <div class="form-group" style="flex: 2;">
-                    <label>Nombre Unidad (Saco/Costal)</label>
-                    <input type="text" v-model="formProd.nombreUnidadMayorista" placeholder="Ej. Saco de 50kg" />
-                  </div>
-                  <div class="form-group" style="flex: 1;">
-                    <label>Cantidad (Equiv.)</label>
-                    <input type="number" step="0.01" min="0" v-model="formProd.cantidadMayorista" placeholder="e.g. 50" />
-                  </div>
-                  <div class="form-group" style="flex: 1;">
-                    <label>Precio Mayorista (S/)</label>
-                    <input type="number" step="0.01" min="0" v-model="formProd.precioMayorista" placeholder="e.g. 45.00" />
-                  </div>
+            <div class="form-section wholesale-bg">
+              <h4 class="section-badge color-wholesale">🏗️ Venta por Mayor (Opcional)</h4>
+              <p class="section-help">Usa esto para productos que vendes por saco y por kilo simultáneamente.</p>
+              <div class="compact-grid">
+                <div class="form-group lg">
+                  <label>Nombre de Unidad (Ej. Saco de 50kg)</label>
+                  <input type="text" v-model="formProd.nombreUnidadMayorista" placeholder="Nombre que verá el cajero" />
+                </div>
+                <div class="form-group">
+                  <label>Cant. Equiv. (Kilos/Unid)</label>
+                  <input type="number" step="0.01" min="0" v-model="formProd.cantidadMayorista" placeholder="e.g. 50" />
+                </div>
+                <div class="form-group">
+                  <label>Precio Saco (S/)</label>
+                  <input type="number" step="0.01" min="0" v-model="formProd.precioMayorista" placeholder="e.g. 45.00" />
                 </div>
               </div>
+            </div>
 
-              <!-- Selector de Imagen -->
-              <div class="form-group image-upload">
-                <label>Imagen del Producto</label>
+            <div class="form-section">
+              <h4 class="section-badge">🖼️ Imagen del Producto</h4>
+              <div class="image-upload-wrapper">
                 <div class="file-drop-area" :class="{'has-file': filePreview}">
                   <input type="file" @change="manejarImagen" accept="image/png, image/jpeg, image/webp" class="file-input" />
                   <div v-if="!filePreview" class="file-msg">
                     <span class="upload-icon">📸</span>
-                    <p>Haz clic para subir una foto</p>
+                    <p>Subir o arrastrar imagen</p>
                   </div>
                   <img v-else :src="filePreview" class="preview-img" />
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="modal-footer">
+          </div> <!-- FIN SCROLL -->
+
+          <div class="modal-footer-fixed">
             <button type="button" class="cancel-btn" @click="cerrarModal">Cancelar</button>
-            <button type="submit" class="primary-btn" :disabled="guardando">
-              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Producto') }}
+            <button type="submit" class="primary-btn-pro" :disabled="guardando">
+              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar Producto' : 'Crear Producto') }}
             </button>
           </div>
         </form>
@@ -614,56 +605,118 @@ const confirmarToggle = async () => {
 .error-banner { background-color: #FFF5F5; color: #C53030; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; }
 .success-banner { background-color: #F0FFF4; color: #2F855A; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; border: 1px solid #C6F6D5; animation: fadeIn 0.3s; }
 
-/* MODAL GRANDE (Dos columnas) */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.2s ease; }
-.modal-content.modal-large { background: white; width: 100%; max-width: 850px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } }
+/* MODAL PRO REDESIGN */
+.modal-content.modal-large {
+  max-width: 900px;
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+}
 
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #E2E8F0; }
-.modal-header h3 { margin: 0; font-size: 1.25rem; font-weight: 700; }
-.close-btn { background: none; border: none; font-size: 1.25rem; color: #A0AEC0; cursor: pointer; }
+.modal-form-pro {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* Evita scroll doble */
+}
 
-.modal-form { padding: 1.5rem; }
-.form-grid { display: flex; gap: 2rem; }
-.col-left, .col-right { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; }
-.form-row { display: flex; gap: 1rem; }
-.form-row .form-group { flex: 1; }
+.modal-body-scroll {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: 65vh; /* Altura ideal para laptops */
+  scrollbar-width: thin;
+  scrollbar-color: #A3E4D7 #F8FAFC;
+}
 
-.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.form-group label { font-size: 0.85rem; font-weight: 600; color: #4A5568; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; box-sizing: border-box; padding: 0.75rem 1rem; border: 1.5px solid #E2E8F0; border-radius: 10px; color: #2D3748; outline: none; transition: border-color 0.2s; font-family: inherit; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #A3E4D7; box-shadow: 0 0 0 3px rgba(163, 228, 215, 0.2); }
-
-.form-error { background: #FFF5F5; color: #E53E3E; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; }
-
-/* Subida de Archivos Drag&Drop Style */
-.file-drop-area { position: relative; border: 2px dashed #E2E8F0; border-radius: 12px; height: 160px; display: flex; align-items: center; justify-content: center; background: #F8FAFC; overflow: hidden; transition: all 0.2s; }
-.file-drop-area:hover { border-color: #A3E4D7; background: #E8F8F5; }
-.file-drop-area.has-file { border: none; background: #000; }
-.file-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
-.file-msg { display: flex; flex-direction: column; align-items: center; color: #718096; font-size: 0.9rem; pointer-events: none; }
-.upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-.preview-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-
-.modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
-
-/* Estilos Wholesale */
-.wholesale-section {
-  background-color: #F0F4F8;
-  padding: 1rem;
+/* Secciones Agrupadas */
+.form-section {
+  background: white;
+  border: 1px solid #EDF2F7;
   border-radius: 12px;
-  border: 1px solid #D1D5DB;
-  margin-bottom: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
 }
 
-.section-title {
-  font-size: 0.85rem;
+.section-badge {
+  position: absolute;
+  top: -12px;
+  left: 15px;
+  background: #2D3748;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #2D3748;
-  margin-top: 0;
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  margin: 0;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; }}
+
+.color-price { background: #2F855A; }
+.color-wholesale { background: #805AD5; }
+
+.wholesale-bg {
+  background: linear-gradient(to bottom right, #F7FAFC, #EDF2F7);
+  border: 1.5px dashed #CBD5E0;
+}
+
+.section-help {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-bottom: 1rem;
+}
+
+/* Grid Compacto y Alineado */
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-group.lg {
+  grid-column: span 2;
+}
+
+/* Footer Fijo */
+.modal-footer-fixed {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background: #F8FAFC;
+  border-radius: 0 0 20px 20px;
+}
+
+.primary-btn-pro {
+  background-color: #2D3748;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.primary-btn-pro:hover:not(:disabled) {
+  background-color: #1A202C;
+  transform: translateY(-1px);
+}
+
+/* Imagen Upload Wrapper */
+.image-upload-wrapper {
+  max-width: 400px;
+  margin-top: 0.5rem;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .form-group.lg {
+    grid-column: span 1;
+  }
+  .modal-body-scroll {
+    max-height: 70vh;
+  }
+}
 </style>
