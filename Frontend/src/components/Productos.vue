@@ -88,30 +88,28 @@
       </table>
     </div>
 
-    <!-- Modal Formulario -->
+    <!-- MODAL PRINCIPAL (CREAR/EDITAR) -->
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-content modal-large">
         <div class="modal-header">
-          <h3>{{ modoEdicion ? 'Editar Producto' : 'Crear Producto' }}</h3>
+          <h3>{{ modoEdicion ? '📋 Editar Producto' : '➕ Nuevo Producto' }}</h3>
           <button class="close-btn" @click="cerrarModal">✕</button>
         </div>
         
         <form @submit.prevent="guardarProducto" class="modal-form-pro">
           <div v-if="errorFormulario" class="form-error">{{ errorFormulario }}</div>
 
-          <!-- CONTENIDO SCROLLABLE -->
           <div class="modal-body-scroll">
-            
             <div class="form-section">
               <h4 class="section-badge">📦 Información General</h4>
               <div class="compact-grid">
                 <div class="form-group lg">
                   <label>Nombre del Producto *</label>
-                  <input type="text" v-model="formProd.nombre" required placeholder="Ej. Ricocan Adultos 15Kg" />
+                  <input type="text" v-model="formProd.nombre" required />
                 </div>
                 <div class="form-group">
                   <label>Código / SKU *</label>
-                  <input type="text" v-model="formProd.codigo" required placeholder="Ej. 1029384" />
+                  <input type="text" v-model="formProd.codigo" required />
                 </div>
                 <div class="form-group">
                   <label>Proveedor *</label>
@@ -122,7 +120,7 @@
                 </div>
                 <div class="form-group lg">
                   <label>Descripción</label>
-                  <textarea v-model="formProd.descripcion" rows="2" placeholder="Características..."></textarea>
+                  <textarea v-model="formProd.descripcion" rows="2"></textarea>
                 </div>
               </div>
             </div>
@@ -131,12 +129,12 @@
               <h4 class="section-badge color-price">💰 Precios e Inventario</h4>
               <div class="compact-grid">
                 <div class="form-group">
-                  <label>Precio Costo (S/)</label>
-                  <input type="number" step="0.01" min="0" v-model="formProd.precioCosto" required />
+                  <label>Precio Costo</label>
+                  <input type="number" step="0.01" v-model="formProd.precioCosto" required />
                 </div>
                 <div class="form-group">
-                  <label>Precio Venta (S/)</label>
-                  <input type="number" step="0.01" min="0" v-model="formProd.precioVenta" required />
+                  <label>Precio Venta</label>
+                  <input type="number" step="0.01" v-model="formProd.precioVenta" required />
                 </div>
                 <div class="form-group">
                   <label>Unidad Medida</label>
@@ -144,86 +142,90 @@
                     <option value="UND">Unidad</option>
                     <option value="KG">Kilogramos</option>
                     <option value="SACO">Saco</option>
-                    <option value="LTS">Litros</option>
-                    <option value="PQTE">Paquete</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label>Stock Mínimo</label>
-                  <input type="number" min="0" v-model="formProd.stockMinimo" required />
+                  <input type="number" v-model="formProd.stockMinimo" required />
                 </div>
               </div>
             </div>
 
             <div class="form-section wholesale-bg">
-              <h4 class="section-badge color-wholesale">🏗️ Venta por Mayor (Opcional)</h4>
-              <p class="section-help">Usa esto para productos que vendes por saco y por kilo simultáneamente.</p>
+              <h4 class="section-badge color-wholesale">🏗️ Venta por Mayor</h4>
               <div class="compact-grid">
                 <div class="form-group lg">
-                  <label>Nombre de Unidad (Ej. Saco de 50kg)</label>
-                  <input type="text" v-model="formProd.nombreUnidadMayorista" placeholder="Nombre que verá el cajero" />
+                  <label>Unidad Mayorista</label>
+                  <input type="text" v-model="formProd.nombreUnidadMayorista" />
                 </div>
                 <div class="form-group">
-                  <label>Cant. Equiv. (Kilos/Unid)</label>
-                  <input type="number" step="0.01" min="0" v-model="formProd.cantidadMayorista" placeholder="e.g. 50" />
+                  <label>Cant. Equiv.</label>
+                  <input type="number" step="0.01" v-model="formProd.cantidadMayorista" />
                 </div>
                 <div class="form-group">
-                  <label>Precio Saco (S/)</label>
-                  <input type="number" step="0.01" min="0" v-model="formProd.precioMayorista" placeholder="e.g. 45.00" />
+                  <label>Precio Saco</label>
+                  <input type="number" step="0.01" v-model="formProd.precioMayorista" />
                 </div>
               </div>
             </div>
 
             <div class="form-section">
-              <h4 class="section-badge">🖼️ Imagen del Producto</h4>
+              <h4 class="section-badge">🖼️ Imagen</h4>
               <div class="image-upload-wrapper">
                 <div class="file-drop-area" :class="{'has-file': filePreview}">
-                  <input type="file" @change="manejarImagen" accept="image/png, image/jpeg, image/webp" class="file-input" />
-                  <div v-if="!filePreview" class="file-msg">
-                    <span class="upload-icon">📸</span>
-                    <p>Subir o arrastrar imagen</p>
-                  </div>
-                  <img v-else :src="filePreview" class="preview-img" />
+                  <input type="file" @change="manejarImagen" accept="image/*" class="file-input" />
+                  <img v-if="filePreview" :src="filePreview" class="preview-img" />
+                  <div v-else class="file-msg">📸 Subir Foto</div>
                 </div>
               </div>
             </div>
-
-          </div> <!-- FIN SCROLL -->
+          </div>
 
           <div class="modal-footer-fixed">
             <button type="button" class="cancel-btn" @click="cerrarModal">Cancelar</button>
             <button type="submit" class="primary-btn-pro" :disabled="guardando">
-              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar Producto' : 'Crear Producto') }}
+              {{ guardando ? '...' : (modoEdicion ? 'Actualizar' : 'Crear') }}
             </button>
           </div>
         </form>
       </div>
     </div>
-    <!-- Modal de Eliminación Segura -->
+
+    <!-- Modal de Eliminación Segura (REESTRUCTURADO) -->
     <div v-if="mostrarModalEliminar" class="modal-overlay" @click.self="cerrarModalEliminar">
-      <div class="modal-content" style="max-width: 450px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-        <div class="modal-header" style="background-color: #FFF5F5; border-bottom: 2px solid #FED7D7; border-radius: 20px 20px 0 0;">
-          <h3 style="color: #C53030;">⚠️ Alerta Crítica</h3>
+      <div class="modal-content" style="max-width: 450px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);">
+        <div class="modal-header" style="background-color: #FFF5F5; border-bottom: 2px solid #FED7D7; padding: 1.5rem;">
+          <h3 style="color: #C53030; display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.3rem;">
+            ⚠️ Alerta Crítica
+          </h3>
           <button class="close-btn" @click="cerrarModalEliminar">✕</button>
         </div>
         
-        <form @submit.prevent="confirmarEliminar" class="modal-form">
-          <p style="font-weight: 700; color: #2D3748; margin-bottom: 0.5rem; text-align: center;">¿Estás completamente seguro?</p>
-          <p style="color: #4A5568; font-size: 0.95rem; line-height: 1.5; text-align: center; margin-top: 0; margin-bottom: 1.5rem;">
-            Se va a eliminar definitivamente el producto <strong style="color: #E53E3E;">{{ prodAEliminar?.nombre }}</strong> y todos sus datos del sistema. Para recuperarlo tendrás que crearlo nuevamente desde cero.
-          </p>
-          
-          <div v-if="errorEliminar" class="form-error" style="text-align: center;">{{ errorEliminar }}</div>
-
-          <div class="form-group" style="background: #F7FAFC; padding: 1rem; border-radius: 10px; border: 1px dashed #CBD5E0;">
-            <label style="text-align: center; color: #4A5568;">Por seguridad, ingresa tu contraseña para confirmar:</label>
-            <input type="password" v-model="passwordEliminar" required placeholder="Tu contraseña de usuario" style="text-align: center; margin-top: 0.5rem;" />
+        <form @submit.prevent="confirmarEliminar" style="display: flex; flex-direction: column;">
+          <div style="padding: 2rem;">
+            <p style="font-weight: 800; color: #1A202C; text-align: center; font-size: 1.1rem; margin-bottom: 1rem;">
+              ¿Confirmas la eliminación definitiva?
+            </p>
+            <p style="color: #4A5568; font-size: 0.95rem; line-height: 1.6; text-align: center; margin: 0 0 1.5rem 0;">
+              Se borrará el producto <strong style="color: #E53E3E;">{{ prodAEliminar?.nombre }}</strong>. Esta acción no tiene vuelta atrás en el inventario.
+            </p>
+            
+            <div style="background: #F7FAFC; padding: 1.25rem; border-radius: 12px; border: 1px dashed #CBD5E0;">
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #4A5568; margin-bottom: 0.75rem; text-align: center;">
+                Ingresa tu contraseña de administrador:
+              </label>
+              <input type="password" v-model="passwordEliminar" required placeholder="Tu clave de seguridad" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1.5px solid #E2E8F0; text-align: center;" />
+            </div>
+            
+            <div v-if="errorEliminar" class="form-error" style="margin-top: 1rem; text-align: center;">{{ errorEliminar }}</div>
           </div>
 
-          <div class="modal-footer" style="justify-content: center; gap: 1rem;">
-            <button type="button" class="cancel-btn" @click="cerrarModalEliminar">Cancelar</button>
-            <button type="submit" class="primary-btn" :disabled="eliminando" style="background-color: #E53E3E; color: white;">
-              {{ eliminando ? 'Verificando...' : 'Sí, Eliminar Definitivamente' }}
+          <div class="modal-footer" style="padding: 1.25rem 2rem; background: #FFF5F5; border-top: 1px solid #FED7D7; display: flex; justify-content: center; gap: 1rem;">
+            <button type="button" @click="cerrarModalEliminar" class="cancel-btn" style="padding: 0.75rem 1.5rem; font-weight: 700;">
+              Cancelar
+            </button>
+            <button type="submit" class="primary-btn-pro" :disabled="eliminando" style="background-color: #E53E3E; padding: 0.75rem 1.5rem;">
+              {{ eliminando ? '🗑️ Eliminando...' : '🗑️ Sí, Eliminar' }}
             </button>
           </div>
         </form>
