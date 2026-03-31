@@ -1,10 +1,13 @@
 <template>
   <div class="productos-module">
-    <div class="module-header">
+    <div class="module-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
         <h2 class="title">Gestión de Productos</h2>
         <p class="subtitle">Consulta y edita tu catálogo de ventas</p>
       </div>
+      <button @click="abrirModalNuevo" class="primary-btn-pro">
+        📦 Nuevo Producto
+      </button>
     </div>
 
     <div v-if="errorGlobal" class="error-banner">{{ errorGlobal }}</div>
@@ -301,29 +304,26 @@ const busqueda = ref('')
 const ordenFecha = ref('desc')
 
 const productosFiltrados = computed(() => {
-  let resultado = productos.value
+  if (!productos.value) return []
+  
+  let resultado = [...productos.value]
 
   // Filtrado por nombre o código
   if (busqueda.value.trim() !== '') {
     const q = busqueda.value.toLowerCase()
     resultado = resultado.filter(p => 
-      p.nombre.toLowerCase().includes(q) || 
-      p.codigo.toLowerCase().includes(q)
+      (p.nombre?.toLowerCase().includes(q)) || 
+      (p.codigo?.toLowerCase().includes(q))
     )
   }
 
-  // Ordenamiento (asumiendo que el ID incremental equivale a fecha de creación reciente si son consecutivos)
-  resultado = resultado.slice().sort((a, b) => {
-    // Si viene fechaCreacion en formato ISO desde C#, ordenaríamos así:
-    const timeA = new Date(a.fechaCreacion || 0).getTime();
-    const timeB = new Date(b.fechaCreacion || 0).getTime();
+  // Ordenamiento seguro
+  resultado.sort((a, b) => {
+    const idA = a.productoID || 0
+    const idB = b.productoID || 0
     
-    // Fallback: ordenar por ID si no tuvieran fecha (productoID más alto = más reciente)
-    const valA = timeA > 0 ? timeA : a.productoID;
-    const valB = timeB > 0 ? timeB : b.productoID;
-
-    if (ordenFecha.value === 'desc') return valB - valA;
-    return valA - valB;
+    if (ordenFecha.value === 'desc') return idB - idA
+    return idA - idB
   })
 
   return resultado
@@ -390,7 +390,15 @@ const abrirModalEditar = (prod) => {
   errorFormulario.value = ''
   archivoSeleccionado.value = null
   filePreview.value = prod.imagenURL ? IMAGE_BASE + prod.imagenURL : null
-  formProd.value = { ...prod } // Copiamos info
+  
+  // Mapeo manual para asegurar que los campos nuevos no sean null
+  formProd.value = {
+    ...prod,
+    precioMayorista: prod.precioMayorista ?? 0,
+    cantidadMayorista: prod.cantidadMayorista ?? 0,
+    nombreUnidadMayorista: prod.nombreUnidadMayorista ?? ''
+  }
+  
   mostrarModal.value = true
 }
 
@@ -605,13 +613,38 @@ const confirmarToggle = async () => {
 .error-banner { background-color: #FFF5F5; color: #C53030; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; }
 .success-banner { background-color: #F0FFF4; color: #2F855A; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; border: 1px solid #C6F6D5; animation: fadeIn 0.3s; }
 
+/* MODAL OVERLAY (LO QUE HACE QUE SE VEA) */
+.modal-overlay { 
+  position: fixed !important; 
+  top: 0 !important; 
+  left: 0 !important; 
+  right: 0 !important; 
+  bottom: 0 !important; 
+  background-color: rgba(0, 0, 0, 0.6) !important; 
+  backdrop-filter: blur(8px) !important; 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  z-index: 999999 !important; /* Capa superior absoluta */
+  animation: fadeIn 0.3s ease; 
+}
+
 /* MODAL PRO REDESIGN */
 .modal-content.modal-large {
+  background: white;
+  width: 100%;
   max-width: 900px;
   max-height: 95vh;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal-form-pro {
   display: flex;
