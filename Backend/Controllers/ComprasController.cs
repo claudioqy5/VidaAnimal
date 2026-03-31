@@ -26,7 +26,12 @@ namespace VidaAnimal.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCompras()
         {
-            var compras = await _context.Compras.OrderByDescending(c => c.FechaCompra).ToListAsync();
+            var compras = await _context.Compras
+                .Include(c => c.Proveedor)
+                .Include(c => c.Detalles)
+                    .ThenInclude(d => d.Producto)
+                .OrderByDescending(c => c.FechaCompra)
+                .ToListAsync();
             return Ok(new { success = true, data = compras });
         }
 

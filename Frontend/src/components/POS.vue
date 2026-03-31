@@ -120,16 +120,29 @@
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
             <div class="item-main">
-              <p class="item-name">{{ item.producto.nombre }}</p>
-              <p class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x ud.</p>
+              <div>
+                <p class="item-name">{{ item.producto.nombre }}</p>
+                <!-- Selector de Unidad (Solo si el producto tiene precio mayorista) -->
+                <div v-if="item.producto.precioMayorista && item.producto.cantidadMayorista" class="unit-selector">
+                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
+                    <option value="UNIDAD">1 {{ item.producto.unidadMedida }} - S/{{ item.producto.precioVenta.toFixed(2) }}</option>
+                    <option value="MAYOR">1 {{ item.producto.nombreUnidadMayorista || 'Saco' }} ({{ item.producto.cantidadMayorista }}{{ item.producto.unidadMedida }}) - S/{{ item.producto.precioMayorista.toFixed(2) }}</option>
+                  </select>
+                </div>
+                <p v-else class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x {{ item.producto.unidadMedida }}</p>
+              </div>
             </div>
             
             <div class="item-actions">
               <div class="qty-control">
                 <button @click="restarCantidad(index)" class="qty-btn">-</button>
-                <input type="number" v-model="item.cantidad" class="qty-input" min="1" disabled />
+                <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
                 <button @click="sumarCantidad(index)" class="qty-btn">+</button>
               </div>
+              <!-- Botón para calcular por soles -->
+              <button class="calc-btn" @click="calcularPorSoles(index)" title="Calcular por soles (S/)">
+                💰
+              </button>
               <div class="item-subtotal">
                 S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}
               </div>
@@ -146,7 +159,6 @@
             <span style="font-size: 0.9rem; color: #718096;">Subtotal</span>
             <span style="font-size: 1rem; color: #4A5568;">S/ {{ subtotalVenta.toFixed(2) }}</span>
           </div>
-          
           <div class="total-row discount-row" style="margin-top: -0.5rem; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.5rem;">
             <span style="font-size: 0.9rem; color: #E53E3E;">Descuento Global</span>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -154,6 +166,14 @@
               <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" 
                      style="width: 80px; text-align: right; border: 1px solid #FED7D7; border-radius: 6px; padding: 0.25rem; font-weight: 700; color: #C53030; background: #FFF5F5;" />
             </div>
+          </div>
+
+          <div class="total-row" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+             <div style="width: 100%;">
+                <label style="font-size: 0.8rem; font-weight: 600; color: #718096; display: block; margin-bottom: 0.4rem;">Notas / Observaciones (Opcional)</label>
+                <textarea v-model="ticket.observaciones" placeholder="Ej: Pago con Yape, recoge productos mañana..." 
+                          style="width: 100%; height: 60px; border-radius: 10px; border: 1px solid #E2E8F0; padding: 0.6rem; font-family: inherit; font-size: 0.85rem; resize: none; color: #4A5568;"></textarea>
+             </div>
           </div>
 
           <div class="total-row">
@@ -251,7 +271,8 @@ const ticket = ref({
   serie: 'B001',
   numero: '',
   clienteID: 0,
-  descuento: 0
+  descuento: 0,
+  observaciones: ''
 })
 
 const cumpleaneroHoy = ref(null)
@@ -426,27 +447,36 @@ const agregarAlCarrito = (prod) => {
   
   const existe = carrito.value.find(item => item.producto.productoID === prod.productoID)
   if (existe) {
-    if (existe.cantidad < prod.stockActual) {
-      existe.cantidad++
-    } else {
-      alert(`No hay más stock disponible de ${prod.nombre}.`);
-    }
+    sumarCantidad(carrito.value.indexOf(existe))
   } else {
     carrito.value.push({
       producto: prod,
       productoID: prod.productoID,
       cantidad: 1,
-      precioVentaUnitario: prod.precioVenta
+      precioVentaUnitario: prod.precioVenta,
+      tipoVenta: 'UNIDAD' // Por defecto suma de 1 en 1 (ej: 1 kilo)
     })
+  }
+}
+
+const cambiarTipoVenta = (idx) => {
+  const item = carrito.value[idx];
+  if (item.tipoVenta === 'MAYOR') {
+    item.precioVentaUnitario = item.producto.precioMayorista;
+  } else {
+    item.precioVentaUnitario = item.producto.precioVenta;
   }
 }
 
 const sumarCantidad = (idx) => {
   const item = carrito.value[idx]
-  if (item.cantidad < item.producto.stockActual) {
+  const factor = item.tipoVenta === 'MAYOR' ? item.producto.cantidadMayorista : 1;
+  const cantidadNueva = item.cantidad + 1;
+  
+  if ((cantidadNueva * factor) <= item.producto.stockActual) {
     item.cantidad++
   } else {
-    alert(`Límite de stock físico alcanzado (${item.producto.stockActual} unidades disponibles).`)
+    alert(`Límite de stock físico alcanzado (${item.producto.stockActual} ${item.producto.unidadMedida} disponibles).`)
   }
 }
 
@@ -461,6 +491,16 @@ const restarCantidad = (idx) => {
 
 const eliminarDelCarrito = (idx) => {
   carrito.value.splice(idx, 1)
+}
+
+const calcularPorSoles = (idx) => {
+  const item = carrito.value[idx];
+  const soles = prompt(`¿Cuánto comprará en Soles (S/) de ${item.producto.nombre}?`, "1.00");
+  if (soles && !isNaN(soles)) {
+    const monto = parseFloat(soles);
+    // Cantidad = Dinero / Precio Unitario
+    item.cantidad = parseFloat((monto / item.precioVentaUnitario).toFixed(3));
+  }
 }
 
 const procesarVenta = async () => {
@@ -478,11 +518,24 @@ const procesarVenta = async () => {
     serieComprobante: ticket.value.serie,
     numeroComprobante: ticket.value.numero,
     descuento: Number(ticket.value.descuento) || 0,
-    detalles: carrito.value.map(item => ({
-      productoID: item.productoID,
-      cantidad: item.cantidad,
-      precioVentaUnitario: item.precioVentaUnitario
-    }))
+    observaciones: ticket.value.observaciones,
+    detalles: carrito.value.map(item => {
+      // Si es venta por mayor (ej: Saco), multiplicamos cantidad por el factor de conversión para el stock
+      const cantidadReal = item.tipoVenta === 'MAYOR' 
+        ? item.cantidad * item.producto.cantidadMayorista 
+        : item.cantidad;
+      
+      // Ajustamos el precio unitario para que el total coincida (PrecioSaco / CantidadSaco)
+      const precioCalculado = item.tipoVenta === 'MAYOR'
+        ? item.producto.precioMayorista / item.producto.cantidadMayorista
+        : item.precioVentaUnitario;
+
+      return {
+        productoID: item.productoID,
+        cantidad: cantidadReal,
+        precioVentaUnitario: precioCalculado
+      }
+    })
   }
 
   try {
@@ -512,6 +565,7 @@ const cerrarModalNuevoCliente = () => {
   mostrarModalVenta.value = false
   carrito.value = []
   ticket.value.descuento = 0
+  ticket.value.observaciones = ''
   generarCorrelativo()
   cargarDatos() // Recargar para actualizar los nuevos niveles de stock en la grilla visual
 }
@@ -614,8 +668,34 @@ const cerrarModalNuevoCliente = () => {
 .qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0;}
 .qty-btn { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; font-weight: bold; color: #4A5568; }
 .qty-btn:hover { background: #E2E8F0; }
-.qty-input { width: 35px; height: 28px; border: none; text-align: center; background: transparent; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
+.qty-input { width: 60px; height: 28px; border: none; text-align: center; background: transparent; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
+.qty-input.editable { background-color: #fff; cursor: text; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); width: 70px;}
 .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+
+.calc-btn { 
+  background: #EBF8FF; 
+  border: 1px solid #BEE3F8; 
+  color: #2B6CB0; 
+  border-radius: 6px; 
+  width: 28px; 
+  height: 28px; 
+  cursor: pointer; 
+  font-size: 0.8rem;
+  margin-left: 0.25rem;
+}
+.calc-btn:hover { background: #BEE3F8; }
+
+.unit-selector { margin: 0.5rem 0; }
+.select-unit-mini { 
+  width: 100%; 
+  padding: 0.4rem; 
+  font-size: 0.75rem; 
+  border-radius: 6px; 
+  border: 1px solid #CBD5E0; 
+  background-color: #F7FAFC;
+  font-weight: 600;
+  color: #2D3748;
+}
 
 .item-subtotal { font-weight: 700; color: #2D3748; font-size: 1rem;}
 .remove-btn { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; transition: 0.2s; }

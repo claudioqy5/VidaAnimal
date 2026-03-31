@@ -14,6 +14,10 @@ namespace VidaAnimal.API.DTOs
         public decimal StockActual { get; set; }
         public decimal StockMinimo { get; set; }
 
+        public decimal? PrecioMayorista { get; set; }
+        public decimal? CantidadMayorista { get; set; }
+        public string? NombreUnidadMayorista { get; set; }
+
         public IFormFile? ImagenFoto { get; set; }
     }
 }

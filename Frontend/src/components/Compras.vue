@@ -182,6 +182,26 @@
               <label>Precio Venta Público (S/ - Opcional)</label>
               <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" placeholder="0.00" />
             </div>
+
+            <!-- Bloque Mayorista -->
+            <div class="form-group full wholesale-box">
+              <p class="box-title">Configuración de Saco/Costal (Opcional)</p>
+              <div class="form-row-custom">
+                <div class="form-group">
+                  <label>Unidad Mayor</label>
+                  <input type="text" v-model="nuevoProd.nombreUnidadMayorista" placeholder="Ej. Saco" />
+                </div>
+                <div class="form-group">
+                  <label>Cant. (kg)</label>
+                  <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" placeholder="50" />
+                </div>
+                <div class="form-group">
+                  <label>Precio (S/)</label>
+                  <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" placeholder="45.00" />
+                </div>
+              </div>
+            </div>
+
             <div class="form-group" style="grid-column: span 2;">
               <label>Fotografía (Opcional)</label>
               <input type="file" @change="onFileChangeProd" accept="image/png, image/jpeg, image/jpg" style="padding: 0.6rem; cursor: pointer;" />
@@ -400,7 +420,8 @@ const errorModalProd = ref('')
 const archivoProd = ref(null)
 const nuevoProd = ref({
   codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
-  precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1
+  precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
+  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
 })
 
 const onFileChangeProd = (e) => {
@@ -416,7 +437,8 @@ const abrirModalProducto = () => {
   archivoProd.value = null
   nuevoProd.value = {
     codigo: '', nombre: '', descripcion: '', proveedorID: compraHeader.value.proveedorID,
-    unidadMedida: 'UND', precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1
+    unidadMedida: 'UND', precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
+    precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
   }
   mostrarModalProducto.value = true
 }
@@ -594,15 +616,31 @@ const registrarCompra = async () => {
 .quick-btn:hover { background-color: #E2E8F0; }
 
 /* MODAL STANDARD PARA PRODUCTO RÁPIDO */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; animation: fadeIn 0.2s ease; }
-.modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
+.modal-content { 
+  background: white; 
+  width: 90%; 
+  max-width: 650px; 
+  max-height: 90vh; 
+  border-radius: 20px; 
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } }
 
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #E2E8F0; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #E2E8F0; flex-shrink: 0; }
 .modal-header h3 { margin: 0; font-size: 1.25rem; font-weight: 700; color: #2D3748; }
 .close-btn { background: none; border: none; font-size: 1.25rem; color: #A0AEC0; cursor: pointer; }
 
-.modal-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.modal-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; flex: 1; }
+
+/* Wholesale box */
+.wholesale-box { background: #F7FAFC; padding: 1rem; border-radius: 12px; border: 1px solid #E2E8F0; grid-column: span 2 !important; }
+.box-title { font-size: 0.75rem; font-weight: 800; color: #4A5568; margin: 0 0 1rem 0; text-transform: uppercase; }
+.form-row-custom { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; }
 .modal-note { font-size: 0.85rem; color: #4A5568; background-color: #EBF8FF; border-left: 4px solid #4299E1; padding: 0.75rem; border-radius: 4px; margin: 0; }
 .form-error { background: #FFF5F5; color: #E53E3E; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; }
 

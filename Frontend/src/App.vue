@@ -31,6 +31,7 @@
       <Proveedores v-else-if="currentTab === 'proveedores'" />
       <Productos v-else-if="currentTab === 'productos'" />
       <Compras v-else-if="currentTab === 'compras'" />
+      <HistorialCompras v-else-if="currentTab === 'historial-compras'" />
       <Clientes v-else-if="currentTab === 'clientes'" />
       <Kardex v-else-if="currentTab === 'kardex'" />
       <VentasCliente v-else-if="currentTab === 'ventas-cliente'" />
@@ -55,6 +56,7 @@ import Compras from './components/Compras.vue'
 import Clientes from './components/Clientes.vue'
 import Kardex from './components/Kardex.vue'
 import VentasCliente from './components/VentasCliente.vue'
+import HistorialCompras from './components/HistorialCompras.vue'
 import Inicio from './components/Inicio.vue'
 
 // Estado global de la aplicación

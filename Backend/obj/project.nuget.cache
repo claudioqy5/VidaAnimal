@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fYiSSIe2bNo=",
+  "dgSpecHash": "XTHbd2VA7l4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\VidaAnimal.API.csproj",
+  "projectFilePath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\VidaAnimal.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ADMIN\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\ADMIN\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

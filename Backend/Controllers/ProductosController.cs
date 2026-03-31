@@ -70,6 +70,9 @@ namespace VidaAnimal.API.Controllers
                     PrecioVenta = modelo.PrecioVenta,
                     StockActual = modelo.StockActual, 
                     StockMinimo = modelo.StockMinimo,
+                    PrecioMayorista = modelo.PrecioMayorista,
+                    CantidadMayorista = modelo.CantidadMayorista,
+                    NombreUnidadMayorista = modelo.NombreUnidadMayorista,
                     Activo = true,
                     FechaCreacion = DateTime.Now,
                     ImagenURL = rutaImagenBD
@@ -116,6 +119,9 @@ namespace VidaAnimal.API.Controllers
             p.PrecioVenta = modelo.PrecioVenta;
             p.StockActual = modelo.StockActual;
             p.StockMinimo = modelo.StockMinimo;
+            p.PrecioMayorista = modelo.PrecioMayorista;
+            p.CantidadMayorista = modelo.CantidadMayorista;
+            p.NombreUnidadMayorista = modelo.NombreUnidadMayorista;
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, mensaje = "Actualizado" });

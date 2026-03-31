@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\VidaAnimal.API.csproj": {}
+    "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\VidaAnimal.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\VidaAnimal.API.csproj": {
+    "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\VidaAnimal.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\VidaAnimal.API.csproj",
+        "projectUniqueName": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\VidaAnimal.API.csproj",
         "projectName": "VidaAnimal.API",
-        "projectPath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\VidaAnimal.API.csproj",
+        "projectPath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\VidaAnimal.API.csproj",
         "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\backend\\obj\\",
+        "outputPath": "C:\\Users\\ADMIN\\Desktop\\MIS PROYECTOS\\VIDA ANIMAL\\Backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

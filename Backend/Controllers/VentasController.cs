@@ -52,6 +52,7 @@ namespace VidaAnimal.API.Controllers
                 v.SerieComprobante,
                 v.NumeroComprobante,
                 v.Observaciones,
+                Cajero = v.Usuario == null ? "SISTEMA" : v.Usuario.NombreCompleto,
                 Cliente = v.Cliente == null ? null : new {
                     v.Cliente.ClienteID,
                     v.Cliente.NombreCompleto,
@@ -93,6 +94,7 @@ namespace VidaAnimal.API.Controllers
                     NumeroComprobante = req.NumeroComprobante,
                     Fecha = DateTime.Now,
                     Descuento = req.Descuento,
+                    Observaciones = req.Observaciones,
                     Total = 0 
                 };
 
@@ -169,6 +171,7 @@ namespace VidaAnimal.API.Controllers
         public string SerieComprobante { get; set; } = string.Empty;
         public string NumeroComprobante { get; set; } = string.Empty;
         public decimal Descuento { get; set; } = 0;
+        public string? Observaciones { get; set; }
         public List<VentaDetalleDTO> Detalles { get; set; } = new List<VentaDetalleDTO>();
     }
 

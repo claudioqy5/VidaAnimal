@@ -22,6 +22,8 @@ namespace VidaAnimal.API.Models
         
         [Column(TypeName = "decimal(12,2)")]
         public decimal Total { get; set; }
+
+        public virtual ICollection<CompraDetalle> Detalles { get; set; } = new List<CompraDetalle>();
     }
 
     public class CompraDetalle
@@ -31,6 +33,7 @@ namespace VidaAnimal.API.Models
         
         public int CompraID { get; set; }
         public int ProductoID { get; set; }
+        public virtual Producto? Producto { get; set; }
         
         [Column(TypeName = "decimal(12,3)")]
         public decimal Cantidad { get; set; }

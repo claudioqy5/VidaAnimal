@@ -69,10 +69,10 @@
         <div class="card-summary">
           <div class="summary-main">
             <span class="comprobante-badge">{{ v.serieComprobante }}-{{ v.numeroComprobante }}</span>
-            <div class="main-info">
-              <span class="cliente-name">{{ v.cliente?.nombreCompleto || 'Consumidor Final' }}</span>
-              <span class="fecha-text">{{ formatDate(v.fecha) }}</span>
-            </div>
+              <div class="main-info">
+                <span class="cliente-name">{{ v.cliente?.nombreCompleto || 'Consumidor Final' }}</span>
+                <span class="fecha-text">{{ formatDate(v.fecha) }} • 👤 {{ v.cajero || 'Sistema' }}</span>
+              </div>
           </div>
           <div class="summary-price">
             <span class="total-label">Pagado:</span>

@@ -162,6 +162,25 @@
                 </div>
               </div>
 
+              <!-- Sección Venta por Mayor -->
+              <div class="wholesale-section">
+                <h4 class="section-title">Venta por Mayor (Opcional)</h4>
+                <div class="form-row">
+                  <div class="form-group" style="flex: 2;">
+                    <label>Nombre Unidad (Saco/Costal)</label>
+                    <input type="text" v-model="formProd.nombreUnidadMayorista" placeholder="Ej. Saco de 50kg" />
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Cantidad (Equiv.)</label>
+                    <input type="number" step="0.01" min="0" v-model="formProd.cantidadMayorista" placeholder="e.g. 50" />
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Precio Mayorista (S/)</label>
+                    <input type="number" step="0.01" min="0" v-model="formProd.precioMayorista" placeholder="e.g. 45.00" />
+                  </div>
+                </div>
+              </div>
+
               <!-- Selector de Imagen -->
               <div class="form-group image-upload">
                 <label>Imagen del Producto</label>
@@ -280,7 +299,8 @@ const modoEdicion = ref(false)
 const productToEditId = ref(0) // ID original de edicion para el PUT
 const formProd = ref({
   codigo: '', nombre: '', descripcion: '', proveedorID: 0, 
-  unidadMedida: 'UND', precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5
+  unidadMedida: 'UND', precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
+  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
 })
 
 const archivoSeleccionado = ref(null)
@@ -365,7 +385,11 @@ const abrirModalNuevo = () => {
   errorFormulario.value = ''
   archivoSeleccionado.value = null
   filePreview.value = null
-  formProd.value = { codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5 }
+  formProd.value = { 
+    codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
+    precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
+    precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
+  }
   mostrarModal.value = true
 }
 
@@ -622,5 +646,24 @@ const confirmarToggle = async () => {
 .preview-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
+
+/* Estilos Wholesale */
+.wholesale-section {
+  background-color: #F0F4F8;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #D1D5DB;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2D3748;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; }}
 </style>

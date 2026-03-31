@@ -13,6 +13,8 @@ namespace VidaAnimal.API.Models
         public DateTime Fecha { get; set; } = DateTime.Now;
 
         public int UsuarioID { get; set; }
+        [ForeignKey("UsuarioID")]
+        public virtual Usuario? Usuario { get; set; }
 
         [Column(TypeName = "decimal(12,2)")]
         public decimal SubTotal { get; set; } = 0;
@@ -56,7 +58,7 @@ namespace VidaAnimal.API.Models
         [ForeignKey("ProductoID")]
         public virtual Producto? Producto { get; set; }
 
-        [Column(TypeName = "decimal(12,2)")]
+        [Column(TypeName = "decimal(18,3)")]
         public decimal Cantidad { get; set; }
 
         [Column("PrecioUnitario", TypeName = "decimal(12,2)")]
