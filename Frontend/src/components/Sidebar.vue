@@ -41,15 +41,15 @@ const menu = [
 
   { id: 'pos',             label: 'Punto de Venta',       icon: '🛒', roles: ['ADMINISTRADOR', 'CAJERO'] },
   { id: 'ventas-cliente',  label: 'Historial de Ventas',  icon: '📅', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'productos',       label: 'Productos',            icon: '🐾', roles: ['ADMINISTRADOR', 'CAJERO'] },
 
   { id: 'users',           label: 'Usuarios',             icon: '👥', roles: ['ADMINISTRADOR'] },
-  { id: 'clientes',        label: 'Clientes',             icon: '👨‍👩‍👧', roles: ['ADMINISTRADOR', 'CAJERO'] },
-  { id: 'productos',       label: 'Productos',            icon: '🐾', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'clientes',        label: 'Clientes',             icon: '👨‍👩‍👧', roles: ['ADMINISTRADOR', 'CAJERO'] },  
   { id: 'proveedores',     label: 'Proveedores',          icon: '🏢', roles: ['ADMINISTRADOR'] },
 
   { id: 'compras',         label: 'Compras (Reponer Stock)', icon: '📦', roles: ['ADMINISTRADOR'] },  
   { id: 'historial-compras', label: 'Historial de Compras',    icon: '🧾', roles: ['ADMINISTRADOR'] },
-  { id: 'kardex',          label: 'Historial de Inventario',    icon: '📓', roles: ['ADMINISTRADOR'] }
+  { id: 'kardex',          label: 'Movimientos de Inventario',    icon: '📓', roles: ['ADMINISTRADOR'] }
   
 ]
 
