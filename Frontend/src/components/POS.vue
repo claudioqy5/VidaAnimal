@@ -133,20 +133,31 @@
               </div>
             </div>
             
-            <div class="item-actions">
-              <div class="qty-control">
-                <button @click="restarCantidad(index)" class="qty-btn">-</button>
-                <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
-                <button @click="sumarCantidad(index)" class="qty-btn">+</button>
+            <div class="item-actions-grouped">
+              <div class="action-column">
+                <span class="action-caption">Ingresar Cant.</span>
+                <div class="qty-control">
+                  <button @click="restarCantidad(index)" class="qty-btn">-</button>
+                  <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
+                  <button @click="sumarCantidad(index)" class="qty-btn">+</button>
+                </div>
               </div>
-              <!-- Botón para calcular por soles -->
-              <button class="calc-btn" @click="abrirModalSoles(index)" title="Calcular por soles (S/)">
-                💰
-              </button>
-              <div class="item-subtotal">
-                S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}
+
+              <!-- Botón para calcular por montos exactos -->
+              <div class="action-column">
+                <span class="action-caption">Monto Exacto</span>
+                <button class="calc-btn-labeled" @click="abrirModalSoles(index)" title="Vender ingresando Soles (S/) exactos">
+                  💰 S/
+                </button>
               </div>
-              <button class="remove-btn" @click="eliminarDelCarrito(index)" title="Quitar">✕</button>
+
+              <div class="action-column subtotal-col">
+                <span class="action-caption">Subtotal</span>
+                <div class="item-subtotal">
+                  S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}
+                </div>
+              </div>
+              <button class="remove-btn" @click="eliminarDelCarrito(index)" title="Quitar item">✕</button>
             </div>
           </div>
         </div>
@@ -720,29 +731,25 @@ const cerrarModalNuevoCliente = () => {
 .item-name { margin: 0; font-weight: 600; color: #2D3748; font-size: 0.9rem; }
 .item-price-unit { margin: 0; font-size: 0.8rem; color: #718096; }
 
-.item-actions { display: flex; align-items: center; justify-content: space-between; }
-.qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0;}
-.qty-btn { width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: #4A5568; }
+.item-actions-grouped { display: flex; align-items: flex-end; gap: 0.5rem; margin-top: 0.25rem; justify-content: space-between; }
+.action-column { display: flex; flex-direction: column; gap: 0.25rem; }
+.action-caption { font-size: 0.6rem; color: #718096; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; line-height: 1; }
+.subtotal-col { align-items: flex-end; flex: 1; margin-right: 0.25rem; }
+
+.qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0; height: 26px;}
+.qty-btn { width: 24px; height: 100%; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: #4A5568; display: flex; align-items: center; justify-content: center; padding: 0;}
 .qty-btn:hover { background: #E2E8F0; }
-.qty-input { width: 50px; height: 24px; border: none; text-align: center; background: transparent; font-size: 0.85rem; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
+.qty-input { width: 50px; height: 100%; border: none; text-align: center; background: transparent; font-size: 0.85rem; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
 .qty-input.editable { background-color: #fff; cursor: text; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); width: 60px;}
 .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
 
-.calc-btn { 
-  background: #EBF8FF; 
-  border: 1px solid #BEE3F8; 
-  color: #2B6CB0; 
-  border-radius: 6px; 
-  width: 24px; 
-  height: 24px; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer; 
-  font-size: 0.75rem;
-  margin-left: 0.25rem;
+.calc-btn-labeled { 
+  background: #EBF8FF; border: 1px solid #BEE3F8; color: #2B6CB0; 
+  border-radius: 6px; height: 26px; padding: 0 0.5rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 0.75rem; font-weight: 700; gap: 0.25rem;
 }
-.calc-btn:hover { background: #BEE3F8; }
+.calc-btn-labeled:hover { background: #BEE3F8; }
 
 .unit-selector { margin: 0.3rem 0; }
 .select-unit-mini { 

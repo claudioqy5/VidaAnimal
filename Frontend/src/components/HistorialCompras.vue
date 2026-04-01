@@ -49,9 +49,14 @@
             </td>
             <td class="total-col">S/ {{ c.total.toFixed(2) }}</td>
             <td class="actions-col">
-              <button class="btn-detail" @click="verDetalle(c)">
-                <span>👁️</span> Ver Detalle
-              </button>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-detail" @click="verDetalle(c)">
+                  <span>👁️</span> Ver Detalle
+                </button>
+                <button class="btn-pdf" @click.stop="descargarPDF(c)" title="Descargar Factura PDF">
+                  📄 PDF
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="comprasFiltradas.length === 0">
@@ -111,6 +116,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const compras = ref([])
 const cargando = ref(true)
@@ -148,8 +155,61 @@ const formatearFecha = (f) => new Date(f).toLocaleDateString('es-PE', { day: '2-
 const formatearHora = (f) => new Date(f).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
 
 const verDetalle = (c) => {
-  compraSeleccionada.value = c
-  mostrarModalDetalle.value = true
+  compraSeleccionada.value = c;
+  mostrarModalDetalle.value = true;
+};
+
+const descargarPDF = (c) => {
+  const doc = new jsPDF();
+  
+  doc.setFontSize(22);
+  doc.setTextColor(43, 108, 176); 
+  doc.text("VIDA ANIMAL", 105, 20, null, null, "center");
+  
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Comprobante de Ingreso (Abastecimiento)", 105, 30, null, null, "center");
+  
+  doc.setFontSize(11);
+  doc.text(`Nro. Comprobante/Guía: ${c.numeroComprobante || 'S/N'}`, 15, 45);
+  doc.text(`Fecha: ${formatearFecha(c.fechaCompra)} ${formatearHora(c.fechaCompra)}`, 15, 52);
+  doc.text(`Proveedor: ${c.proveedor?.nombre || 'Desconocido'}`, 15, 59);
+
+  const tableColumn = ["Producto", "Código", "Cantidad Lote", "Costo Unit.", "Subtotal"];
+  const tableRows = [];
+
+  if(c.detalles) {
+    c.detalles.forEach(d => {
+      tableRows.push([
+        d.producto?.nombre || 'Producto',
+        d.producto?.codigo || '-',
+        d.cantidad,
+        `S/ ${Number(d.precioCostoUnitario).toFixed(2)}`,
+        `S/ ${Number(d.subTotal).toFixed(2)}`
+      ]);
+    });
+  }
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 68,
+    theme: 'grid',
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [45, 55, 72], textColor: [255, 255, 255] }
+  });
+
+  const finalY = doc.lastAutoTable.finalY || 68;
+  doc.setFontSize(13);
+  doc.setFont(undefined, 'bold');
+  doc.text(`TOTAL FACTURA: S/ ${Number(c.total).toFixed(2)}`, 140, finalY + 15);
+  
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(150, 150, 150);
+  doc.text("Historial de Abastecimiento - Sistema Vida Animal", 105, 280, null, null, "center");
+
+  doc.save(`Compra_${c.numeroComprobante || 'Abastecimiento'}.pdf`);
 }
 
 onMounted(() => cargarCompras())
@@ -176,8 +236,11 @@ onMounted(() => cargarCompras())
 .invoice-badge { background: #EBF8FF; color: #2B6CB0; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; font-family: monospace; font-size: 0.9rem; }
 .total-col { font-weight: 800; color: #2D3748; font-size: 1.1rem; }
 
-.btn-detail { background: #EDF2F7; border: none; padding: 0.5rem 1rem; border-radius: 8px; color: #4A5568; cursor: pointer; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+.btn-detail { background: #EDF2F7; border: none; padding: 0.5rem 0.8rem; border-radius: 8px; color: #4A5568; cursor: pointer; transition: all 0.2s; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
 .btn-detail:hover { background: #E2E8F0; color: #2D3748; }
+
+.btn-pdf { background: #EBF8FF; color: #2B6CB0; border: 1px solid #90CDF4; border-radius: 8px; padding: 0.5rem 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.85rem;}
+.btn-pdf:hover { background: #BEE3F8; transform: translateY(-2px);}
 
 /* Modal Detalle */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }

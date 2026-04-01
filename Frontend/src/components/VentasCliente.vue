@@ -44,6 +44,9 @@
           <span class="label">Monto Total:</span>
           <span class="value highlight">S/ {{ totalGeneral.toFixed(2) }}</span>
         </div>
+        <button class="btn-reporte" @click="descargarReporteVentas" :disabled="ventasOrdenadas.length === 0">
+          📄 Generar Reporte
+        </button>
       </div>
     </div>
 
@@ -292,6 +295,60 @@ const formatDate = (dateStr) => {
   });
 };
 
+const descargarReporteVentas = () => {
+  const doc = new jsPDF();
+  
+  doc.setFontSize(22);
+  doc.setTextColor(43, 108, 176); 
+  doc.text("VIDA ANIMAL", 105, 20, null, null, "center");
+  
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Reporte General de Ventas", 105, 30, null, null, "center");
+  
+  doc.setFontSize(11);
+  let fechaFiltroStr = selectedFecha.value ? `${selectedFecha.value}` : 'Todo el historial';
+  let clienteFiltroStr = selectedClienteID.value ? 'Cliente filtrado' : 'Todos los clientes';
+  
+  doc.text(`Filtro Fecha: ${fechaFiltroStr}`, 15, 45);
+  doc.text(`Filtro Cliente: ${clienteFiltroStr}`, 15, 52);
+  doc.text(`N° Ventas Mostradas: ${ventasOrdenadas.value.length}`, 130, 45);
+
+  const tableColumn = ["Fecha/Hora", "Comprobante", "Cliente", "Cajero", "TotalPagado"];
+  const tableRows = [];
+
+  ventasOrdenadas.value.forEach(v => {
+    tableRows.push([
+      formatDate(v.fecha),
+      `${v.serieComprobante}-${v.numeroComprobante}`,
+      v.cliente?.nombreCompleto || 'Consumidor Final',
+      v.cajero || 'Sistema',
+      `S/ ${Number(v.total).toFixed(2)}`
+    ]);
+  });
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 60,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: [43, 108, 176], textColor: [255, 255, 255] }
+  });
+
+  const finalY = doc.lastAutoTable.finalY || 60;
+  doc.setFontSize(13);
+  doc.setFont(undefined, 'bold');
+  doc.text(`MONTO TOTAL: S/ ${totalGeneral.value.toFixed(2)}`, 120, finalY + 15);
+  
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(150, 150, 150);
+  doc.text("Generado por el Sistema Vida Animal.", 105, 280, null, null, "center");
+
+  doc.save(`Reporte_Ventas_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
 onMounted(async () => {
   await fetchClientes();
   await fetchVentas();
@@ -334,10 +391,14 @@ onMounted(async () => {
 .stat-item .value { font-weight: 800; color: #2D3748; font-size: 1.4rem; }
 .stat-item .value.highlight { 
   background: linear-gradient(135deg, #276749, #48BB78);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
+
+.btn-reporte { background: #2D3748; color: white; border: none; border-radius: 10px; padding: 0.8rem 1.25rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s ease; margin-left: 1.5rem; white-space: nowrap; align-self: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.btn-reporte:hover { background: #1A202C; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.15);}
+.btn-reporte:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .ventas-grid {
   display: flex;
