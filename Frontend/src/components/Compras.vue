@@ -156,13 +156,7 @@
               <label>Unidad Medida *</label>
               <select v-model="nuevoProd.unidadMedida" required>
                 <option value="UND">Unidad</option>
-                <option value="KG">Kilogramos</option>
-                <option value="GR">Gramos</option>
-                <option value="LTS">Litros</option>
-                <option value="ML">Mililitros</option>
-                <option value="SACO">Saco</option>
-                <option value="PQTE">Paquete</option>
-                <option value="LATA">Lata</option>
+                <option value="SACO">Saco o costal</option>
               </select>
             </div>
             <div class="form-group">
@@ -179,25 +173,22 @@
               <input type="number" min="0" v-model="nuevoProd.stockMinimo" required />
             </div>
             <div class="form-group" style="grid-column: span 2;">
-              <label>Precio Venta Público (S/ - Opcional)</label>
+              <label>{{ nuevoProd.unidadMedida === 'SACO' ? 'Precio Venta Público (por Kilo) (S/ - Opcional)' : 'Precio Venta Público (S/ - Opcional)' }}</label>
               <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" placeholder="0.00" />
             </div>
 
             <!-- Bloque Mayorista -->
-            <div class="form-group full wholesale-box">
-              <p class="box-title">Configuración de Saco/Costal (Opcional)</p>
-              <div class="form-row-custom">
+            <div v-if="nuevoProd.unidadMedida === 'SACO'" class="form-group full wholesale-box animate-fade-in">
+              <p class="box-title" style="color: #6B46C1; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">⚖️ Configuración de Saco</p>
+              <p style="font-size: 0.8rem; color: #718096; margin-top: -10px; margin-bottom: 1rem;">Ingresa el peso neto de cada bulto y el precio de venta cuando se compre el saco entero.</p>
+              <div class="form-row-custom" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
-                  <label>Unidad Mayor</label>
-                  <input type="text" v-model="nuevoProd.nombreUnidadMayorista" placeholder="Ej. Saco" />
+                  <label>Peso por Saco (Kg) *</label>
+                  <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" :required="nuevoProd.unidadMedida === 'SACO'" placeholder="Ej. 40" />
                 </div>
                 <div class="form-group">
-                  <label>Cant. (kg)</label>
-                  <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" placeholder="50" />
-                </div>
-                <div class="form-group">
-                  <label>Precio (S/)</label>
-                  <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" placeholder="45.00" />
+                  <label>Precio Saco Completo (S/) *</label>
+                  <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" :required="nuevoProd.unidadMedida === 'SACO'" placeholder="S/ 0.00" />
                 </div>
               </div>
             </div>

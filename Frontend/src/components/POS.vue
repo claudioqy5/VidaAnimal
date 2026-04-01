@@ -140,7 +140,7 @@
                 <button @click="sumarCantidad(index)" class="qty-btn">+</button>
               </div>
               <!-- Botón para calcular por soles -->
-              <button class="calc-btn" @click="calcularPorSoles(index)" title="Calcular por soles (S/)">
+              <button class="calc-btn" @click="abrirModalSoles(index)" title="Calcular por soles (S/)">
                 💰
               </button>
               <div class="item-subtotal">
@@ -170,9 +170,9 @@
 
           <div class="total-row" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
              <div style="width: 100%;">
-                <label style="font-size: 0.8rem; font-weight: 600; color: #718096; display: block; margin-bottom: 0.4rem;">Notas / Observaciones (Opcional)</label>
+                <label style="font-size: 0.75rem; font-weight: 600; color: #718096; display: block; margin-bottom: 0.2rem;">Notas / Observaciones (Opcional)</label>
                 <textarea v-model="ticket.observaciones" placeholder="Ej: Pago con Yape, recoge productos mañana..." 
-                          style="width: 100%; height: 60px; border-radius: 10px; border: 1px solid #E2E8F0; padding: 0.6rem; font-family: inherit; font-size: 0.85rem; resize: none; color: #4A5568;"></textarea>
+                          style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #E2E8F0; padding: 0.4rem; font-family: inherit; font-size: 0.8rem; resize: none; color: #4A5568;"></textarea>
              </div>
           </div>
 
@@ -190,6 +190,32 @@
       </div>
     </div>
     
+    <!-- Modal Calculadora de Soles -->
+    <div v-if="mostrarModalSoles" class="modal-overlay" @click.self="cerrarModalSoles">
+      <div class="modal-card animate-slide-up" style="max-width: 380px; padding: 1.5rem;">
+        <div class="modal-header" style="margin-bottom: 1rem;">
+          <h3 style="font-size: 1.15rem;">💰 Vender por Monto (S/)</h3>
+          <button class="btn-close" @click="cerrarModalSoles">×</button>
+        </div>
+        <p style="color: #4A5568; font-size: 0.9rem; margin-bottom: 1.5rem;">
+          ¿Cuánto comprará el cliente en Soles de:<br/>
+          <strong style="color: #2D3748; font-size: 0.95rem;">{{ itemSolesNombre }}</strong>?
+        </p>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <input type="number" v-model="inputSoles" step="0.50" min="0.10" 
+                 @keyup.enter="confirmarCalculoSoles"
+                 id="inputMontoSoles"
+                 style="font-size: 1.8rem; text-align: center; padding: 1rem; font-weight: 800; color: #1A365D; border: 2px solid #A7C7E7; border-radius: 12px; transition: all 0.2s; outline: none;" 
+                 onfocus="this.style.boxShadow='0 0 0 4px rgba(167, 199, 231, 0.3)'"
+                 onblur="this.style.boxShadow='none'" />
+        </div>
+        <div class="modal-footer" style="margin-top: 0;">
+          <button class="secondary-btn" @click="cerrarModalSoles">Cancelar</button>
+          <button class="primary-btn" @click="confirmarCalculoSoles">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal de Venta Exitosa -->
     <div v-if="mostrarModalVenta" class="modal-overlay">
       <div class="modal-success">
@@ -274,6 +300,11 @@ const ticket = ref({
   descuento: 0,
   observaciones: ''
 })
+
+const mostrarModalSoles = ref(false)
+const inputSoles = ref('')
+const itemSolesIdx = ref(-1)
+const itemSolesNombre = ref('')
 
 const cumpleaneroHoy = ref(null)
 const mostrarModalNuevoCliente = ref(false)
@@ -502,14 +533,38 @@ const eliminarDelCarrito = (idx) => {
   carrito.value.splice(idx, 1)
 }
 
-const calcularPorSoles = (idx) => {
-  const item = carrito.value[idx];
-  const soles = prompt(`¿Cuánto comprará en Soles (S/) de ${item.producto.nombre}?`, "1.00");
-  if (soles && !isNaN(soles)) {
-    const monto = parseFloat(soles);
-    // Cantidad = Dinero / Precio Unitario
-    item.cantidad = parseFloat((monto / item.precioVentaUnitario).toFixed(3));
+const abrirModalSoles = (idx) => {
+  const item = carrito.value[idx]
+  itemSolesIdx.value = idx
+  itemSolesNombre.value = item.producto.nombre
+  inputSoles.value = '1.00'
+  mostrarModalSoles.value = true
+  // Autofocus con pequeño rebote
+  setTimeout(() => {
+    const input = document.getElementById('inputMontoSoles')
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  }, 100)
+}
+
+const confirmarCalculoSoles = () => {
+  if (itemSolesIdx.value >= 0 && inputSoles.value) {
+    const monto = parseFloat(inputSoles.value)
+    if (!isNaN(monto) && monto > 0) {
+      const item = carrito.value[itemSolesIdx.value]
+      item.cantidad = parseFloat((monto / item.precioVentaUnitario).toFixed(3))
+    }
   }
+  cerrarModalSoles()
+}
+
+const cerrarModalSoles = () => {
+  mostrarModalSoles.value = false
+  inputSoles.value = ''
+  itemSolesIdx.value = -1
+  itemSolesNombre.value = ''
 }
 
 const procesarVenta = async () => {
@@ -590,7 +645,7 @@ const cerrarModalNuevoCliente = () => {
 .success-banner { background-color: #F0FFF4; color: #2F855A; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; border: 1px solid #C6F6D5;}
 
 /* LAYOUT PRINCIPAL DEL POS */
-.pos-layout { display: flex; gap: 2rem; height: calc(100vh - 160px); min-height: 600px;}
+.pos-layout { display: flex; gap: 2rem; height: calc(100vh - 120px); min-height: 500px;}
 
 /* Panel Catálogo */
 .panel-catalogo { flex: 65; display: flex; flex-direction: column; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #E2E8F0; padding: 1.5rem; overflow: hidden;}
@@ -641,24 +696,24 @@ const cerrarModalNuevoCliente = () => {
 /* PANEL COMANDA/TICKET */
 .panel-ticket { flex: 35; display: flex; flex-direction: column; background: #F8FAFC; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0; overflow: hidden; }
 
-.ticket-title { margin: 0; padding: 1.25rem 1.5rem; background: white; border-bottom: 1px solid #E2E8F0; font-size: 1.1rem; font-weight: 700; color: #2D3748;}
-.ticket-header-form { padding: 1rem 1.5rem; background: white; }
+.ticket-title { margin: 0; padding: 0.75rem 1.25rem; background: white; border-bottom: 1px solid #E2E8F0; font-size: 1rem; font-weight: 700; color: #2D3748;}
+.ticket-header-form { padding: 0.75rem 1.25rem; background: white; }
 
 .row-inline { display: flex; gap: 1rem; }
-.form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #718096; margin-bottom: 0.25rem;}
-.form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 0.6rem; border-radius: 8px; border: 1px solid #CBD5E0; font-family: inherit; outline: none; transition: border-color 0.2s;}
+.form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: #718096; margin-bottom: 0.2rem;}
+.form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 0.45rem; border-radius: 8px; border: 1px solid #CBD5E0; font-family: inherit; font-size: 0.85rem; outline: none; transition: border-color 0.2s;}
 .form-group input:focus, .form-group select:focus { border-color: #A7C7E7; }
 
 .ticket-divider { height: 4px; background: url('data:image/svg+xml;utf8,<svg width="10" height="4" xmlns="http://www.w3.org/2000/svg"><path d="M0 2h5" stroke="%23CBD5E0" stroke-width="2" fill="none"/></svg>') repeat-x; margin: 0; }
 
-.cart-items-container { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; background: #F8FAFC; display: flex; flex-direction: column; gap: 0.75rem;}
+.cart-items-container { flex: 1; overflow-y: auto; padding: 0.75rem 1.25rem; background: #F8FAFC; display: flex; flex-direction: column; gap: 0.5rem;}
 .cart-items-container::-webkit-scrollbar { width: 4px; }
 .cart-items-container::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
 .empty-cart { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #A0AEC0; text-align: center;}
 .cart-icon-big { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;}
 
-.cart-item { background: white; border-radius: 10px; padding: 0.85rem; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 0.5rem; animation: slideInX 0.2s ease;}
+.cart-item { background: white; border-radius: 8px; padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 0.35rem; animation: slideInX 0.2s ease;}
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
 
 .item-main { display: flex; justify-content: space-between; align-items: flex-start;}
@@ -667,10 +722,10 @@ const cerrarModalNuevoCliente = () => {
 
 .item-actions { display: flex; align-items: center; justify-content: space-between; }
 .qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0;}
-.qty-btn { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; font-weight: bold; color: #4A5568; }
+.qty-btn { width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: #4A5568; }
 .qty-btn:hover { background: #E2E8F0; }
-.qty-input { width: 60px; height: 28px; border: none; text-align: center; background: transparent; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
-.qty-input.editable { background-color: #fff; cursor: text; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); width: 70px;}
+.qty-input { width: 50px; height: 24px; border: none; text-align: center; background: transparent; font-size: 0.85rem; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
+.qty-input.editable { background-color: #fff; cursor: text; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); width: 60px;}
 .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
 
 .calc-btn { 
@@ -678,35 +733,38 @@ const cerrarModalNuevoCliente = () => {
   border: 1px solid #BEE3F8; 
   color: #2B6CB0; 
   border-radius: 6px; 
-  width: 28px; 
-  height: 28px; 
+  width: 24px; 
+  height: 24px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer; 
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   margin-left: 0.25rem;
 }
 .calc-btn:hover { background: #BEE3F8; }
 
-.unit-selector { margin: 0.5rem 0; }
+.unit-selector { margin: 0.3rem 0; }
 .select-unit-mini { 
   width: 100%; 
-  padding: 0.4rem; 
-  font-size: 0.75rem; 
-  border-radius: 6px; 
+  padding: 0.2rem; 
+  font-size: 0.7rem; 
+  border-radius: 4px; 
   border: 1px solid #CBD5E0; 
   background-color: #F7FAFC;
   font-weight: 600;
   color: #2D3748;
 }
 
-.item-subtotal { font-weight: 700; color: #2D3748; font-size: 1rem;}
-.remove-btn { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; transition: 0.2s; }
+.item-subtotal { font-weight: 700; color: #2D3748; font-size: 0.95rem;}
+.remove-btn { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; border-radius: 6px; width: 24px; height: 24px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; font-size: 0.9rem;}
 .remove-btn:hover { background: #FED7D7; }
 
-.ticket-footer { background: white; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;}
-.total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.25rem; font-weight: 700; color: #2D3748;}
-.total-monto { font-size: 1.75rem; color: #1A365D; }
+.ticket-footer { background: white; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;}
+.total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: 700; color: #2D3748;}
+.total-monto { font-size: 1.5rem; color: #1A365D; }
 
-.checkout-btn { background-color: #A7C7E7; color: #1A365D; border: none; padding: 1.25rem; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(167, 199, 231, 0.4);}
+.checkout-btn { background-color: #A7C7E7; color: #1A365D; border: none; padding: 0.9rem; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(167, 199, 231, 0.4);}
 .checkout-btn:hover:not(:disabled) { transform: translateY(-2px); background-color: #8BA9C7; }
 .checkout-btn:active:not(:disabled) { transform: translateY(0); }
 .checkout-btn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; background-color: #E2E8F0; color: #A0AEC0;}
