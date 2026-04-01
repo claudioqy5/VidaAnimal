@@ -327,7 +327,7 @@ const descargarReporteVentas = () => {
     ]);
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
     startY: 60,
