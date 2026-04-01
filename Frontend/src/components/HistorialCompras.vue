@@ -190,7 +190,7 @@ const descargarPDF = (c) => {
     });
   }
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
     startY: 68,
