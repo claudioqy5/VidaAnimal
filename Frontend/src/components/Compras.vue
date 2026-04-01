@@ -163,35 +163,65 @@
               <label>Cantidad (La que acaba de llegar) *</label>
               <input type="number" step="0.01" min="0.01" v-model="nuevoProd.cantidadLlegando" required />
             </div>
-            <div class="form-group">
-              <label>Precio unitario de compra (S/)</label>
-              <input type="number" step="0.01" min="0" v-model="nuevoProd.precioCosto" />
-            </div>
-            
-            <div class="form-group">
-              <label>Stock Mínimo Alerta *</label>
-              <input type="number" min="0" v-model="nuevoProd.stockMinimo" required />
-            </div>
-            <div class="form-group" style="grid-column: span 2;">
-              <label>{{ nuevoProd.unidadMedida === 'SACO' ? 'Precio Venta Público (por Kilo) (S/ - Opcional)' : 'Precio Venta Público (S/ - Opcional)' }}</label>
-              <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" placeholder="0.00" />
-            </div>
 
-            <!-- Bloque Mayorista -->
-            <div v-if="nuevoProd.unidadMedida === 'SACO'" class="form-group full wholesale-box animate-fade-in">
-              <p class="box-title" style="color: #6B46C1; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">⚖️ Configuración de Saco</p>
-              <p style="font-size: 0.8rem; color: #718096; margin-top: -10px; margin-bottom: 1rem;">Ingresa el peso neto de cada bulto y el precio de venta cuando se compre el saco entero.</p>
-              <div class="form-row-custom" style="grid-template-columns: 1fr 1fr;">
-                <div class="form-group">
-                  <label>Peso por Saco (Kg) *</label>
-                  <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" :required="nuevoProd.unidadMedida === 'SACO'" placeholder="Ej. 40" />
-                </div>
-                <div class="form-group">
-                  <label>Precio Saco Completo (S/) *</label>
-                  <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" :required="nuevoProd.unidadMedida === 'SACO'" placeholder="S/ 0.00" />
+            <!-- ======== RENDERING PARA UNIDAD ======== -->
+            <template v-if="nuevoProd.unidadMedida === 'UND'">
+              <div class="form-group">
+                <label>Precio Costo de Compra (S/)</label>
+                <input type="number" step="0.01" min="0" v-model="nuevoProd.precioCosto" />
+              </div>
+              <div class="form-group">
+                <label>Stock Mínimo Alerta *</label>
+                <input type="number" min="0" v-model="nuevoProd.stockMinimo" required />
+              </div>
+              <div class="form-group" style="grid-column: span 2;">
+                <label>Precio Venta Público (S/ - Opcional)</label>
+                <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" placeholder="0.00" />
+              </div>
+            </template>
+
+            <!-- ======== RENDERING PARA SACO ======== -->
+            <template v-if="nuevoProd.unidadMedida === 'SACO'">
+              <div class="form-group" style="grid-column: span 2; margin-top: 0.5rem;">
+                <div class="wholesale-box animate-fade-in" style="background: #F7FAFC; border-color: #CBD5E0;">
+                  <p class="box-title" style="color: #2D3748; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">📦 Configuración por Saco</p>
+                  <p style="font-size: 0.8rem; color: #718096; margin-top: -10px; margin-bottom: 1rem;">Ingresa los costos y detalles del bulto entero.</p>
+                  <div class="form-row-custom" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
+                    <div class="form-group">
+                      <label>Precio Costo Compra (S/) *</label>
+                      <input type="number" step="0.01" min="0" v-model="nuevoProd.precioCosto" required placeholder="Costo del saco entero" />
+                    </div>
+                    <div class="form-group">
+                      <label>Peso de cada Saco (Kg) *</label>
+                      <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" required placeholder="Ej. 40" />
+                    </div>
+                  </div>
+                  <div class="form-row-custom" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                      <label>Precio Venta Público Saco (S/) *</label>
+                      <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" required placeholder="S/ 0.00" />
+                    </div>
+                    <div class="form-group">
+                      <label>Stock Mínimo Alerta (En sacos) *</label>
+                      <input type="number" min="0" v-model="nuevoProd.stockMinimo" required />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <div class="form-group" style="grid-column: span 2; margin-top: -0.5rem;">
+                <div class="wholesale-box animate-fade-in" style="background: #EBF8FF; border-color: #90CDF4;">
+                  <p class="box-title" style="color: #2B6CB0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">⚖️ Configuración por Kilo</p>
+                  <p style="font-size: 0.8rem; color: #4A5568; margin-top: -10px; margin-bottom: 1rem;">¿A cuánto venderás cada kilo si se fracciona el saco?</p>
+                  <div class="form-row-custom" style="grid-template-columns: 1fr;">
+                    <div class="form-group">
+                      <label>Precio Venta Público por Kilo (S/) *</label>
+                      <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" required placeholder="0.00" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
 
             <div class="form-group" style="grid-column: span 2;">
               <label>Fotografía (Opcional)</label>

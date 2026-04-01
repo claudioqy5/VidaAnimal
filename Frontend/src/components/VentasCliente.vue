@@ -77,6 +77,7 @@
           <div class="summary-price">
             <span class="total-label">Pagado:</span>
             <span class="total-value">S/ {{ Number(v.total).toFixed(2) }}</span>
+            <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
             <span class="expand-icon">{{ expandedVentas.has(v.ventaID) ? '▲' : '▼' }}</span>
           </div>
         </div>
@@ -135,6 +136,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
@@ -160,6 +163,78 @@ const toggleVenta = (id) => {
   } else {
     expandedVentas.value.add(id);
   }
+};
+
+const descargarPDF = (v) => {
+  const doc = new jsPDF();
+  
+  // Titulo general
+  doc.setFontSize(22);
+  doc.setTextColor(43, 108, 176); // Azul logo 
+  doc.text("VIDA ANIMAL", 105, 20, null, null, "center");
+  
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Comprobante de Venta", 105, 30, null, null, "center");
+  
+  // Info de la Venta
+  doc.setFontSize(11);
+  doc.text(`Comprobante: ${v.serieComprobante}-${v.numeroComprobante}`, 15, 45);
+  doc.text(`Fecha: ${formatDate(v.fecha)}`, 15, 52);
+  doc.text(`Cliente: ${v.cliente?.nombreCompleto || 'Consumidor Final'}`, 15, 59);
+  doc.text(`DNI/RUC: ${v.cliente?.documentoIdentidad || '---'}`, 15, 66);
+  doc.text(`Cajero: ${v.cajero || 'Sistema'}`, 130, 45);
+
+  // Detalles de Venta con AutoTable
+  const tableColumn = ["Producto", "U. Venta", "Cantidad", "P. Unitario", "Subtotal"];
+  const tableRows = [];
+
+  v.detalleVentas.forEach(d => {
+    const pName = d.producto?.nombre || 'Producto';
+    const cant = d.cantidad;
+    const pu = `S/ ${Number(d.precioUnitario).toFixed(2)}`;
+    const sub = `S/ ${(d.cantidad * d.precioUnitario).toFixed(2)}`;
+    const uv = d.unidadVenta || 'UND';
+    tableRows.push([pName, uv, cant, pu, sub]);
+  });
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 75,
+    theme: 'grid',
+    styles: { fontSize: 9, cellPadding: 3 },
+    headStyles: { fillColor: [43, 108, 176], textColor: [255, 255, 255] }
+  });
+
+  // Totales
+  const finalY = doc.lastAutoTable.finalY || 75;
+  doc.setFontSize(11);
+  doc.text(`Subtotal: S/ ${Number(v.subTotal || 0).toFixed(2)}`, 140, finalY + 10);
+  const desc = Number(v.descuento || 0);
+  if (desc > 0) {
+    doc.text(`Descuento: - S/ ${desc.toFixed(2)}`, 140, finalY + 17);
+  }
+  
+  doc.setFontSize(13);
+  doc.setFont(undefined, 'bold');
+  const totalY = desc > 0 ? finalY + 25 : finalY + 18;
+  doc.text(`TOTAL PAGADO: S/ ${Number(v.total).toFixed(2)}`, 140, totalY);
+  
+  if (v.observaciones) {
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    doc.text("Notas:", 15, finalY + 15);
+    doc.text(v.observaciones, 15, finalY + 22, { maxWidth: 100 });
+  }
+
+  // Footer
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text("Gracias por su preferencia. - Sistema Vida Animal", 105, 280, null, null, "center");
+
+  // Save the PDF
+  doc.save(`Venta_${v.serieComprobante}-${v.numeroComprobante}.pdf`);
 };
 
 const apiFetch = async (endpoint) => {
@@ -294,6 +369,9 @@ onMounted(async () => {
 .fecha-text { font-size: 0.8rem; color: #A0AEC0; }
 
 .summary-price { display: flex; align-items: center; gap: 1rem; }
+.btn-pdf { background: #EBF8FF; color: #2B6CB0; border: 1px solid #90CDF4; border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 0.25rem;}
+.btn-pdf:hover { background: #BEE3F8; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(43,108,176, 0.15);}
+.btn-pdf:active { transform: translateY(0); }
 .total-label { font-size: 0.8rem; color: #718096; }
 .total-value { 
   font-size: 1.25rem; font-weight: 800; color: #2C5282;

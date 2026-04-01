@@ -10,20 +10,21 @@ namespace VidaAnimal.API.Models
         public string? Descripcion { get; set; }
         public int? ProveedorID { get; set; }
         public string UnidadMedida { get; set; }
-        public decimal PrecioCosto { get; set; }
-        public decimal PrecioVenta { get; set; }
+        
+        public decimal PrecioCosto { get; set; } // precio de costo por saco
+        public decimal PrecioVenta { get; set; }  // PrecioVenta = Precio por Kilo
         
         // Para productos que se venden por saco (UnidadMedida = SACO)
-        // PrecioVenta = Precio por Kilo
-        // PrecioMayorista = Precio por Saco Completo
-        // CantidadMayorista = Peso de cada Saco en Kilos (ej. 40, 50)
-        // StockActual = Cantidad de Sacos (admite decimales para porciones de saco)
-        public decimal? PrecioMayorista { get; set; }
-        public decimal? CantidadMayorista { get; set; }
-        public string? NombreUnidadMayorista { get; set; }
+        
+        
+        
+        
+        public decimal? PrecioMayorista { get; set; } // PrecioMayorista = Precio por Saco Completo
+        public decimal? CantidadMayorista { get; set; } // CantidadMayorista = Peso de cada Saco en Kilos (ej. 40, 50)
+        public string? NombreUnidadMayorista { get; set; } // guarda el nombre de la unidad de medida
 
         [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "decimal(18,3)")]
-        public decimal StockActual { get; set; }
+        public decimal StockActual { get; set; } // StockActual = Cantidad de Sacos (admite decimales para porciones de saco)
 
         [System.ComponentModel.DataAnnotations.Schema.Column(TypeName = "decimal(18,3)")]
         public decimal StockMinimo { get; set; }
