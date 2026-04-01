@@ -133,14 +133,13 @@
                   <input type="number" step="0.01" v-model="formProd.precioCosto" required />
                 </div>
                 <div class="form-group">
-                  <label>Precio Venta</label>
+                  <label>{{ formProd.unidadMedida === 'SACO' ? 'Precio Venta (por Kilo) *' : 'Precio Venta *' }}</label>
                   <input type="number" step="0.01" v-model="formProd.precioVenta" required />
                 </div>
                 <div class="form-group">
                   <label>Unidad Medida</label>
                   <select v-model="formProd.unidadMedida" required>
                     <option value="UND">Unidad</option>
-                    <option value="KG">Kilogramos</option>
                     <option value="SACO">Saco</option>
                   </select>
                 </div>
@@ -151,20 +150,17 @@
               </div>
             </div>
 
-            <div class="form-section wholesale-bg">
-              <h4 class="section-badge color-wholesale">🏗️ Venta por Mayor</h4>
+            <div v-if="formProd.unidadMedida === 'SACO'" class="form-section wholesale-bg animate-fade-in">
+              <h4 class="section-badge color-wholesale" style="background-color: #805AD5;">⚖️ Configuración de Saco</h4>
+              <p style="font-size: 0.8rem; color: #718096; margin-bottom: 1rem;">Ingresa el peso neto de cada bulto y el precio de venta cuando se compre el saco entero.</p>
               <div class="compact-grid">
-                <div class="form-group lg">
-                  <label>Unidad Mayorista</label>
-                  <input type="text" v-model="formProd.nombreUnidadMayorista" />
+                <div class="form-group">
+                  <label>Peso por Saco (Kg) *</label>
+                  <input type="number" step="0.01" v-model="formProd.cantidadMayorista" :required="formProd.unidadMedida === 'SACO'" />
                 </div>
                 <div class="form-group">
-                  <label>Cant. Equiv.</label>
-                  <input type="number" step="0.01" v-model="formProd.cantidadMayorista" />
-                </div>
-                <div class="form-group">
-                  <label>Precio Saco</label>
-                  <input type="number" step="0.01" v-model="formProd.precioMayorista" />
+                  <label>Precio Saco Completo *</label>
+                  <input type="number" step="0.01" v-model="formProd.precioMayorista" :required="formProd.unidadMedida === 'SACO'" />
                 </div>
               </div>
             </div>

@@ -67,5 +67,7 @@ namespace VidaAnimal.API.Models
         [Column(TypeName = "decimal(12,2)")]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal SubTotal { get; set; }
+
+        public string? UnidadVenta { get; set; }
     }
 }

@@ -122,14 +122,14 @@
             <div class="item-main">
               <div>
                 <p class="item-name">{{ item.producto.nombre }}</p>
-                <!-- Selector de Unidad (Solo si el producto tiene precio mayorista) -->
-                <div v-if="item.producto.precioMayorista && item.producto.cantidadMayorista" class="unit-selector">
+                <!-- Selector de Unidad (Solo si el producto es SACO) -->
+                <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector">
                   <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="UNIDAD">1 {{ item.producto.unidadMedida }} - S/{{ item.producto.precioVenta.toFixed(2) }}</option>
-                    <option value="MAYOR">1 {{ item.producto.nombreUnidadMayorista || 'Saco' }} ({{ item.producto.cantidadMayorista }}{{ item.producto.unidadMedida }}) - S/{{ item.producto.precioMayorista.toFixed(2) }}</option>
+                    <option value="KG">Vender por Kilo (Kg) - S/ {{ item.producto.precioVenta.toFixed(2) }}</option>
+                    <option value="SACO">Vender por Saco (Bulto) - S/ {{ (item.producto.precioMayorista || 0).toFixed(2) }}</option>
                   </select>
                 </div>
-                <p v-else class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x {{ item.producto.unidadMedida }}</p>
+                <p v-else class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</p>
               </div>
             </div>
             
@@ -454,29 +454,38 @@ const agregarAlCarrito = (prod) => {
       productoID: prod.productoID,
       cantidad: 1,
       precioVentaUnitario: prod.precioVenta,
-      tipoVenta: 'UNIDAD' // Por defecto suma de 1 en 1 (ej: 1 kilo)
+      tipoVenta: prod.unidadMedida === 'SACO' ? 'KG' : 'UND' // Por defecto kilo si es saco, sino unidad
     })
   }
 }
 
 const cambiarTipoVenta = (idx) => {
   const item = carrito.value[idx];
-  if (item.tipoVenta === 'MAYOR') {
-    item.precioVentaUnitario = item.producto.precioMayorista;
-  } else {
+  if (item.tipoVenta === 'SACO') {
+    item.precioVentaUnitario = item.producto.precioMayorista || 0;
+    // Si cambiamos a saco, reseteamos cantidad a 1 bulto para evitar compras gigantes accidentales
+    item.cantidad = 1;
+  } else if (item.tipoVenta === 'KG') {
     item.precioVentaUnitario = item.producto.precioVenta;
+    item.cantidad = 1;
   }
 }
 
 const sumarCantidad = (idx) => {
   const item = carrito.value[idx]
-  const factor = item.tipoVenta === 'MAYOR' ? item.producto.cantidadMayorista : 1;
-  const cantidadNueva = item.cantidad + 1;
   
-  if ((cantidadNueva * factor) <= item.producto.stockActual) {
+  // Calculamos cuánto representa esta unidad en el StockActual físico (que está en SACOS)
+  const pesoSaco = item.producto.cantidadMayorista || 1;
+  const decrementoPorUnidad = (item.producto.unidadMedida === 'SACO' && item.tipoVenta === 'KG') 
+    ? (1 / pesoSaco) 
+    : 1;
+
+  const cantidadNuevaEnSacos = (item.cantidad + 1) * decrementoPorUnidad;
+  
+  if (cantidadNuevaEnSacos <= item.producto.stockActual) {
     item.cantidad++
   } else {
-    alert(`Límite de stock físico alcanzado (${item.producto.stockActual} ${item.producto.unidadMedida} disponibles).`)
+    alert(`Límite de stock físico alcanzado. Quedan ${item.producto.stockActual.toFixed(3)} sacos disponibles.`)
   }
 }
 
@@ -520,20 +529,12 @@ const procesarVenta = async () => {
     descuento: Number(ticket.value.descuento) || 0,
     observaciones: ticket.value.observaciones,
     detalles: carrito.value.map(item => {
-      // Si es venta por mayor (ej: Saco), multiplicamos cantidad por el factor de conversión para el stock
-      const cantidadReal = item.tipoVenta === 'MAYOR' 
-        ? item.cantidad * item.producto.cantidadMayorista 
-        : item.cantidad;
-      
-      // Ajustamos el precio unitario para que el total coincida (PrecioSaco / CantidadSaco)
-      const precioCalculado = item.tipoVenta === 'MAYOR'
-        ? item.producto.precioMayorista / item.producto.cantidadMayorista
-        : item.precioVentaUnitario;
-
+      // El backend ahora recibe cantidad nominal y unidad de venta, manejando él mismo la división del stock
       return {
         productoID: item.productoID,
-        cantidad: cantidadReal,
-        precioVentaUnitario: precioCalculado
+        cantidad: item.cantidad,
+        precioVentaUnitario: item.precioVentaUnitario,
+        unidadVenta: item.tipoVenta // 'KG', 'SACO' o 'UND'
       }
     })
   }

@@ -13,7 +13,11 @@ namespace VidaAnimal.API.Models
         public decimal PrecioCosto { get; set; }
         public decimal PrecioVenta { get; set; }
         
-        // Campos para venta por mayor (ej: Sacos/Costales)
+        // Para productos que se venden por saco (UnidadMedida = SACO)
+        // PrecioVenta = Precio por Kilo
+        // PrecioMayorista = Precio por Saco Completo
+        // CantidadMayorista = Peso de cada Saco en Kilos (ej. 40, 50)
+        // StockActual = Cantidad de Sacos (admite decimales para porciones de saco)
         public decimal? PrecioMayorista { get; set; }
         public decimal? CantidadMayorista { get; set; }
         public string? NombreUnidadMayorista { get; set; }

@@ -108,20 +108,32 @@ namespace VidaAnimal.API.Controllers
                     var p = await _context.Productos.FindAsync(det.ProductoID);
                     if (p == null) return BadRequest(new { success = false, mensaje = $"Producto con ID {det.ProductoID} no existe." });
 
-                    if (p.StockActual < det.Cantidad)
-                        return BadRequest(new { success = false, mensaje = $"Stock insuficiente para '{p.Nombre}'. Solicitado: {det.Cantidad}, Disponible: {p.StockActual}." });
+                    // Lógica especial de stock para Sacos vendidos por Kilo
+                    decimal decrementoStockActual = det.Cantidad;
+                    if (p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") 
+                    {
+                        // Si se vende por kilo, restamos (cantidad / peso_del_saco) del stock actual de sacos
+                        if (p.CantidadMayorista.HasValue && p.CantidadMayorista > 0)
+                        {
+                            decrementoStockActual = det.Cantidad / p.CantidadMayorista.Value;
+                        }
+                    }
 
-                    itemsVenta.Add((p, det.Cantidad, det.PrecioVentaUnitario, p.StockActual));
+                    if (p.StockActual < decrementoStockActual)
+                        return BadRequest(new { success = false, mensaje = $"Stock insuficiente para '{p.Nombre}'. Solicitado: {decrementoStockActual} sacos, Disponible: {p.StockActual} sacos." });
 
-                    // Descontar stock
-                    p.StockActual -= det.Cantidad;
+                    itemsVenta.Add((p, decrementoStockActual, det.PrecioVentaUnitario, p.StockActual));
+
+                    // Descontar stock (decrementoStockActual ya está en unidades del stock)
+                    p.StockActual -= decrementoStockActual;
 
                     // Agregar detalle a la venta
                     nuevaVenta.VentaDetalles.Add(new VentaDetalle
                     {
                         ProductoID = det.ProductoID,
-                        Cantidad = det.Cantidad,
-                        PrecioVentaUnitario = det.PrecioVentaUnitario
+                        Cantidad = det.Cantidad, // Se guarda la cantidad nominal vendida (ej: 2)
+                        PrecioVentaUnitario = det.PrecioVentaUnitario,
+                        UnidadVenta = det.UnidadVenta ?? p.UnidadMedida // Guardamos si fue KG o SACO
                     });
 
                     totalCalculado += (det.Cantidad * det.PrecioVentaUnitario);
@@ -180,5 +192,6 @@ namespace VidaAnimal.API.Controllers
         public int ProductoID { get; set; }
         public decimal Cantidad { get; set; }
         public decimal PrecioVentaUnitario { get; set; }
+        public string? UnidadVenta { get; set; }
     }
 }

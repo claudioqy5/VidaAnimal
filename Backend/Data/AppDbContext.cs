@@ -39,6 +39,14 @@ namespace VidaAnimal.API.Data
                 .Property(p => p.StockMinimo)
                 .HasColumnType("decimal(12,3)");
 
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.PrecioMayorista)
+                .HasColumnType("decimal(12,2)");
+
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.CantidadMayorista)
+                .HasColumnType("decimal(12,3)");
+
             // Trigger TR_ReducirStock fue eliminado. El backend gestiona el stock directamente.
         }
     }
