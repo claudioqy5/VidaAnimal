@@ -47,7 +47,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': (prod.activo && prod.precioVenta < prod.precioCosto) }">
+          <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': evaluarPerdida(prod) }">
             <td class="img-cell">
               <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-thumb" alt="Product thumbnail" />
               <div v-else class="img-placeholder">🐾</div>
@@ -57,7 +57,7 @@
               <div class="prod-name">
                 {{ prod.nombre }}
                 <span v-if="prod.stockActual <= prod.stockMinimo" class="alert-badge stock-badge" title="Stock Bajo">⚠️ Bajo Stock</span>
-                <span v-if="prod.activo && prod.precioVenta < prod.precioCosto" class="alert-badge loss-badge" title="Venta por debajo del costo">🚨 Pérdida</span>
+                <span v-if="evaluarPerdida(prod)" class="alert-badge loss-badge" title="Venta por debajo del costo de compra">🚨 Pérdida</span>
               </div>
             </td>
             <td class="text-muted">S/ {{ prod.precioCosto.toFixed(2) }}</td>
@@ -398,6 +398,25 @@ const cargarDatos = async () => {
 onMounted(() => cargarDatos())
 
 const provStatus = (activo) => activo ? 'Activo' : 'Inactivo'
+
+const evaluarPerdida = (prod) => {
+  if (!prod.activo) return false;
+  
+  if (prod.unidadMedida === 'SACO' || prod.unidadMedida === 'BALDE') {
+    // Calculamos si hay perdida en el granel (Vender bulto más barato que costo)
+    const perdidaEnMayorista = prod.precioMayorista < prod.precioCosto;
+    
+    // Calculamos el costo por fracción = Costo Bulto / Unidades que trae el bulto
+    const costoFraccion = (prod.cantidadMayorista > 0) ? (prod.precioCosto / prod.cantidadMayorista) : prod.precioCosto;
+    // Calculamos si hay pérdida al vender por fracción (Vender kilo/unidad más barato de lo que costó el kilo/unidad en el interior del bulto)
+    const perdidaEnFraccion = prod.precioVenta < costoFraccion;
+    
+    return perdidaEnMayorista || perdidaEnFraccion;
+  }
+  
+  // Para productos de unidad normal
+  return prod.precioVenta < prod.precioCosto;
+}
 
 // Lógica de Imagen
 const manejarImagen = (event) => {
