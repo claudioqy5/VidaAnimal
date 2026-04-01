@@ -108,11 +108,12 @@ namespace VidaAnimal.API.Controllers
                     var p = await _context.Productos.FindAsync(det.ProductoID);
                     if (p == null) return BadRequest(new { success = false, mensaje = $"Producto con ID {det.ProductoID} no existe." });
 
-                    // Lógica especial de stock para Sacos vendidos por Kilo
+                    // Lógica especial de stock para Sacos vendidos por Kilo y Baldes por Unidad
                     decimal decrementoStockActual = det.Cantidad;
-                    if (p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") 
+                    if ((p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") || 
+                        (p.UnidadMedida == "BALDE" && det.UnidadVenta == "UND")) 
                     {
-                        // Si se vende por kilo, restamos (cantidad / peso_del_saco) del stock actual de sacos
+                        // Si se vende fracción, restamos (cantidad / capacidad_bulto) del stock actual de bultos
                         if (p.CantidadMayorista.HasValue && p.CantidadMayorista > 0)
                         {
                             decrementoStockActual = det.Cantidad / p.CantidadMayorista.Value;

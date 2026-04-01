@@ -122,11 +122,17 @@
             <div class="item-main">
               <div>
                 <p class="item-name">{{ item.producto.nombre }}</p>
-                <!-- Selector de Unidad (Solo si el producto es SACO) -->
+                <!-- Selector de Unidad (Solo si el producto es SACO o BALDE) -->
                 <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector">
                   <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
                     <option value="KG">Vender por Kilo (Kg) - S/ {{ item.producto.precioVenta.toFixed(2) }}</option>
                     <option value="SACO">Vender por Saco (Bulto) - S/ {{ (item.producto.precioMayorista || 0).toFixed(2) }}</option>
+                  </select>
+                </div>
+                <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector">
+                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
+                    <option value="UND">Vender por Unidad Suelta - S/ {{ item.producto.precioVenta.toFixed(2) }}</option>
+                    <option value="BALDE">Vender Balde Entero - S/ {{ (item.producto.precioMayorista || 0).toFixed(2) }}</option>
                   </select>
                 </div>
                 <p v-else class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</p>
@@ -136,7 +142,7 @@
             <div class="item-actions-grouped">
               <div class="action-column">
                 <span class="action-caption">
-                  {{ item.tipoVenta === 'KG' ? 'Ingresar Cant. (KG)' : (item.tipoVenta === 'SACO' ? 'Nro. de Sacos' : 'Ingresar Cantidad') }}
+                  {{ item.tipoVenta === 'KG' ? 'Ingresar Cant. (KG)' : (item.tipoVenta === 'SACO' ? 'Nro. de Sacos' : (item.tipoVenta === 'BALDE' ? 'Nro. de Baldes' : 'Ingresar Cantidad')) }}
                 </span>
                 <div class="qty-control">
                   <button @click="restarCantidad(index)" class="qty-btn">-</button>
@@ -498,18 +504,17 @@ const agregarAlCarrito = (prod) => {
       productoID: prod.productoID,
       cantidad: 1,
       precioVentaUnitario: prod.precioVenta,
-      tipoVenta: prod.unidadMedida === 'SACO' ? 'KG' : 'UND' // Por defecto kilo si es saco, sino unidad
+      tipoVenta: prod.unidadMedida === 'SACO' ? 'KG' : (prod.unidadMedida === 'BALDE' ? 'UND' : 'UND')
     })
   }
 }
 
 const cambiarTipoVenta = (idx) => {
   const item = carrito.value[idx];
-  if (item.tipoVenta === 'SACO') {
+  if (item.tipoVenta === 'SACO' || item.tipoVenta === 'BALDE') {
     item.precioVentaUnitario = item.producto.precioMayorista || 0;
-    // Si cambiamos a saco, reseteamos cantidad a 1 bulto para evitar compras gigantes accidentales
     item.cantidad = 1;
-  } else if (item.tipoVenta === 'KG') {
+  } else if (item.tipoVenta === 'KG' || item.tipoVenta === 'UND') {
     item.precioVentaUnitario = item.producto.precioVenta;
     item.cantidad = 1;
   }
@@ -518,18 +523,17 @@ const cambiarTipoVenta = (idx) => {
 const sumarCantidad = (idx) => {
   const item = carrito.value[idx]
   
-  // Calculamos cuánto representa esta unidad en el StockActual físico (que está en SACOS)
-  const pesoSaco = item.producto.cantidadMayorista || 1;
-  const decrementoPorUnidad = (item.producto.unidadMedida === 'SACO' && item.tipoVenta === 'KG') 
-    ? (1 / pesoSaco) 
-    : 1;
-
-  const cantidadNuevaEnSacos = (item.cantidad + 1) * decrementoPorUnidad;
+  const udsEnBulto = item.producto.cantidadMayorista || 1;
+  const esFraccion = (item.producto.unidadMedida === 'SACO' && item.tipoVenta === 'KG') || 
+                     (item.producto.unidadMedida === 'BALDE' && item.tipoVenta === 'UND');
+                     
+  const decrementoFisico = esFraccion ? (1 / udsEnBulto) : 1;
+  const cantidadNuevaEnSacos = (item.cantidad + 1) * decrementoFisico;
   
   if (cantidadNuevaEnSacos <= item.producto.stockActual) {
     item.cantidad++
   } else {
-    alert(`Límite de stock físico alcanzado. Quedan ${item.producto.stockActual.toFixed(3)} sacos disponibles.`)
+    alert(`Límite de stock físico alcanzado. Quedan ${item.producto.stockActual.toFixed(3)} ${item.producto.unidadMedida === 'SACO' ? 'sacos' : 'bultos'} disponibles.`)
   }
 }
 

@@ -157,6 +157,7 @@
               <select v-model="nuevoProd.unidadMedida" required>
                 <option value="UND">Unidad</option>
                 <option value="SACO">Saco o costal</option>
+                <option value="BALDE">Balde o bolsa granel</option>
               </select>
             </div>
             <div class="form-group">
@@ -180,29 +181,29 @@
               </div>
             </template>
 
-            <!-- ======== RENDERING PARA SACO ======== -->
-            <template v-if="nuevoProd.unidadMedida === 'SACO'">
+            <!-- ======== RENDERING PARA SACO Y BALDE ======== -->
+            <template v-if="nuevoProd.unidadMedida === 'SACO' || nuevoProd.unidadMedida === 'BALDE'">
               <div class="form-group" style="grid-column: span 2; margin-top: 0.5rem;">
                 <div class="wholesale-box animate-fade-in" style="background: #F7FAFC; border-color: #CBD5E0;">
-                  <p class="box-title" style="color: #2D3748; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">📦 Configuración por Saco</p>
+                  <p class="box-title" style="color: #2D3748; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">📦 Configuración por {{ nuevoProd.unidadMedida === 'SACO' ? 'Saco' : 'Balde/Bolsa' }}</p>
                   <p style="font-size: 0.8rem; color: #718096; margin-top: -10px; margin-bottom: 1rem;">Ingresa los costos y detalles del bulto entero.</p>
                   <div class="form-row-custom" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
                     <div class="form-group">
                       <label>Precio Costo Compra (S/) *</label>
-                      <input type="number" step="0.01" min="0" v-model="nuevoProd.precioCosto" required placeholder="Costo del saco entero" />
+                      <input type="number" step="0.01" min="0" v-model="nuevoProd.precioCosto" required placeholder="Costo del bulto entero" />
                     </div>
                     <div class="form-group">
-                      <label>Peso de cada Saco (Kg) *</label>
+                      <label>{{ nuevoProd.unidadMedida === 'SACO' ? 'Peso del Saco (Kg)' : 'Cant. Unidades por Balde' }} *</label>
                       <input type="number" step="0.01" v-model="nuevoProd.cantidadMayorista" required placeholder="Ej. 40" />
                     </div>
                   </div>
                   <div class="form-row-custom" style="grid-template-columns: 1fr 1fr;">
                     <div class="form-group">
-                      <label>Precio Venta Público Saco (S/) *</label>
+                      <label>Precio Venta Público Bulto (S/) *</label>
                       <input type="number" step="0.01" v-model="nuevoProd.precioMayorista" required placeholder="S/ 0.00" />
                     </div>
                     <div class="form-group">
-                      <label>Stock Mínimo Alerta (En sacos) *</label>
+                      <label>Stock Mínimo Alerta (En bultos) *</label>
                       <input type="number" min="0" v-model="nuevoProd.stockMinimo" required />
                     </div>
                   </div>
@@ -211,11 +212,11 @@
 
               <div class="form-group" style="grid-column: span 2; margin-top: -0.5rem;">
                 <div class="wholesale-box animate-fade-in" style="background: #EBF8FF; border-color: #90CDF4;">
-                  <p class="box-title" style="color: #2B6CB0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">⚖️ Configuración por Kilo</p>
-                  <p style="font-size: 0.8rem; color: #4A5568; margin-top: -10px; margin-bottom: 1rem;">¿A cuánto venderás cada kilo si se fracciona el saco?</p>
+                  <p class="box-title" style="color: #2B6CB0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">⚖️ Configuración de Fracción</p>
+                  <p style="font-size: 0.8rem; color: #4A5568; margin-top: -10px; margin-bottom: 1rem;">¿A cuánto venderás cada {{ nuevoProd.unidadMedida === 'SACO' ? 'kilo' : 'unidad' }} si se fracciona el bulto?</p>
                   <div class="form-row-custom" style="grid-template-columns: 1fr;">
                     <div class="form-group">
-                      <label>Precio Venta Público por Kilo (S/) *</label>
+                      <label>Precio Venta Público por {{ nuevoProd.unidadMedida === 'SACO' ? 'Kilo' : 'Unidad' }} (S/) *</label>
                       <input type="number" step="0.01" min="0" v-model="nuevoProd.precioVenta" required placeholder="0.00" />
                     </div>
                   </div>

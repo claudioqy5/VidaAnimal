@@ -133,6 +133,7 @@
                   <select v-model="formProd.unidadMedida" required :disabled="modoEdicion">
                     <option value="UND">Unidad o Pieza Entera</option>
                     <option value="SACO">Saco (Stock controlable por Kilos y Bultos)</option>
+                    <option value="BALDE">Balde o Bolsa Granel (Stock controlable por Unidades)</option>
                   </select>
                 </div>
               </div>
@@ -163,10 +164,10 @@
               </div>
             </template>
 
-            <!-- ======== RENDERING PARA SACO ======== -->
-            <template v-if="formProd.unidadMedida === 'SACO'">
+            <!-- ======== RENDERING PARA SACO Y BALDE ======== -->
+            <template v-if="formProd.unidadMedida === 'SACO' || formProd.unidadMedida === 'BALDE'">
               <div class="form-section wholesale-bg animate-fade-in" style="background: #F7FAFC; border: 1px solid #CBD5E0;">
-                <h4 class="section-badge" style="background-color: #4A5568;">📦 Configuración por Saco</h4>
+                <h4 class="section-badge" style="background-color: #4A5568;">📦 Configuración por {{ formProd.unidadMedida === 'SACO' ? 'Saco' : 'Balde/Bolsa' }}</h4>
                 <p style="font-size: 0.8rem; color: #718096; margin-top: -5px; margin-bottom: 1rem;">Ingresa los costos y detalles del bulto entero.</p>
                 <div class="compact-grid">
                   <div class="form-group">
@@ -174,30 +175,30 @@
                     <input type="number" step="0.01" v-model="formProd.precioCosto" required />
                   </div>
                   <div class="form-group">
-                    <label>Peso del Saco (Kg) *</label>
+                    <label>{{ formProd.unidadMedida === 'SACO' ? 'Peso del Saco (Kg)' : 'Unidades por Balde' }} *</label>
                     <input type="number" step="0.01" v-model="formProd.cantidadMayorista" required />
                   </div>
                   <div class="form-group">
-                    <label>Precio Venta Público Saco (S/) *</label>
+                    <label>Precio Venta Público (Entero) (S/) *</label>
                     <input type="number" step="0.01" v-model="formProd.precioMayorista" required />
                   </div>
                   <div class="form-group">
-                    <label>Stock Actual (Sacos) *</label>
+                    <label>Stock Actual (Bultos) *</label>
                     <input type="number" step="0.01" v-model="formProd.stockActual" required />
                   </div>
                   <div class="form-group">
-                    <label>Min. Alerta (En sacos) *</label>
+                    <label>Min. Alerta (En bultos) *</label>
                     <input type="number" v-model="formProd.stockMinimo" required />
                   </div>
                 </div>
               </div>
 
               <div class="form-section animate-fade-in" style="background: #EBF8FF; border: 1px solid #90CDF4; margin-top: -0.5rem;">
-                <h4 class="section-badge" style="background-color: #2B6CB0;">⚖️ Configuración por Kilo</h4>
-                <p style="font-size: 0.8rem; color: #4A5568; margin-top: -5px; margin-bottom: 1rem;">Precio al que venderás cada kilo si se fracciona.</p>
+                <h4 class="section-badge" style="background-color: #2B6CB0;">⚖️ Configuración de Fracción</h4>
+                <p style="font-size: 0.8rem; color: #4A5568; margin-top: -5px; margin-bottom: 1rem;">Precio al que venderás cada {{ formProd.unidadMedida === 'SACO' ? 'Kilo' : 'Unidad suelta' }} si el bulto se fracciona.</p>
                 <div class="compact-grid">
                   <div class="form-group">
-                    <label>Precio Venta Público por Kilo (S/) *</label>
+                    <label>Precio Venta Público por {{ formProd.unidadMedida === 'SACO' ? 'Kilo' : 'Unidad' }} (S/) *</label>
                     <input type="number" step="0.01" v-model="formProd.precioVenta" required />
                   </div>
                 </div>
