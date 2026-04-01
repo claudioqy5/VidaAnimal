@@ -130,7 +130,7 @@
               <div class="compact-grid">
                 <div class="form-group lg">
                   <label>Unidad Medida</label>
-                  <select v-model="formProd.unidadMedida" required>
+                  <select v-model="formProd.unidadMedida" required :disabled="modoEdicion">
                     <option value="UND">Unidad o Pieza Entera</option>
                     <option value="SACO">Saco (Stock controlable por Kilos y Bultos)</option>
                   </select>
@@ -150,6 +150,10 @@
                   <div class="form-group">
                     <label>Precio Venta Público (S/) *</label>
                     <input type="number" step="0.01" v-model="formProd.precioVenta" required />
+                  </div>
+                  <div class="form-group">
+                    <label>Stock Actual (Cant.) *</label>
+                    <input type="number" step="0.01" v-model="formProd.stockActual" required />
                   </div>
                   <div class="form-group">
                     <label>Stock Mínimo (Alerta) *</label>
@@ -176,6 +180,10 @@
                   <div class="form-group">
                     <label>Precio Venta Público Saco (S/) *</label>
                     <input type="number" step="0.01" v-model="formProd.precioMayorista" required />
+                  </div>
+                  <div class="form-group">
+                    <label>Stock Actual (Sacos) *</label>
+                    <input type="number" step="0.01" v-model="formProd.stockActual" required />
                   </div>
                   <div class="form-group">
                     <label>Min. Alerta (En sacos) *</label>

@@ -135,7 +135,9 @@
             
             <div class="item-actions-grouped">
               <div class="action-column">
-                <span class="action-caption">Ingresar Cant.</span>
+                <span class="action-caption">
+                  {{ item.tipoVenta === 'KG' ? 'Ingresar Cant. (KG)' : (item.tipoVenta === 'SACO' ? 'Nro. de Sacos' : 'Ingresar Cantidad') }}
+                </span>
                 <div class="qty-control">
                   <button @click="restarCantidad(index)" class="qty-btn">-</button>
                   <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
@@ -143,8 +145,8 @@
                 </div>
               </div>
 
-              <!-- Botón para calcular por montos exactos -->
-              <div class="action-column">
+              <!-- Botón para calcular por montos exactos SOLO SI SE VENDE POR KILO -->
+              <div class="action-column" v-if="item.tipoVenta === 'KG'">
                 <span class="action-caption">Monto Exacto</span>
                 <button class="calc-btn-labeled" @click="abrirModalSoles(index)" title="Vender ingresando Soles (S/) exactos">
                   💰 S/
