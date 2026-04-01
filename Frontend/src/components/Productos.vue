@@ -60,7 +60,9 @@
                 <span v-if="evaluarPerdida(prod)" class="alert-badge loss-badge" title="Venta por debajo del costo de compra">🚨 Pérdida</span>
               </div>
             </td>
-            <td class="text-muted">S/ {{ prod.precioCosto.toFixed(2) }}</td>
+            <td class="text-muted">
+              S/ {{ (prod.unidadMedida === 'SACO' || prod.unidadMedida === 'BALDE') && prod.cantidadMayorista > 0 ? (prod.precioCosto / prod.cantidadMayorista).toFixed(2) : prod.precioCosto.toFixed(2) }}
+            </td>
             <td class="price-text">S/ {{ prod.precioVenta.toFixed(2) }}</td>
             <td>
               <span :class="{'text-danger': prod.stockActual <= prod.stockMinimo, 'text-success': prod.stockActual > prod.stockMinimo}">
