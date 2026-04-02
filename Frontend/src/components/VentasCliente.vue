@@ -143,6 +143,32 @@
         </div>
       </div>
     </div>
+
+    <!-- MODAL DE DESACTIVACION DE BOLETA / ANULACION -->
+    <div class="modal-overlay" v-if="showAnularModal" @click.self="cerrarAnularModal">
+      <div class="modal-content glass-modal bounce-in" style="max-width: 400px; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+        <h2 style="color: #742A2A; margin-bottom: 0.5rem; font-size: 1.2rem;">Seguridad Requerida</h2>
+        <p style="color: #4A5568; font-size: 0.85rem; margin-bottom: 1.5rem;">
+          Estás a punto de anular la boleta <b>{{ ventaToAnular?.serieComprobante }}-{{ ventaToAnular?.numeroComprobante }}</b>.<br>
+          Esto devolverá la mercancía al Kardex y restará los ingresos de tu Dashboard contable.
+        </p>
+        
+        <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+          <label style="font-size: 0.75rem; color: #718096; font-weight: 700;">INGRESE SU CONTRASEÑA:</label>
+          <input type="password" v-model="adminPassword" placeholder="Contraseña de Administrador" @keyup.enter="confirmAnularVenta"
+                 style="width: 100%; padding: 0.75rem; border: 2px solid #E2E8F0; border-radius: 8px; margin-top: 0.3rem;" />
+        </div>
+
+        <div class="modal-actions" style="display: flex; gap: 0.5rem; justify-content: center;">
+          <button @click="cerrarAnularModal" class="btn-secondary" style="flex: 1; padding: 0.75rem;">Cancelar</button>
+          <button @click="confirmAnularVenta" class="btn-danger" style="flex: 1; padding: 0.75rem; background: #E53E3E; color: white; border: none; border-radius: 8px; font-weight: 700;" :disabled="loadingAnular">
+            {{ loadingAnular ? 'Validando...' : 'Anular Venta' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -159,6 +185,10 @@ const getTodayInFormat = () => new Date().toLocaleDateString('en-CA');
 const ventas = ref([]);
 const clientes = ref([]);
 const loading = ref(false);
+const showAnularModal = ref(false);
+const adminPassword = ref('');
+const ventaToAnular = ref(null);
+const loadingAnular = ref(false);
 const selectedClienteID = ref('');
 const selectedFecha = ref(getTodayInFormat());
 const orderBy = ref('fecha_desc');
@@ -283,19 +313,38 @@ const fetchVentas = async () => {
   }
 };
 
-const anularVenta = async (venta) => {
-  if (!confirm(`⚠️ ATENCIÓN: ¿Estás seguro que deseas ANULAR la boleta ${venta.serieComprobante}-${venta.numeroComprobante}?\n\nEsto devolverá automáticamente el stock al inventario y restará S/ ${venta.total} de tu recaudación del día.`)) {
+const anularVenta = (venta) => {
+  ventaToAnular.value = venta;
+  adminPassword.value = '';
+  showAnularModal.value = true;
+};
+
+const cerrarAnularModal = () => {
+  showAnularModal.value = false;
+  ventaToAnular.value = null;
+  adminPassword.value = '';
+};
+
+const confirmAnularVenta = async () => {
+  if (!adminPassword.value) {
+    alert("❌ Debes ingresar tu contraseña de seguridad.");
     return;
   }
   
+  loadingAnular.value = true;
   try {
-    const res = await fetch(`${API_BASE}/Ventas/${venta.ventaID}/anular`, {
+    const res = await fetch(`${API_BASE}/Ventas/${ventaToAnular.value.ventaID}/anular`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${getToken()}` }
+      headers: { 
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: adminPassword.value })
     });
     
     if (res.ok) {
       alert("✅ Venta anulada con éxito. El stock ha sido devuelto al Kardex.");
+      cerrarAnularModal();
       fetchVentas(); // Recargar la lista
     } else {
       const errorData = await res.json();
@@ -303,6 +352,8 @@ const anularVenta = async (venta) => {
     }
   } catch (error) {
     alert("❌ Error de comunicación al intentar anular la venta.");
+  } finally {
+    loadingAnular.value = false;
   }
 };
 
@@ -485,6 +536,18 @@ onMounted(async () => {
 .anulado-badge { color: #E53E3E; font-weight: 800; font-size: 0.9rem; padding: 0.5rem; background: #FFF5F5; border-radius: 8px; border: 1px dashed #FC8181; display: inline-block; }
 .is-anulada { background: #FAFAFA; opacity: 0.8; border-color: #FED7D7; }
 .is-anulada:hover { border-color: #FC8181; }
+/* EFECTO BOUNCE */
+@keyframes bounceIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.bounce-in { animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
+
+.glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+.btn-secondary { background: #EDF2F7; color: #4A5568; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn-secondary:hover { background: #E2E8F0; }
+.btn-danger:hover { background: #C53030 !important; }
 
 /* CONTENIDO EXPANDIDO */
 .card-details-wrapper {

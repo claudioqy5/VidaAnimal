@@ -81,6 +81,50 @@ namespace VidaAnimal.API.Controllers
                 _context.Productos.Add(nuevoProducto);
                 await _context.SaveChangesAsync();
 
+                // Si se registró un stock inicial, crear la Compra y el Movimiento de Inventario Kardex
+                if (nuevoProducto.StockActual > 0)
+                {
+                    // 1. Crear Compra (Para que salga en Historial de Compras)
+                    var nuevaCompra = new Compra
+                    {
+                        ProveedorID = nuevoProducto.ProveedorID ?? 1, // Si no eligió proveedor, asume el ID 1 por defecto
+                        NumeroComprobante = "INITIAL-" + nuevoProducto.ProductoID.ToString(),
+                        FechaCompra = DateTime.Now,
+                        Total = nuevoProducto.StockActual * nuevoProducto.PrecioCosto,
+                    };
+
+                    var compDetalle = new CompraDetalle
+                    {
+                        ProductoID = nuevoProducto.ProductoID,
+                        Cantidad = nuevoProducto.StockActual,
+                        PrecioCostoUnitario = nuevoProducto.PrecioCosto,
+                        SubTotal = nuevoProducto.StockActual * nuevoProducto.PrecioCosto
+                    };
+                    nuevaCompra.Detalles.Add(compDetalle);
+                    _context.Compras.Add(nuevaCompra);
+
+                    // 2. Crear Movimiento en el Kardex
+                    var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                    int? usuarioId = null;
+                    if (int.TryParse(claimUsuarioId, out int uid)) usuarioId = uid;
+
+                    var kardex = new MovimientoInventario
+                    {
+                        Fecha = DateTime.Now,
+                        Tipo = "ENTRADA",
+                        ProductoID = nuevoProducto.ProductoID,
+                        Cantidad = nuevoProducto.StockActual,
+                        UsuarioID = usuarioId ?? 1,
+                        StockAnterior = 0,
+                        StockNuevo = nuevoProducto.StockActual,
+                        ReferenciaID = nuevoProducto.ProductoID,
+                        Observaciones = "Carga de Stock Inicial al crear el producto"
+                    };
+                    _context.MovimientosInventario.Add(kardex);
+
+                    await _context.SaveChangesAsync();
+                }
+
                 return Ok(new { success = true, mensaje = "Producto creado.", data = nuevoProducto });
             }
             catch (Exception ex)

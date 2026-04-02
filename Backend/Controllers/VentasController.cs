@@ -180,8 +180,13 @@ namespace VidaAnimal.API.Controllers
             }
         }
 
+        public class AnularRequest 
+        {
+            public string Password { get; set; } = string.Empty;
+        }
+
         [HttpPost("{id}/anular")]
-        public async Task<IActionResult> AnularVenta(int id)
+        public async Task<IActionResult> AnularVenta(int id, [FromBody] AnularRequest req)
         {
             var venta = await _context.Ventas
                 .Include(v => v.VentaDetalles)
@@ -193,6 +198,12 @@ namespace VidaAnimal.API.Controllers
             var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
             int? usuarioId = null;
             if (int.TryParse(claimUsuarioId, out int uid)) usuarioId = uid;
+
+            var usuario = await _context.Usuarios.FindAsync(usuarioId);
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(req.Password, usuario.PasswordHash))
+            {
+                return BadRequest(new { success = false, mensaje = "Contraseña de administrador incorrecta. Operación denegada." });
+            }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
