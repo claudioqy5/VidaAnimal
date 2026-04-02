@@ -213,6 +213,7 @@
                 <div class="file-drop-area" :class="{'has-file': filePreview}">
                   <input type="file" @change="manejarImagen" accept="image/*" class="file-input" />
                   <img v-if="filePreview" :src="filePreview" class="preview-img" />
+                  <button v-if="filePreview" type="button" @click.stop.prevent="eliminarImagenActual" class="delete-img-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(255, 0, 0, 0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; z-index: 10;">✕</button>
                   <div v-else class="file-msg">📸 Subir Foto</div>
                 </div>
               </div>
@@ -439,8 +440,15 @@ const manejarImagen = (event) => {
   if (file) {
     archivoSeleccionado.value = file
     filePreview.value = URL.createObjectURL(file)
+    formProd.value.eliminarImagen = false
   }
 }
+
+const eliminarImagenActual = () => {
+  filePreview.value = null;
+  archivoSeleccionado.value = null;
+  formProd.value.eliminarImagen = true;
+};
 
 // Modal
 const abrirModalNuevo = () => {
@@ -451,7 +459,8 @@ const abrirModalNuevo = () => {
   formProd.value = { 
     codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
     precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
-    precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
+    precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: '',
+    eliminarImagen: false
   }
   mostrarModal.value = true
 }
@@ -468,7 +477,8 @@ const abrirModalEditar = (prod) => {
     ...prod,
     precioMayorista: prod.precioMayorista ?? 0,
     cantidadMayorista: prod.cantidadMayorista ?? 0,
-    nombreUnidadMayorista: prod.nombreUnidadMayorista ?? ''
+    nombreUnidadMayorista: prod.nombreUnidadMayorista ?? '',
+    eliminarImagen: false
   }
   
   mostrarModal.value = true

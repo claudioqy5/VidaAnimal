@@ -153,6 +153,10 @@ namespace VidaAnimal.API.Controllers
                 }
                 p.ImagenURL = $"/uploads/productos/{nm}";
             }
+            else if (modelo.EliminarImagen)
+            {
+                p.ImagenURL = null;
+            }
 
             p.Codigo = modelo.Codigo;
             p.Nombre = modelo.Nombre;

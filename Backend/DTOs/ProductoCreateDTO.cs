@@ -19,5 +19,6 @@ namespace VidaAnimal.API.DTOs
         public string? NombreUnidadMayorista { get; set; }
 
         public IFormFile? ImagenFoto { get; set; }
+        public bool EliminarImagen { get; set; }
     }
 }
