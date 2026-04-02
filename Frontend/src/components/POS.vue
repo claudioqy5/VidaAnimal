@@ -713,7 +713,7 @@ const cerrarModalNuevoCliente = () => {
 .products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
 .product-card { background: white; border: 1px solid #E2E8F0; border-radius: 14px; overflow: visible; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; position: relative;}
-.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); border-color: #A7C7E7; z-index: 100; }
+.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); border-color: #A7C7E7; }
 .product-card:active:not(.out-of-stock) { transform: translateY(0); }
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
