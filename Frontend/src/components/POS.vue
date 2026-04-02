@@ -45,24 +45,6 @@
               <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-img" alt="Foto producto" />
               <div v-else class="no-img"><span>📦</span></div>
               
-              <!-- Imagen flotante en HOVER (Tarjeta completa) -->
-              <div v-if="prod.imagenURL" class="prod-hover-preview">
-                <div class="preview-card-content">
-                  <div class="preview-img-box">
-                    <img :src="`${IMAGE_BASE}${prod.imagenURL}`" alt="Vista previa" />
-                    <!-- Reusar badge de stock en la preview -->
-                    <div class="stock-badge mini-pos" :class="getStockClass(prod)">
-                      {{ formatStock(prod) }}
-                    </div>
-                  </div>
-                  <div class="preview-info-box">
-                    <h5 class="preview-name">{{ prod.nombre }}</h5>
-                    <p class="preview-code">Código: {{ prod.codigo }}</p>
-                    <div class="preview-price">S/ {{ prod.precioVenta.toFixed(2) }}</div>
-                  </div>
-                </div>
-              </div>
-
               <!-- Badge de stock superpuesto -->
               <div class="stock-badge" :class="getStockClass(prod)">
                 Stock: {{ formatStock(prod) }}
@@ -701,7 +683,7 @@ const cerrarModalNuevoCliente = () => {
 .pos-layout { display: flex; gap: 2rem; height: calc(100vh - 120px); min-height: 500px;}
 
 /* Panel Catálogo */
-.panel-catalogo { flex: 65; display: flex; flex-direction: column; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #E2E8F0; padding: 1.5rem; overflow: visible;}
+.panel-catalogo { flex: 65; display: flex; flex-direction: column; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #E2E8F0; padding: 1.5rem; overflow: hidden;}
 .search-bar { margin-bottom: 1.5rem; }
 .search-input { width: 100%; padding: 1rem 1.25rem; border-radius: 12px; border: 2px solid #E2E8F0; font-size: 1rem; color: #2D3748; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: #F7FAFC; font-family: inherit;}
 .search-input:focus { border-color: #A7C7E7; background: white; box-shadow: 0 0 0 4px rgba(167, 199, 231, 0.15); }
@@ -731,68 +713,19 @@ const cerrarModalNuevoCliente = () => {
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
-.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: visible; display: flex; align-items: center; justify-content: center;}
+/* Grilla Productos */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
+.products-grid::-webkit-scrollbar { width: 6px; }
+.products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
+
+.product-card { background: white; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; position: relative;}
+.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #3182CE; }
+.product-card:active:not(.out-of-stock) { transform: translateY(0); }
+
+.out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;}
 .prod-img { width: 100%; height: 100%; object-fit: cover; }
-.no-img { font-size: 3rem; opacity: 0.2; }
-
-/* Efecto Flotante en Hover (Tarjeta Detallada) */
-.prod-hover-preview {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.85);
-  width: 320px; 
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 35px 70px -15px rgba(0,0,0,0.5);
-  z-index: 99999;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  border: 1px solid #E2E8F0;
-  display: flex;
-  flex-direction: column;
-}
-
-.preview-card-content { display: flex; flex-direction: column; }
-
-.preview-img-box { 
-  height: 240px; 
-  background: #F8FAFC; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 10px;
-  position: relative;
-  border-bottom: 2px solid #EDF2F7;
-}
-
-.preview-img-box img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.stock-badge.mini-pos { 
-  position: absolute; 
-  bottom: 10px; 
-  right: 10px; 
-  top: auto; 
-  font-size: 0.8rem;
-}
-
-.preview-info-box { padding: 1.25rem; text-align: center; }
-.preview-name { margin: 0 0 0.4rem 0; font-size: 1.2rem; font-weight: 800; color: #1A202C; line-height: 1.3; }
-.preview-code { margin: 0; font-size: 0.9rem; color: #718096; font-weight: 600; }
-.preview-price { margin-top: 0.75rem; font-size: 1.6rem; font-weight: 900; color: #2B6CB0; background: #EBF8FF; padding: 0.5rem; border-radius: 12px; display: inline-block; width: 100%; }
-
-.product-card:hover:not(.out-of-stock) .prod-hover-preview {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
-}
 .no-img { font-size: 3rem; opacity: 0.2; }
 
 /* Status stock en miniatura */
