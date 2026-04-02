@@ -189,12 +189,9 @@
           </div>
 
           <!-- Mínima Fila de Pago (1ola línea) -->
-          <div style="display: flex; gap: 0.25rem; margin-bottom: 0.6rem; overflow-x: hidden;">
-            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'" title="Efectivo">💵 Efec.</button>
-            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
-            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Plin'}" @click="ticket.metodoPago = 'Plin'">📱 Plin</button>
-            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Transferencia'}" @click="ticket.metodoPago = 'Transferencia'" title="Transferencia">🏦 Transf.</button>
-            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Tarjeta'}" @click="ticket.metodoPago = 'Tarjeta'">💳 Tarj.</button>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; overflow-x: hidden;">
+            <button class="metodo-btn-mini" style="font-size: 0.8rem; padding: 0.6rem;" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
+            <button class="metodo-btn-mini" style="font-size: 0.8rem; padding: 0.6rem;" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
           </div>
 
           <!-- Total Final Reducido -->

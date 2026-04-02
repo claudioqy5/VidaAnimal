@@ -72,6 +72,14 @@ namespace VidaAnimal.API.Controllers
                     .Distinct()
                     .CountAsync();
 
+                // Ventas por Método de Pago
+                var ventasPorMetodo = await _context.Ventas
+                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.Estado != "Anulada")
+                    .GroupBy(v => string.IsNullOrEmpty(v.MetodoPago) ? "Efectivo" : v.MetodoPago)
+                    .Select(g => new { Metodo = g.Key, Total = g.Sum(v => v.Total) })
+                    .OrderByDescending(x => x.Total)
+                    .ToListAsync();
+
                 return Ok(new {
                     success = true,
                     data = new {
@@ -80,7 +88,8 @@ namespace VidaAnimal.API.Controllers
                         clientesHoy,
                         ventasPorHora,
                         topProductosHoy,
-                        stockBajo
+                        stockBajo,
+                        ventasPorMetodo
                     }
                 });
             } catch (Exception ex) {

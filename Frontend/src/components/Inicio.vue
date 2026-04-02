@@ -35,6 +35,18 @@
       </div>
     </div>
 
+    <!-- Resumen Método de Pago -->
+    <div class="card payment-methods-card" v-if="datos.ventasPorMetodo?.length > 0">
+      <h2 class="card-title" style="margin-bottom: 1rem; font-size: 1rem;">💳 Ingresos por Método de Pago</h2>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div v-for="m in datos.ventasPorMetodo" :key="m.metodo" 
+             style="flex: 1; min-width: 120px; background: #F7FAFC; border: 1px solid #E2E8F0; padding: 1rem; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #718096; text-transform: uppercase; margin-bottom: 0.25rem;">{{ m.metodo }}</span>
+          <span style="font-size: 1.3rem; font-weight: 800; color: #2D3748;">S/ {{ formatMoney(m.total) }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-two">
 
       <!-- Productos más vendidos (gráfico de barras) -->
