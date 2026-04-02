@@ -5,11 +5,11 @@ namespace VidaAnimal.API.Models
     public class Producto
     {
         public int ProductoID { get; set; }
-        public string Codigo { get; set; }
-        public string Nombre { get; set; }
+        public string Codigo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
         public string? Descripcion { get; set; }
         public int? ProveedorID { get; set; }
-        public string UnidadMedida { get; set; }
+        public string UnidadMedida { get; set; } = "UND";
         
         public decimal PrecioCosto { get; set; } // precio de costo por saco
         public decimal PrecioVenta { get; set; }  // PrecioVenta = Precio por Kilo

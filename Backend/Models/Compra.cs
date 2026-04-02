@@ -16,7 +16,7 @@ namespace VidaAnimal.API.Models
         
         [Required]
         [MaxLength(50)]
-        public string NumeroComprobante { get; set; }
+        public string NumeroComprobante { get; set; } = string.Empty;
         
         public DateTime FechaCompra { get; set; } = DateTime.Now;
         
