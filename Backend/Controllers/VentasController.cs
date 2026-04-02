@@ -208,7 +208,10 @@ namespace VidaAnimal.API.Controllers
                         if ((p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") || 
                             (p.UnidadMedida == "BALDE" && det.UnidadVenta == "UND")) 
                         {
-                            incrementoStockActual = det.Cantidad / (p.Peso > 0 ? p.Peso.Value : 1m);
+                            if (p.CantidadMayorista.HasValue && p.CantidadMayorista > 0)
+                            {
+                                incrementoStockActual = det.Cantidad / p.CantidadMayorista.Value;
+                            }
                         }
 
                         var stockAnterior = p.StockActual;
