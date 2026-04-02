@@ -704,7 +704,7 @@ const cerrarModalNuevoCliente = () => {
 
 /* Grilla Productos */
 /* Grilla Productos */
-.products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
+.products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; overflow-y: auto; padding-right: 0.5rem; }
 .products-grid::-webkit-scrollbar { width: 6px; }
 .products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
@@ -714,9 +714,9 @@ const cerrarModalNuevoCliente = () => {
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
-.card-img-wrapper { height: 180px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 3px solid #F1F5F9;}
-.prod-img { width: 100%; height: 100%; object-fit: contain; padding: 5px; transition: transform 0.5s ease; }
-.product-card:hover .prod-img { transform: scale(1.08); }
+.card-img-wrapper { height: 240px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid #EDF2F7;}
+.prod-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.product-card:hover .prod-img { transform: scale(1.05); }
 .no-img { font-size: 3rem; opacity: 0.2; }
 
 /* Status stock en miniatura */
@@ -725,10 +725,10 @@ const cerrarModalNuevoCliente = () => {
 .stock-low { background-color: #ED8936; }
 .stock-none { background-color: #E53E3E; }
 
-.card-info { padding: 1rem; display: flex; flex-direction: column; flex: 1; justify-content: center; text-align: center; background: linear-gradient(to bottom, #ffffff, #fdfdfd); }
-.prod-name { margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 700; color: #2D3748; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.6em;}
-.prod-code { margin: 0; font-size: 0.8rem; color: #718096; font-weight: 500; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-.prod-price { margin-top: 0.75rem; font-size: 1.25rem; font-weight: 800; color: #E53E3E; background: #FFF5F5; padding: 0.25rem; border-radius: 8px; display: inline-block; width: fit-content; margin-inline: auto; }
+.card-info { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between; text-align: center; background: white; }
+.prod-name { margin: 0 0 0.25rem 0; font-size: 1.1rem; font-weight: 800; color: #1A202C; line-height: 1.4; overflow: hidden; height: 2.8em; }
+.prod-code { margin: 0; font-size: 0.85rem; color: #718096; font-weight: 600; }
+.prod-price { margin-top: 1rem; font-size: 1.5rem; font-weight: 900; color: #2C5282; padding: 0.5rem; border-radius: 12px; background: #EBF8FF; display: block; }
 
 /* PANEL COMANDA/TICKET */
 .panel-ticket { flex: 35; display: flex; flex-direction: column; background: #F8FAFC; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0; overflow: hidden; }
