@@ -78,6 +78,7 @@
               </div>
           </div>
           <div class="summary-price">
+            <span class="metodo-badge" :class="(v.metodoPago || 'Efectivo').toLowerCase()">{{ v.metodoPago || 'Efectivo' }}</span>
             <span class="total-label">Pagado:</span>
             <span class="total-value">S/ {{ Number(v.total).toFixed(2) }}</span>
             <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
@@ -187,6 +188,7 @@ const descargarPDF = (v) => {
   doc.text(`Cliente: ${v.cliente?.nombreCompleto || 'Consumidor Final'}`, 15, 59);
   doc.text(`DNI/RUC: ${v.cliente?.documentoIdentidad || '---'}`, 15, 66);
   doc.text(`Cajero: ${v.cajero || 'Sistema'}`, 130, 45);
+  doc.text(`M. Pago: ${v.metodoPago || 'Efectivo'}`, 130, 52);
 
   // Detalles de Venta con AutoTable
   const tableColumn = ["Producto", "U. Venta", "Cantidad", "P. Unitario", "Subtotal"];
@@ -437,8 +439,15 @@ onMounted(async () => {
 .total-value { 
   font-size: 1.25rem; font-weight: 800; color: #2C5282;
   background: linear-gradient(135deg, #A7C7E7, #C3B1E1);
+  background-clip: text;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
+.metodo-badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 700; text-transform: uppercase; margin-right: 0.5rem; }
+.efectivo { background: #E6FFFA; color: #234E52; border: 1px solid #81E6D9; }
+.yape { background: #FAF5FF; color: #44337A; border: 1px solid #D6BCFA; }
+.plin { background: #ebf8ff; color: #2C5282; border: 1px solid #90CDF4; }
+.transferencia { background: #EDF2F7; color: #2D3748; border: 1px solid #CBD5E0; }
+.tarjeta { background: #FFF5F5; color: #742A2A; border: 1px solid #FEB2B2; }
 .expand-icon { color: #CBD5E0; font-size: 0.8rem; }
 
 /* CONTENIDO EXPANDIDO */

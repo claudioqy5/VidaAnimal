@@ -34,6 +34,9 @@ namespace VidaAnimal.API.Models
         [MaxLength(50)]
         public string? NumeroComprobante { get; set; }
 
+        [MaxLength(50)]
+        public string MetodoPago { get; set; } = "Efectivo";
+
         public int? ClienteID { get; set; }
         public virtual Cliente? Cliente { get; set; }
 

@@ -194,6 +194,16 @@
                           style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #E2E8F0; padding: 0.4rem; font-family: inherit; font-size: 0.8rem; resize: none; color: #4A5568;"></textarea>
              </div>
           </div>
+          <div class="total-row" style="margin-top: 0.5rem; margin-bottom: 1rem; flex-direction: column; gap: 0.5rem; align-items: flex-start; justify-content: flex-start;">
+            <label style="font-size: 0.75rem; font-weight: 600; color: #718096;">Método de Pago</label>
+            <div style="display: flex; gap: 0.4rem; width: 100%; flex-wrap: wrap;">
+              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
+              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
+              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Plin'}" @click="ticket.metodoPago = 'Plin'">📱 Plin</button>
+              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Transferencia'}" @click="ticket.metodoPago = 'Transferencia'">🏦 Transf.</button>
+              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Tarjeta'}" @click="ticket.metodoPago = 'Tarjeta'">💳 Tarjeta</button>
+            </div>
+          </div>
 
           <div class="total-row">
             <span>Total Recaudado</span>
@@ -317,7 +327,8 @@ const ticket = ref({
   numero: '',
   clienteID: 0,
   descuento: 0,
-  observaciones: ''
+  observaciones: '',
+  metodoPago: 'Efectivo'
 })
 
 const mostrarModalSoles = ref(false)
@@ -600,6 +611,7 @@ const procesarVenta = async () => {
     numeroComprobante: ticket.value.numero,
     descuento: Number(ticket.value.descuento) || 0,
     observaciones: ticket.value.observaciones,
+    metodoPago: ticket.value.metodoPago,
     detalles: carrito.value.map(item => {
       // El backend ahora recibe cantidad nominal y unidad de venta, manejando él mismo la división del stock
       return {
@@ -639,6 +651,7 @@ const cerrarModalNuevoCliente = () => {
   carrito.value = []
   ticket.value.descuento = 0
   ticket.value.observaciones = ''
+  ticket.value.metodoPago = 'Efectivo'
   generarCorrelativo()
   cargarDatos() // Recargar para actualizar los nuevos niveles de stock en la grilla visual
 }
@@ -828,6 +841,10 @@ const cerrarModalNuevoCliente = () => {
 .form-group.full { grid-column: span 2; }
 .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 .secondary-btn { background: #EDF2F7; color: #4A5568; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+.metodo-btn { flex: 1 1 30%; background: #F7FAFC; color: #4A5568; border: 1px solid #E2E8F0; padding: 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.metodo-btn:hover { background: #EDF2F7; }
+.metodo-btn.active { background: #EBF8FF; color: #2B6CB0; border-color: #90CDF4; box-shadow: 0 0 0 1px #90CDF4; }
 
 .animate-slide-up { animation: slideUp 0.3s ease-out; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
