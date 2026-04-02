@@ -81,11 +81,14 @@
                 <div class="bar-track">
                   <div class="bar-fill"
                     :class="'bc-' + i"
-                    :style="{ width: barH(p.totalUnidades, periodoData.topProductos[0]?.totalUnidades) + '%' }"
+                    :style="{ width: barH(p.totalMonto, periodoData.topProductos[0]?.totalMonto) + '%' }"
                   ></div>
                 </div>
               </div>
-              <span class="bar-qty">{{ p.totalUnidades }} uds</span>
+              <div style="text-align: right; line-height: 1.1;">
+                <span class="bar-qty" style="color: #553C9A;">S/ {{ formatMoney(p.totalMonto) }}</span><br>
+                <span style="font-size: 0.65rem; color: #A0AEC0; font-weight: 600;">{{ p.totalUnidades }} uds</span>
+              </div>
             </div>
           </div>
         </div>
@@ -247,7 +250,7 @@ onMounted(cargar);
 
 /* Barras de productos */
 .bar-chart { display: flex; flex-direction: column; gap: 0.875rem; }
-.bar-row { display: grid; grid-template-columns: 24px 1fr 60px; gap: 0.75rem; align-items: center; }
+.bar-row { display: grid; grid-template-columns: 24px 1fr 85px; gap: 0.75rem; align-items: center; }
 .bar-rank { font-weight: 800; color: #A0AEC0; font-size: 0.85rem; }
 .bar-name { font-size: 0.8rem; color: #4A5568; font-weight: 600; margin-bottom: 4px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-track { background: #F7FAFC; border-radius: 999px; height: 10px; overflow: hidden; }

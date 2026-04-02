@@ -117,7 +117,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const compras = ref([])
 const cargando = ref(true)

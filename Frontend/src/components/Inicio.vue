@@ -53,7 +53,7 @@
             <div class="bar-track">
               <div
                 class="bar-fill"
-                :style="{ width: barWidth(p.totalUnidades, maxUnidades) + '%' }"
+                :style="{ width: barWidth(p.totalMonto, maxMonto) + '%' }"
                 :class="['bar-color-' + i]"
               >
                 <span class="bar-val">{{ p.totalUnidades }} uds</span>
@@ -131,8 +131,8 @@ const fechaHoy = computed(() => new Date().toLocaleDateString('es-PE', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
 }));
 
-const maxUnidades = computed(() =>
-  Math.max(...(datos.value.topProductosHoy?.map(p => p.totalUnidades) || [1]))
+const maxMonto = computed(() =>
+  Math.max(...(datos.value.topProductosHoy?.map(p => p.totalMonto) || [1]))
 );
 
 const maxHoraTotal = computed(() =>
@@ -142,10 +142,10 @@ const maxHoraTotal = computed(() =>
 const horasCompletas = computed(() => {
   const mapa = {};
   (datos.value.ventasPorHora || []).forEach(h => { mapa[h.hora] = h.total; });
-  // Solo mostrar de 8am a 10pm
-  return Array.from({ length: 15 }, (_, i) => ({
-    hora: i + 8,
-    total: mapa[i + 8] || 0
+  // Solo mostrar de 6am a 10pm (6h - 22h)
+  return Array.from({ length: 17 }, (_, i) => ({
+    hora: i + 6,
+    total: mapa[i + 6] || 0
   }));
 });
 

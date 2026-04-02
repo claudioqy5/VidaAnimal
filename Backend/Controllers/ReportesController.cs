@@ -53,7 +53,7 @@ namespace VidaAnimal.API.Controllers
                         TotalUnidades = g.Sum(d => d.Cantidad),
                         TotalMonto = g.Sum(d => d.SubTotal)
                     })
-                    .OrderByDescending(x => x.TotalUnidades)
+                    .OrderByDescending(x => x.TotalMonto)
                     .Take(5)
                     .ToListAsync();
 
@@ -133,7 +133,7 @@ namespace VidaAnimal.API.Controllers
                         TotalUnidades = g.Sum(d => d.Cantidad),
                         TotalMonto = g.Sum(d => d.SubTotal)
                     })
-                    .OrderByDescending(x => x.TotalUnidades)
+                    .OrderByDescending(x => x.TotalMonto)
                     .Take(5)
                     .ToListAsync();
 
@@ -171,7 +171,7 @@ namespace VidaAnimal.API.Controllers
                         TotalUnidades = g.Sum(d => d.Cantidad),
                         TotalMonto = g.Sum(d => d.SubTotal)
                     })
-                    .OrderByDescending(x => x.TotalUnidades)
+                    .OrderByDescending(x => x.TotalMonto)
                     .Take(5)
                     .ToListAsync();
 
