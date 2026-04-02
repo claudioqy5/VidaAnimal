@@ -45,6 +45,11 @@
               <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-img" alt="Foto producto" />
               <div v-else class="no-img"><span>📦</span></div>
               
+              <!-- Imagen flotante en HOVER -->
+              <div v-if="prod.imagenURL" class="prod-hover-preview">
+                <img :src="`${IMAGE_BASE}${prod.imagenURL}`" alt="Vista previa" />
+              </div>
+
               <!-- Badge de stock superpuesto -->
               <div class="stock-badge" :class="getStockClass(prod)">
                 Stock: {{ formatStock(prod) }}
@@ -713,19 +718,45 @@ const cerrarModalNuevoCliente = () => {
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
-/* Grilla Productos */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
-.products-grid::-webkit-scrollbar { width: 6px; }
-.products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
-
-.product-card { background: white; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; position: relative;}
-.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #3182CE; }
-.product-card:active:not(.out-of-stock) { transform: translateY(0); }
-
-.out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
-
-.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;}
+.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: visible; display: flex; align-items: center; justify-content: center;}
 .prod-img { width: 100%; height: 100%; object-fit: cover; }
+.no-img { font-size: 3rem; opacity: 0.2; }
+
+/* Efecto Flotante en Hover */
+.prod-hover-preview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 280px; 
+  height: 280px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border: 4px solid white;
+}
+
+.prod-hover-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.product-card:hover:not(.out-of-stock) .prod-hover-preview {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
 .no-img { font-size: 3rem; opacity: 0.2; }
 
 /* Status stock en miniatura */
