@@ -45,6 +45,11 @@
               <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-img" alt="Foto producto" />
               <div v-else class="no-img"><span>📦</span></div>
               
+              <!-- Imagen flotante en HOVER -->
+              <div v-if="prod.imagenURL" class="prod-hover-preview">
+                <img :src="`${IMAGE_BASE}${prod.imagenURL}`" alt="Vista previa" />
+              </div>
+
               <!-- Badge de stock superpuesto -->
               <div class="stock-badge" :class="getStockClass(prod)">
                 Stock: {{ formatStock(prod) }}
@@ -703,42 +708,54 @@ const cerrarModalNuevoCliente = () => {
 .page-indicator { font-size: 0.9rem; font-weight: 700; color: #718096; }
 
 /* Grilla Productos */
-/* Grilla Productos */
-.products-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-  gap: 1.5rem; 
-  overflow-y: auto; 
-  padding: 1rem 0.5rem;
-}
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
 .products-grid::-webkit-scrollbar { width: 6px; }
 .products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
-.product-card { background: white; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; position: relative;}
-.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); border-color: #A7C7E7; }
+.product-card { background: white; border: 1px solid #E2E8F0; border-radius: 14px; overflow: visible; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; position: relative;}
+.product-card:hover:not(.out-of-stock) { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); border-color: #A7C7E7; z-index: 100; }
 .product-card:active:not(.out-of-stock) { transform: translateY(0); }
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
-.card-img-wrapper { 
-  height: 200px; 
-  background: #ffffff; 
-  position: relative; 
-  overflow: hidden; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  border-bottom: 1px solid #edf2f7;
-  padding: 10px;
+.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: visible; display: flex; align-items: center; justify-content: center;}
+.prod-img { width: 100%; height: 100%; object-fit: cover; }
+.no-img { font-size: 3rem; opacity: 0.2; }
+
+/* Efecto Flotante en Hover */
+.prod-hover-preview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 280px; 
+  height: 280px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border: 4px solid white;
 }
-.prod-img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: contain; 
-  transition: transform 0.3s ease-in-out; 
+
+.prod-hover-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
 }
-.product-card:hover .prod-img { 
-  transform: scale(1.15); 
+
+.product-card:hover:not(.out-of-stock) .prod-hover-preview {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
 }
 .no-img { font-size: 3rem; opacity: 0.2; }
 
