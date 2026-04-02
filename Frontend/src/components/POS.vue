@@ -173,46 +173,39 @@
         <div class="ticket-divider"></div>
 
         <!-- Totales y Cobro -->
-        <div class="ticket-footer">
-          <div class="total-row subtotal">
-            <span style="font-size: 0.9rem; color: #718096;">Subtotal</span>
-            <span style="font-size: 1rem; color: #4A5568;">S/ {{ subtotalVenta.toFixed(2) }}</span>
-          </div>
-          <div class="total-row discount-row" style="margin-top: -0.5rem; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.5rem;">
-            <span style="font-size: 0.9rem; color: #E53E3E;">Descuento Global</span>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span style="font-size: 0.9rem; color: #E53E3E;">- S/ </span>
-              <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" 
-                     style="width: 80px; text-align: right; border: 1px solid #FED7D7; border-radius: 6px; padding: 0.25rem; font-weight: 700; color: #C53030; background: #FFF5F5;" />
-            </div>
-          </div>
-
-          <div class="total-row" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-             <div style="width: 100%;">
-                <label style="font-size: 0.75rem; font-weight: 600; color: #718096; display: block; margin-bottom: 0.2rem;">Notas / Observaciones (Opcional)</label>
-                <textarea v-model="ticket.observaciones" placeholder="Ej: Pago con Yape, recoge productos mañana..." 
-                          style="width: 100%; height: 40px; border-radius: 8px; border: 1px solid #E2E8F0; padding: 0.4rem; font-family: inherit; font-size: 0.8rem; resize: none; color: #4A5568;"></textarea>
+        <div class="ticket-footer" style="padding: 0.5rem 1.5rem 1rem 1.5rem;">
+          <!-- Fila Combinada: Subtotal y Descuento -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.35rem; font-size: 0.85rem;">
+             <span>Subtotal: <b style="color: #4A5568;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
+             <div style="display: flex; align-items: center; gap: 0.3rem; color: #E53E3E;">
+               <span>Desc: -S/</span>
+               <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" style="width: 55px; text-align: center; border: 1px solid #FED7D7; border-radius: 4px; padding: 0.1rem; font-weight: 700; color: #C53030; background: #FFF5F5;" />
              </div>
           </div>
-          <div class="total-row" style="margin-top: 0.5rem; margin-bottom: 1rem; flex-direction: column; gap: 0.5rem; align-items: flex-start; justify-content: flex-start;">
-            <label style="font-size: 0.75rem; font-weight: 600; color: #718096;">Método de Pago</label>
-            <div style="display: flex; gap: 0.4rem; width: 100%; flex-wrap: wrap;">
-              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
-              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
-              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Plin'}" @click="ticket.metodoPago = 'Plin'">📱 Plin</button>
-              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Transferencia'}" @click="ticket.metodoPago = 'Transferencia'">🏦 Transf.</button>
-              <button class="metodo-btn" :class="{'active': ticket.metodoPago === 'Tarjeta'}" @click="ticket.metodoPago = 'Tarjeta'">💳 Tarjeta</button>
-            </div>
+
+          <!-- Mínima Fila de Notas -->
+          <div style="margin-bottom: 0.4rem;">
+             <input type="text" v-model="ticket.observaciones" placeholder="Notas (Ej: Recoge mañana...)" style="width: 100%; height: 32px; border-radius: 6px; border: 1px solid #E2E8F0; padding: 0 0.5rem; font-size: 0.75rem; color: #4A5568;" />
           </div>
 
-          <div class="total-row">
-            <span>Total Recaudado</span>
-            <span class="total-monto">S/ {{ totalVenta.toFixed(2) }}</span>
+          <!-- Mínima Fila de Pago (1ola línea) -->
+          <div style="display: flex; gap: 0.25rem; margin-bottom: 0.6rem; overflow-x: hidden;">
+            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'" title="Efectivo">💵 Efec.</button>
+            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
+            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Plin'}" @click="ticket.metodoPago = 'Plin'">📱 Plin</button>
+            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Transferencia'}" @click="ticket.metodoPago = 'Transferencia'" title="Transferencia">🏦 Transf.</button>
+            <button class="metodo-btn-mini" :class="{'active': ticket.metodoPago === 'Tarjeta'}" @click="ticket.metodoPago = 'Tarjeta'">💳 Tarj.</button>
           </div>
 
-          <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta">
+          <!-- Total Final Reducido -->
+          <div class="total-row" style="margin-bottom: 0.5rem;">
+            <span style="font-size: 1rem; font-weight: 700;">Total</span>
+            <span class="total-monto" style="font-size: 1.4rem;">S/ {{ totalVenta.toFixed(2) }}</span>
+          </div>
+
+          <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.75rem;">
             <span v-if="vendiendo" class="spinner-small"></span>
-            {{ vendiendo ? 'Procesando Tarjeta/Efectivo...' : 'Generar Venta 💳' }}
+            {{ vendiendo ? 'Procesando...' : 'Generar Venta 💳' }}
           </button>
         </div>
 
@@ -842,9 +835,9 @@ const cerrarModalNuevoCliente = () => {
 .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 .secondary-btn { background: #EDF2F7; color: #4A5568; border: none; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
 
-.metodo-btn { flex: 1 1 30%; background: #F7FAFC; color: #4A5568; border: 1px solid #E2E8F0; padding: 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-.metodo-btn:hover { background: #EDF2F7; }
-.metodo-btn.active { background: #EBF8FF; color: #2B6CB0; border-color: #90CDF4; box-shadow: 0 0 0 1px #90CDF4; }
+.metodo-btn-mini { flex: 1; background: #F7FAFC; color: #4A5568; border: 1px solid #E2E8F0; padding: 0.4rem 0.2rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-align: center; }
+.metodo-btn-mini:hover { background: #EDF2F7; }
+.metodo-btn-mini.active { background: #EBF8FF; color: #2B6CB0; border-color: #90CDF4; box-shadow: 0 0 0 1px #90CDF4; }
 
 .animate-slide-up { animation: slideUp 0.3s ease-out; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

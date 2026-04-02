@@ -65,7 +65,7 @@
         class="venta-card glass" 
         v-for="v in ventasOrdenadas" 
         :key="v.ventaID"
-        :class="{ 'is-expanded': expandedVentas.has(v.ventaID) }"
+        :class="{ 'is-expanded': expandedVentas.has(v.ventaID), 'is-anulada': v.estado === 'Anulada' }"
         @click="toggleVenta(v.ventaID)"
       >
         <!-- CABECERA RESUMIDA -->
@@ -79,8 +79,9 @@
           </div>
           <div class="summary-price">
             <span class="metodo-badge" :class="(v.metodoPago || 'Efectivo').toLowerCase()">{{ v.metodoPago || 'Efectivo' }}</span>
-            <span class="total-label">Pagado:</span>
-            <span class="total-value">S/ {{ Number(v.total).toFixed(2) }}</span>
+            <span class="total-label" v-if="v.estado !== 'Anulada'">Pagado:</span>
+            <span class="total-label" v-else style="color: #E53E3E; font-weight: bold;">ANULADA:</span>
+            <span class="total-value" :style="v.estado === 'Anulada' ? 'text-decoration: line-through; opacity: 0.5;' : ''">S/ {{ Number(v.total).toFixed(2) }}</span>
             <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
             <span class="expand-icon">{{ expandedVentas.has(v.ventaID) ? '▲' : '▼' }}</span>
           </div>
@@ -130,6 +131,13 @@
 
             <div class="extra-info" v-if="v.observaciones">
               <p><strong>Nota:</strong> {{ v.observaciones }}</p>
+            </div>
+            
+            <div class="actions-footer" style="margin-top: 1.5rem; text-align: right;">
+              <button class="btn-anular" v-if="v.estado !== 'Anulada'" @click.stop="anularVenta(v)">
+                ⛔ Anular Boleta y Devolver Stock
+              </button>
+              <div v-else class="anulado-badge">🚫 ESTA VENTA FUE ANULADA - STOCK DEVUELTO</div>
             </div>
           </div>
         </div>
@@ -275,6 +283,29 @@ const fetchVentas = async () => {
   }
 };
 
+const anularVenta = async (venta) => {
+  if (!confirm(`⚠️ ATENCIÓN: ¿Estás seguro que deseas ANULAR la boleta ${venta.serieComprobante}-${venta.numeroComprobante}?\n\nEsto devolverá automáticamente el stock al inventario y restará S/ ${venta.total} de tu recaudación del día.`)) {
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_BASE}/Ventas/${venta.ventaID}/anular`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
+    
+    if (res.ok) {
+      alert("✅ Venta anulada con éxito. El stock ha sido devuelto al Kardex.");
+      fetchVentas(); // Recargar la lista
+    } else {
+      const errorData = await res.json();
+      alert("❌ Error: " + (errorData.mensaje || "Error al anular"));
+    }
+  } catch (error) {
+    alert("❌ Error de comunicación al intentar anular la venta.");
+  }
+};
+
 const ventasOrdenadas = computed(() => {
   return [...ventas.value].sort((a, b) => {
     if (orderBy.value === 'fecha_desc') return new Date(b.fecha) - new Date(a.fecha);
@@ -286,7 +317,7 @@ const ventasOrdenadas = computed(() => {
 });
 
 const totalGeneral = computed(() => 
-  ventas.value.reduce((sum, v) => sum + Number(v.total || 0), 0)
+  ventas.value.filter(v => v.estado !== 'Anulada').reduce((sum, v) => sum + Number(v.total || 0), 0)
 );
 
 const formatDate = (dateStr) => {
@@ -449,6 +480,11 @@ onMounted(async () => {
 .transferencia { background: #EDF2F7; color: #2D3748; border: 1px solid #CBD5E0; }
 .tarjeta { background: #FFF5F5; color: #742A2A; border: 1px solid #FEB2B2; }
 .expand-icon { color: #CBD5E0; font-size: 0.8rem; }
+.btn-anular { background: #FFF5F5; color: #E53E3E; border: 1px solid #FEB2B2; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+.btn-anular:hover { background: #FED7D7; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(229, 62, 62, 0.2); }
+.anulado-badge { color: #E53E3E; font-weight: 800; font-size: 0.9rem; padding: 0.5rem; background: #FFF5F5; border-radius: 8px; border: 1px dashed #FC8181; display: inline-block; }
+.is-anulada { background: #FAFAFA; opacity: 0.8; border-color: #FED7D7; }
+.is-anulada:hover { border-color: #FC8181; }
 
 /* CONTENIDO EXPANDIDO */
 .card-details-wrapper {

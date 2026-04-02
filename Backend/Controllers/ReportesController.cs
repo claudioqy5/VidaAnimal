@@ -25,17 +25,17 @@ namespace VidaAnimal.API.Controllers
 
                 // Total vendido hoy
                 var totalHoy = await _context.Ventas
-                    .Where(v => v.Fecha >= hoy && v.Fecha < manana)
+                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.Estado != "Anulada")
                     .SumAsync(v => (decimal?)v.Total) ?? 0;
 
                 // Número de ventas hoy
                 var numVentasHoy = await _context.Ventas
-                    .Where(v => v.Fecha >= hoy && v.Fecha < manana)
+                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.Estado != "Anulada")
                     .CountAsync();
 
                 // Ventas por hora (para gráfico)
                 var ventasPorHora = await _context.Ventas
-                    .Where(v => v.Fecha >= hoy && v.Fecha < manana)
+                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.Estado != "Anulada")
                     .GroupBy(v => v.Fecha.Hour)
                     .Select(g => new { Hora = g.Key, Total = g.Sum(v => v.Total) })
                     .OrderBy(x => x.Hora)
@@ -45,7 +45,7 @@ namespace VidaAnimal.API.Controllers
                 var topProductosHoy = await _context.VentaDetalles
                     .Include(d => d.Venta)
                     .Include(d => d.Producto)
-                    .Where(d => d.Venta!.Fecha >= hoy && d.Venta.Fecha < manana)
+                    .Where(d => d.Venta!.Fecha >= hoy && d.Venta.Fecha < manana && d.Venta.Estado != "Anulada")
                     .GroupBy(d => new { d.ProductoID, Name = d.Producto != null ? d.Producto.Nombre : "Producto" })
                     .Select(g => new {
                         ProductoID = g.Key.ProductoID,
@@ -67,7 +67,7 @@ namespace VidaAnimal.API.Controllers
 
                 // Clientes atendidos hoy
                 var clientesHoy = await _context.Ventas
-                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.ClienteID != null)
+                    .Where(v => v.Fecha >= hoy && v.Fecha < manana && v.ClienteID != null && v.Estado != "Anulada")
                     .Select(v => v.ClienteID)
                     .Distinct()
                     .CountAsync();
@@ -104,16 +104,16 @@ namespace VidaAnimal.API.Controllers
 
                 // ── SEMANA ──
                 var totalSemana = await _context.Ventas
-                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana)
+                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana && v.Estado != "Anulada")
                     .SumAsync(v => (decimal?)v.Total) ?? 0;
 
                 var numVentasSemana = await _context.Ventas
-                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana)
+                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana && v.Estado != "Anulada")
                     .CountAsync();
 
                 // Ventas por día de la semana - Agrupamos por fecha y proyectamos después para evitar fallos de traducción
                 var ventasPorDiaRaw = await _context.Ventas
-                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana)
+                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana && v.Estado != "Anulada")
                     .Select(v => new { v.Fecha, v.Total })
                     .ToListAsync();
 
@@ -126,7 +126,7 @@ namespace VidaAnimal.API.Controllers
                 // Top 5 productos semana
                 var topProductosSemana = await _context.VentaDetalles
                     .Include(d => d.Venta).Include(d => d.Producto)
-                    .Where(d => d.Venta!.Fecha >= inicioSemana && d.Venta.Fecha < finSemana)
+                    .Where(d => d.Venta!.Fecha >= inicioSemana && d.Venta.Fecha < finSemana && d.Venta.Estado != "Anulada")
                     .GroupBy(d => new { d.ProductoID, d.Producto!.Nombre })
                     .Select(g => new {
                         Nombre = g.Key.Nombre,
@@ -140,7 +140,7 @@ namespace VidaAnimal.API.Controllers
                 // Top 5 clientes semana
                 var topClientesSemana = await _context.Ventas
                     .Include(v => v.Cliente)
-                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana && v.ClienteID != null)
+                    .Where(v => v.Fecha >= inicioSemana && v.Fecha < finSemana && v.ClienteID != null && v.Estado != "Anulada")
                     .GroupBy(v => new { v.ClienteID, Nombre = v.Cliente != null ? v.Cliente.NombreCompleto : "Cliente" })
                     .Select(g => new {
                         ClienteID = g.Key.ClienteID,
@@ -154,17 +154,17 @@ namespace VidaAnimal.API.Controllers
 
                 // ── MES ──
                 var totalMes = await _context.Ventas
-                    .Where(v => v.Fecha >= inicioMes && v.Fecha < finMes)
+                    .Where(v => v.Fecha >= inicioMes && v.Fecha < finMes && v.Estado != "Anulada")
                     .SumAsync(v => (decimal?)v.Total) ?? 0;
 
                 var numVentasMes = await _context.Ventas
-                    .Where(v => v.Fecha >= inicioMes && v.Fecha < finMes)
+                    .Where(v => v.Fecha >= inicioMes && v.Fecha < finMes && v.Estado != "Anulada")
                     .CountAsync();
 
                 // Top 5 productos mes
                 var topProductosMes = await _context.VentaDetalles
                     .Include(d => d.Venta).Include(d => d.Producto)
-                    .Where(d => d.Venta!.Fecha >= inicioMes && d.Venta.Fecha < finMes)
+                    .Where(d => d.Venta!.Fecha >= inicioMes && d.Venta.Fecha < finMes && d.Venta.Estado != "Anulada")
                     .GroupBy(d => new { d.ProductoID, Name = d.Producto != null ? d.Producto.Nombre : "Producto" })
                     .Select(g => new {
                         Nombre = g.Key.Name,

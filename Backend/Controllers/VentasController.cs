@@ -52,6 +52,7 @@ namespace VidaAnimal.API.Controllers
                 v.SerieComprobante,
                 v.NumeroComprobante,
                 v.MetodoPago,
+                v.Estado,
                 v.Observaciones,
                 Cajero = v.Usuario == null ? "SISTEMA" : v.Usuario.NombreCompleto,
                 Cliente = v.Cliente == null ? null : new {
@@ -176,6 +177,70 @@ namespace VidaAnimal.API.Controllers
                 var innermost = ex;
                 while (innermost.InnerException != null) innermost = innermost.InnerException;
                 return BadRequest(new { success = false, mensaje = "Error interno al vender: " + innermost.Message });
+            }
+        }
+
+        [HttpPost("{id}/anular")]
+        public async Task<IActionResult> AnularVenta(int id)
+        {
+            var venta = await _context.Ventas
+                .Include(v => v.VentaDetalles)
+                .FirstOrDefaultAsync(v => v.VentaID == id);
+
+            if (venta == null) return NotFound(new { success = false, mensaje = "Venta no encontrada." });
+            if (venta.Estado == "Anulada") return BadRequest(new { success = false, mensaje = "La venta ya está anulada." });
+
+            var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            int? usuarioId = null;
+            if (int.TryParse(claimUsuarioId, out int uid)) usuarioId = uid;
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                venta.Estado = "Anulada";
+
+                foreach (var det in venta.VentaDetalles)
+                {
+                    var p = await _context.Productos.FindAsync(det.ProductoID);
+                    if (p != null)
+                    {
+                        decimal incrementoStockActual = det.Cantidad;
+                        if ((p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") || 
+                            (p.UnidadMedida == "BALDE" && det.UnidadVenta == "UND")) 
+                        {
+                            incrementoStockActual = det.Cantidad / (p.Peso > 0 ? p.Peso.Value : 1m);
+                        }
+
+                        var stockAnterior = p.StockActual;
+                        p.StockActual += incrementoStockActual;
+
+                        var kardex = new MovimientoInventario
+                        {
+                            Fecha = DateTime.Now,
+                            Tipo = "DEVOLUCION",
+                            ProductoID = p.ProductoID,
+                            Cantidad = incrementoStockActual,
+                            UsuarioID = usuarioId ?? 1,
+                            StockAnterior = stockAnterior,
+                            StockNuevo = stockAnterior + incrementoStockActual,
+                            ReferenciaID = venta.VentaID,
+                            Observaciones = $"Anulación de Venta #{venta.VentaID} - {venta.SerieComprobante}-{venta.NumeroComprobante}",
+                        };
+                        _context.MovimientosInventario.Add(kardex);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { success = true, mensaje = "Venta anulada y stock devuelto exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                var innermost = ex;
+                while (innermost.InnerException != null) innermost = innermost.InnerException;
+                return StatusCode(500, new { success = false, mensaje = "Error al anular venta: " + innermost.Message });
             }
         }
     }

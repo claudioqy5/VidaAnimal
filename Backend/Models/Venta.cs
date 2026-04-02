@@ -37,6 +37,9 @@ namespace VidaAnimal.API.Models
         [MaxLength(50)]
         public string MetodoPago { get; set; } = "Efectivo";
 
+        [MaxLength(50)]
+        public string Estado { get; set; } = "Completada";
+
         public int? ClienteID { get; set; }
         public virtual Cliente? Cliente { get; set; }
 
