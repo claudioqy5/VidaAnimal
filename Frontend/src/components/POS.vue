@@ -47,7 +47,7 @@
               
               <!-- Badge de stock superpuesto -->
               <div class="stock-badge" :class="getStockClass(prod)">
-                Stock: {{ prod.stockActual }}
+                Stock: {{ formatStock(prod) }}
               </div>
             </div>
             <div class="card-info">
@@ -485,9 +485,19 @@ const totalVenta = computed(() => {
 })
 
 const getStockClass = (prod) => {
-  if (prod.stockActual <= 0) return 'stock-none'
+  if (prod.stockActual <= 0) return 'stock-out'
   if (prod.stockActual <= prod.stockMinimo) return 'stock-low'
   return 'stock-ok'
+}
+
+const formatStock = (prod) => {
+  if ((prod.unidadMedida === 'SACO' || prod.unidadMedida === 'BALDE') && prod.cantidadMayorista > 0) {
+    const totalInner = prod.stockActual * prod.cantidadMayorista;
+    const formatted = parseFloat(totalInner.toFixed(2));
+    const unidad = prod.nombreUnidadMayorista || (prod.unidadMedida === 'SACO' ? 'KG' : 'UND');
+    return `${formatted} ${unidad}`;
+  }
+  return `${prod.stockActual}`;
 }
 
 const agregarAlCarrito = (prod) => {

@@ -371,7 +371,15 @@ const productosFiltrados = computed(() => {
 
 const getToken = () => localStorage.getItem('jwt_token')
 
-// Carga Inicial
+const formatStock = (prod) => {
+  if ((prod.unidadMedida === 'SACO' || prod.unidadMedida === 'BALDE') && prod.cantidadMayorista > 0) {
+    const totalInner = prod.stockActual * prod.cantidadMayorista;
+    const formatted = parseFloat(totalInner.toFixed(2));
+    const unidad = prod.nombreUnidadMayorista || (prod.unidadMedida === 'SACO' ? 'KG' : 'UND');
+    return `${formatted} ${unidad}`;
+  }
+  return `${prod.stockActual} ${prod.unidadMedida}`;
+}// Carga Inicial
 const cargarDatos = async () => {
   cargando.value = true
   errorGlobal.value = ''
