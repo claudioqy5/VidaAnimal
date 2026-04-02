@@ -703,7 +703,14 @@ const cerrarModalNuevoCliente = () => {
 .page-indicator { font-size: 0.9rem; font-weight: 700; color: #718096; }
 
 /* Grilla Productos */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
+/* Grilla Productos */
+.products-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+  gap: 1.5rem; 
+  overflow-y: auto; 
+  padding: 1rem 0.5rem;
+}
 .products-grid::-webkit-scrollbar { width: 6px; }
 .products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
@@ -713,8 +720,26 @@ const cerrarModalNuevoCliente = () => {
 
 .out-of-stock { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
 
-.card-img-wrapper { height: 140px; background: #F8FAFC; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;}
-.prod-img { width: 100%; height: 100%; object-fit: cover; }
+.card-img-wrapper { 
+  height: 200px; 
+  background: #ffffff; 
+  position: relative; 
+  overflow: hidden; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  border-bottom: 1px solid #edf2f7;
+  padding: 10px;
+}
+.prod-img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain; 
+  transition: transform 0.3s ease-in-out; 
+}
+.product-card:hover .prod-img { 
+  transform: scale(1.15); 
+}
 .no-img { font-size: 3rem; opacity: 0.2; }
 
 /* Status stock en miniatura */
