@@ -27,9 +27,29 @@ namespace VidaAnimal.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProductos()
         {
-            // Omitimos include de relaciones para hacer la petición rápida y sencilla por ahora
-            var productos = await _context.Productos.ToListAsync();
-            return Ok(new { success = true, data = productos });
+            // Calculamos la popularidad basada en la cantidad vendida en los últimos 30 días
+            var fechaLimite = DateTime.Now.AddDays(-30);
+            
+            var productosPopularidad = await _context.VentaDetalles
+                .Where(vd => vd.Venta != null && vd.Venta.Fecha >= fechaLimite && vd.Venta.Estado != "Anulada")
+                .GroupBy(vd => vd.ProductoID)
+                .Select(g => new { ProductoID = g.Key, CantidadVendida = g.Sum(vd => vd.Cantidad) })
+                .ToListAsync();
+
+            var todosLosProductos = await _context.Productos.Where(p => p.Activo).ToListAsync();
+
+            // Unimos los productos con su conteo de ventas y ordenamos
+            var resultado = todosLosProductos
+                .Select(p => new {
+                    Producto = p,
+                    Ventas = productosPopularidad.FirstOrDefault(pop => pop.ProductoID == p.ProductoID)?.CantidadVendida ?? 0
+                })
+                .OrderByDescending(x => x.Ventas) // Los más vendidos primero
+                .ThenBy(x => x.Producto.Nombre)    // Luego por nombre alfabéticamente
+                .Select(x => x.Producto)
+                .ToList();
+
+            return Ok(new { success = true, data = resultado });
         }
 
         [HttpPost]
