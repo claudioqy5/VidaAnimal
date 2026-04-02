@@ -494,7 +494,12 @@ const formatStock = (prod) => {
   if ((prod.unidadMedida === 'SACO' || prod.unidadMedida === 'BALDE') && prod.cantidadMayorista > 0) {
     const totalInner = prod.stockActual * prod.cantidadMayorista;
     const formatted = parseFloat(totalInner.toFixed(2));
-    const unidad = prod.nombreUnidadMayorista || (prod.unidadMedida === 'SACO' ? 'KG' : 'UND');
+    
+    let unidad = prod.nombreUnidadMayorista;
+    if (!unidad || unidad === '0' || unidad === '') {
+       unidad = prod.unidadMedida === 'SACO' ? 'KG' : 'UND';
+    }
+    
     return `${formatted} ${unidad}`;
   }
   return `${prod.stockActual}`;
