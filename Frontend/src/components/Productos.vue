@@ -66,7 +66,7 @@
             <td class="price-text">S/ {{ prod.precioVenta.toFixed(2) }}</td>
             <td>
               <span :class="{'text-danger': prod.stockActual <= prod.stockMinimo, 'text-success': prod.stockActual > prod.stockMinimo}">
-                {{ prod.stockActual }} {{ prod.unidadMedida }}
+                {{ formatStock(prod) }}
               </span>
             </td>
             <td>
