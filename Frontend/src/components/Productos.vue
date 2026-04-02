@@ -304,7 +304,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 const API_URL = '/api'
-const IMAGE_BASE = '/'
+const IMAGE_BASE = '/api'
 
 const productos = ref([])
 const categorias = ref([])

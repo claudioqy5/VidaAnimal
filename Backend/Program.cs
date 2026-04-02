@@ -73,7 +73,16 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowVueApp");
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Servir estáticos desde wwwroot PERO bajo la ruta "/api" para que NGINX permita su paso
+var webRootPath = builder.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+if (!Directory.Exists(webRootPath)) Directory.CreateDirectory(webRootPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(webRootPath),
+    RequestPath = "/api" // Magical trick: ahora /api/uploads apuntará a wwwroot/uploads
+});
 
 // ESTOS DEBEN IR EN ESTE ORDEN (PRIMERO AUTENTICAR, LUEGO AUTORIZAR)
 app.UseAuthentication();

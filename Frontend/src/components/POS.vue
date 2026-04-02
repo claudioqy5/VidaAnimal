@@ -294,7 +294,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 
 const API_URL = '/api'
-const IMAGE_BASE = ''
+const IMAGE_BASE = '/api'
 
 const productos = ref([])
 const clientes = ref([])

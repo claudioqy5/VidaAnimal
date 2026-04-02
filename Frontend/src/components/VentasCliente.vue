@@ -20,6 +20,15 @@
       </div>
 
       <div class="filter-group">
+        <label>Forma de Pago:</label>
+        <select v-model="selectedMetodoPago">
+          <option value="">Todas (Efec / Yape)</option>
+          <option value="efectivo">💵 Efectivo</option>
+          <option value="yape">📱 Yape</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
         <label>Ordenar por:</label>
         <select v-model="orderBy">
           <option value="fecha_desc">📌 Fecha: Recientes primero</option>
@@ -189,6 +198,7 @@ const showAnularModal = ref(false);
 const adminPassword = ref('');
 const ventaToAnular = ref(null);
 const loadingAnular = ref(false);
+const selectedMetodoPago = ref('');
 const selectedClienteID = ref('');
 const selectedFecha = ref(getTodayInFormat());
 const orderBy = ref('fecha_desc');
@@ -358,7 +368,12 @@ const confirmAnularVenta = async () => {
 };
 
 const ventasOrdenadas = computed(() => {
-  return [...ventas.value].sort((a, b) => {
+  let list = [...ventas.value];
+  if (selectedMetodoPago.value) {
+    list = list.filter(v => (v.metodoPago || 'Efectivo').toLowerCase() === selectedMetodoPago.value.toLowerCase());
+  }
+
+  return list.sort((a, b) => {
     if (orderBy.value === 'fecha_desc') return new Date(b.fecha) - new Date(a.fecha);
     if (orderBy.value === 'fecha_asc') return new Date(a.fecha) - new Date(b.fecha);
     if (orderBy.value === 'monto_desc') return Number(b.total) - Number(a.total);
@@ -368,7 +383,7 @@ const ventasOrdenadas = computed(() => {
 });
 
 const totalGeneral = computed(() => 
-  ventas.value.filter(v => v.estado !== 'Anulada').reduce((sum, v) => sum + Number(v.total || 0), 0)
+  ventasOrdenadas.value.filter(v => v.estado !== 'Anulada').reduce((sum, v) => sum + Number(v.total || 0), 0)
 );
 
 const formatDate = (dateStr) => {
@@ -545,6 +560,17 @@ onMounted(async () => {
 .bounce-in { animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
 
 .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white; padding: 2rem; border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  width: 90%; max-width: 400px;
+}
 .btn-secondary { background: #EDF2F7; color: #4A5568; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .btn-secondary:hover { background: #E2E8F0; }
 .btn-danger:hover { background: #C53030 !important; }
