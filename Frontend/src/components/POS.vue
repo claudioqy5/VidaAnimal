@@ -46,7 +46,7 @@
               <div v-else class="no-img"><span>📦</span></div>
               
               <!-- Imagen flotante en HOVER -->
-              <div v-if="prod.imagenURL" class="prod-hover-preview">
+              <div v-if="prod.imagenURL" class="prod-hover-preview" :class="index % 4 >= 2 ? 'preview-left' : 'preview-right'">
                 <img :src="`${IMAGE_BASE}${prod.imagenURL}`" alt="Vista previa" />
               </div>
 
@@ -726,23 +726,35 @@ const cerrarModalNuevoCliente = () => {
 .prod-hover-preview {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
-  width: 280px; 
-  height: 280px;
+  width: 320px; 
+  height: 320px;
   background: white;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  z-index: 500;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+  z-index: 9999;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 15px;
-  border: 4px solid white;
+  border: 1px solid #E2E8F0;
+}
+
+/* Si el producto está a la derecha, mostrar a la izquierda */
+.preview-left {
+  right: 105%;
+  left: auto;
+  transform: translateY(-50%) scale(0.8);
+}
+
+/* Si el producto está a la izquierda, mostrar a la derecha */
+.preview-right {
+  left: 105%;
+  right: auto;
+  transform: translateY(-50%) scale(0.8);
 }
 
 .prod-hover-preview img {
@@ -755,7 +767,14 @@ const cerrarModalNuevoCliente = () => {
 .product-card:hover:not(.out-of-stock) .prod-hover-preview {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
+}
+
+.product-card:hover:not(.out-of-stock) .preview-left {
+  transform: translateY(-50%) scale(1);
+}
+
+.product-card:hover:not(.out-of-stock) .preview-right {
+  transform: translateY(-50%) scale(1);
 }
 .no-img { font-size: 3rem; opacity: 0.2; }
 
