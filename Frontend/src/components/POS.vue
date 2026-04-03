@@ -119,46 +119,50 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <div class="item-header-row">
-                <span class="item-name">{{ item.producto.nombre }}</span>
-                <span class="item-total-price">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
-            </div>
-            
-            <div class="item-controls-grid">
-                <!-- Col 1: Unidad y Precio -->
-                <div class="control-group-box">
-                    <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-toggle-row">
-                        <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="micro-select">
-                            <option value="KG">Unid/Kg</option>
-                            <option :value="item.producto.unidadMedida">{{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
-                        </select>
-                    </div>
-                    <div class="micro-price-box">
-                        <span class="micro-currency">S/</span>
-                        <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="micro-price-input" step="0.10" />
-                        <span class="micro-unit-info" v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'">{{ item.producto.unidadMedida }}</span>
-                    </div>
+            <div class="item-main">
+              <div style="flex: 1;">
+                <p class="item-name">{{ item.producto.nombre }}</p>
+                
+                <!-- Selector de Unidad -->
+                <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-selector">
+                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
+                    <option value="KG">Vender por Kilo (Kg)</option>
+                    <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
+                  </select>
                 </div>
 
-                <!-- Col 2: Cantidad -->
-                <div class="control-group-box centered">
-                    <div class="micro-qty-control">
-                        <button @click="restarCantidad(index)" class="micro-qty-btn">-</button>
-                        <input type="number" v-model.number="item.cantidad" class="micro-qty-input" step="0.001" min="0.001" />
-                        <button @click="sumarCantidad(index)" class="micro-qty-btn">+</button>
-                    </div>
+                <!-- Caja de Precio (Ancho completo) -->
+                <div class="price-edit-container extra-margin">
+                  <span class="currency-label">S/</span>
+                  <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-editable" step="0.10" />
+                  <span class="unit-label" v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE' && item.tipoVenta !== 'KG'">x {{ item.producto.unidadMedida }}</span>
+                  <span class="unit-label" v-else>x {{ item.tipoVenta }}</span>
                 </div>
 
-                <!-- Col 3: Acciones (Monto Exacto / Borrar) -->
-                <div class="control-group-box end">
-                    <button class="micro-delete-btn" @click="eliminarDelCarrito(index)">✕</button>
+                <!-- Fila de Cantidad y Subtotal -->
+                <div class="item-actions-grouped">
+                  <div class="action-column">
+                    <span class="action-caption">Cantidad</span>
+                    <div class="qty-control">
+                      <button @click="restarCantidad(index)" class="qty-btn">-</button>
+                      <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
+                      <button @click="sumarCantidad(index)" class="qty-btn">+</button>
+                    </div>
+                  </div>
+
+                  <div class="action-column subtotal-col">
+                    <span class="action-caption">Subtotal</span>
+                    <div class="item-subtotal">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</div>
+                  </div>
+                  <button class="remove-btn" @click="eliminarDelCarrito(index)">✕</button>
                 </div>
+
+                <!-- Botón opcional solo para Kilos -->
+                <button v-if="item.tipoVenta === 'KG'" class="calc-btn-labeled" @click="abrirModalSoles(index)" style="margin-top: 0.5rem; width: 100%;">
+                   💰 Calcular por Soles (S/)
+                </button>
+              </div>
             </div>
-            
-            <!-- Botón opcional solo para Kilos -->
-            <button v-if="item.tipoVenta === 'KG'" class="micro-calc-button" @click="abrirModalSoles(index)">
-               💰 Calcular por Soles
-            </button>
           </div>
         </div>
 
@@ -819,39 +823,51 @@ const cerrarModalNuevoCliente = () => {
 }
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
 
-.header-input-mini { 
-  width: 100%; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid #CBD5E0; 
-  font-family: inherit; font-size: 0.9rem; font-weight: 700; color: #2D3748; 
-  background: white; outline: none; transition: all 0.2s;
+/* Estilos para el carrito y edición de precios (Diseño Amplio) */
+.unit-selector { margin-bottom: 0.5rem; width: 100%; }
+
+.select-unit-mini { 
+  width: 100%; padding: 0.5rem; font-size: 0.9rem; border-radius: 8px; 
+  border: 1px solid #CBD5E0; background-color: white; font-weight: 700; color: #2D3748;
+  outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A5568%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;
 }
-.header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.2); }
-.compact-label { display: block; font-size: 0.75rem; font-weight: 800; color: #4A5568; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.025em;}
-.btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;}
 
-.item-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.35rem; margin-bottom: 0.5rem; }
-.item-total-price { font-weight: 900; color: #1e293b; font-size: 0.95rem; }
+.price-edit-container {
+  display: flex; align-items: center; gap: 0.5rem; background: #EDF2F7; padding: 0.6rem 0.85rem; 
+  border-radius: 10px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;
+}
+.price-edit-container.extra-margin { margin-top: 0.25rem; }
 
-.item-controls-grid { display: grid; grid-template-columns: 1.2fr 1fr 40px; gap: 0.5rem; align-items: center; }
-.control-group-box { display: flex; flex-direction: column; gap: 0.2rem; }
-.control-group-box.centered { align-items: center; }
+.currency-label { font-size: 0.9rem; color: #4A5568; font-weight: 800; font-style: italic; }
+.unit-label { font-size: 0.75rem; color: #718096; font-weight: 800; text-transform: uppercase; margin-left: auto; }
 
-.micro-select { padding: 0.25rem; font-size: 0.75rem; font-weight: 800; border-radius: 6px; border: 1px solid #E2E8F0; background: #FFF; color: #4A5568; outline: none; width: 100%; cursor: pointer;}
+.price-input-editable {
+  width: 100%; border: none; background: transparent; font-size: 1.1rem; 
+  font-weight: 900; color: #1A365D; padding: 0; outline: none; -moz-appearance: textfield; appearance: textfield;
+}
+.price-input-editable::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.micro-price-box { display: flex; align-items: center; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.3rem 0.5rem; gap: 0.2rem; }
-.micro-currency { font-size: 0.75rem; color: #94A3B8; font-weight: 700; }
-.micro-price-input { border: none; background: transparent; font-size: 0.9rem; font-weight: 800; color: #0F172A; width: 100%; outline: none; }
-.micro-unit-info { font-size: 0.65rem; font-weight: 800; color: #94A3B8; text-transform: uppercase; }
+.item-actions-grouped { display: flex; align-items: flex-end; gap: 0.5rem; margin-top: 0.75rem; justify-content: space-between; align-items: center;}
+.action-column { display: flex; flex-direction: column; gap: 0.25rem; }
+.action-caption { font-size: 0.65rem; color: #718096; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
+.subtotal-col { align-items: flex-end; flex: 1; }
 
-.micro-qty-control { display: flex; align-items: center; background: #F1F5F9; border-radius: 6px; border: 1px solid #E2E8F0; height: 32px; overflow: hidden; }
-.micro-qty-btn { width: 28px; height: 100%; border: none; background: transparent; font-size: 1.1rem; font-weight: 900; color: #475569; cursor: pointer; }
-.micro-qty-btn:hover { background: #E2E8F0; }
-.micro-qty-input { width: 45px; border: none; background: transparent; text-align: center; font-size: 0.95rem; font-weight: 800; color: #1E293B; outline: none; }
+.qty-control { display: flex; align-items: center; background: #FFF; border-radius: 6px; border: 1px solid #CBD5E0; height: 34px; overflow: hidden; }
+.qty-btn { width: 30px; height: 100%; border: none; background: #F7FAFC; font-weight: bold; font-size: 1.2rem; color: #4A5568; cursor: pointer; }
+.qty-btn:hover { background: #EDF2F7; }
+.qty-input { width: 50px; border: none; text-align: center; font-size: 1rem; font-weight: 800; color: #2D3748; outline: none; }
 
-.micro-delete-btn { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
-.micro-delete-btn:hover { background: #FECDD3; }
+.item-subtotal { font-weight: 800; color: #1A365D; font-size: 1.1rem;}
+.remove-btn { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1rem; font-weight: bold;}
+.remove-btn:hover { background: #FECDD3; }
 
-.micro-calc-button { margin-top: 0.5rem; background: #F0F9FF; border: 1px solid #BAE6FD; color: #0369A1; padding: 0.4rem; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
-.micro-calc-button:hover { background: #BAE6FD; }
+.calc-btn-labeled { 
+  background: #EBF8FF; border: 1px solid #BEE3F8; color: #2B6CB0; 
+  border-radius: 8px; padding: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: 800; transition: 0.2s;
+}
+.calc-btn-labeled:hover { background: #BEE3F8; }
 
 .extra-actions-row { 
   display: flex; 
