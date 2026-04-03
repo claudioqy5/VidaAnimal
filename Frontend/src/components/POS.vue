@@ -141,7 +141,7 @@
                  <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
                </select>
                <div class="item-desc-line" style="margin-top: 0.25rem;">
-                 <span>Editar Precio: S/&nbsp;</span>
+                 <span>S/&nbsp;</span>
                  <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
                  <span>&nbsp;x {{ item.tipoVenta.toLowerCase() }}</span>
                </div>
@@ -881,7 +881,7 @@ const cerrarModalNuevoCliente = () => {
 
 .calc-btn-styled { 
   background: #EBF8FF; border: 1px solid #90CDF4; color: #2B6CB0; 
-  border-radius: 8px; height: 36px; padding: 0 1rem; font-weight: 800; cursor: pointer;
+  border-radius: 8px; height: 36px; padding: 0 1rem; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 0.3rem; transition: 0.2s;
 }
 .calc-btn-styled:hover { background: #BEE3F8; }
@@ -890,7 +890,7 @@ const cerrarModalNuevoCliente = () => {
 .action-stack { display: flex; flex-direction: column; gap: 0.3rem; }
 .subtotal-stack { display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-end; }
 
-.action-caption-gray { font-size: 0.7rem; color: #718096; font-weight: 900; letter-spacing: 0.05em; }
+.action-caption-gray { font-size: 0.7rem; color: #718096; font-weight: 600; letter-spacing: 0.05em; }
 
 .qty-control-styled { display: flex; align-items: center; background: #F1F5F9; border-radius: 8px; border: 1px solid #E2E8F0; height: 36px; overflow: hidden; }
 .qty-btn-styled { width: 32px; height: 100%; border: none; background: transparent; font-size: 1.2rem; font-weight: 900; color: #475569; cursor: pointer; }
