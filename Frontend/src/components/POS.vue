@@ -814,7 +814,7 @@ const cerrarModalNuevoCliente = () => {
   background: #F8FAFC; 
   display: flex; 
   flex-direction: column; 
-  gap: 0.6rem;
+  
 }
 .cart-items-container::-webkit-scrollbar { width: 4px; }
 .cart-items-container::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
@@ -886,7 +886,7 @@ const cerrarModalNuevoCliente = () => {
 }
 .calc-btn-styled:hover { background: #BEE3F8; }
 
-.item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
+.item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end;}
 .action-stack { display: flex; flex-direction: column; gap: 0.3rem; }
 .subtotal-stack { display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-end; }
 
