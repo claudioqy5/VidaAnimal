@@ -130,7 +130,12 @@
             <!-- DESCRIPCIÓN CON PRECIO EDITABLE -->
             <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-desc-line">
                <span>S/&nbsp;</span>
-               <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
+               <input type="number" 
+                      v-model.number="item.precioVentaUnitario" 
+                      @change="validarPrecioCosto(index)" 
+                      class="desc-price-input" 
+                      step="0.10" 
+                      :readonly="usuarioRol === 'CAJERO'" />
                <span>&nbsp;x {{ item.producto.unidadMedida.toLowerCase() }}</span>
             </div>
 
@@ -298,6 +303,17 @@ const IMAGE_BASE = '/api'
 
 const productos = ref([])
 const clientes = ref([])
+const usuarioRol = ref('')
+
+const obtenerRol = () => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return '';
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role || '';
+    } catch (e) { return ''; }
+}
+
 const cargandoProductos = ref(true)
 const conexionExitosa = ref(false)
 const errorGlobal = ref('')

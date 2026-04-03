@@ -48,7 +48,7 @@
         </div>
       </div>
 
-      <div class="stats-mini">
+      <div v-if="usuarioRol === 'ADMINISTRADOR'" class="stats-mini">
         <div class="stat-item">
           <span class="label">Monto Total:</span>
           <span class="value highlight">S/ {{ totalGeneral.toFixed(2) }}</span>
@@ -192,7 +192,18 @@ const getToken = () => localStorage.getItem('jwt_token');
 const getTodayInFormat = () => new Date().toLocaleDateString('en-CA');
 
 const ventas = ref([]);
-const clientes = ref([]);
+const clientes = ref([])
+const usuarioRol = ref('')
+
+const obtenerRol = () => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return '';
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role || '';
+    } catch (e) { return ''; }
+}
+;
 const loading = ref(false);
 const showAnularModal = ref(false);
 const adminPassword = ref('');
@@ -306,6 +317,7 @@ const fetchClientes = async () => {
 
 const fetchVentas = async () => {
   loading.value = true;
+  usuarioRol.value = obtenerRol();
   try {
     let url = `${API_BASE}/ventas?`;
     if (selectedClienteID.value) url += `clienteId=${selectedClienteID.value}&`;

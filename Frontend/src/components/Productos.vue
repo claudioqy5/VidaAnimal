@@ -5,7 +5,7 @@
         <h2 class="title">Gestión de Productos</h2>
         <p class="subtitle">Consulta y edita tu catálogo de ventas</p>
       </div>
-      <button @click="abrirModalNuevo" class="primary-btn-pro">
+      <button v-if="usuarioRol === 'ADMINISTRADOR'" @click="abrirModalNuevo" class="primary-btn-pro">
         📦 Nuevo Producto
       </button>
     </div>
@@ -43,7 +43,7 @@
             <th>P. Venta</th>
             <th>Stock Actual</th>
             <th>Estado</th>
-            <th class="text-right">Acciones</th>
+            <th v-if="usuarioRol === 'ADMINISTRADOR'" class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -73,7 +73,7 @@
               <span class="status-dot" :class="prod.activo ? 'dot-active' : 'dot-inactive'"></span>
               {{ provStatus(prod.activo) }}
             </td>
-            <td class="actions-cell">
+            <td v-if="usuarioRol === 'ADMINISTRADOR'" class="actions-cell">
               <button class="action-btn edit-btn" @click="abrirModalEditar(prod)" title="Editar">✏️</button>
               <button class="action-btn toggle-btn" @click="abrirModalToggle(prod)" :title="prod.activo ? 'Desactivar' : 'Activar'">
                 {{ prod.activo ? '🚫' : '✅' }}
@@ -308,6 +308,20 @@ const API_URL = '/api'
 const IMAGE_BASE = '/api'
 
 const productos = ref([])
+const usuarioRol = ref('')
+
+const obtenerRol = () => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return '';
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // Buscamos el rol en los claims estándar de ASP.NET Core
+        return payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role || '';
+    } catch (e) {
+        return '';
+    }
+}
+
 const categorias = ref([])
 const proveedores = ref([])
 
@@ -408,6 +422,7 @@ const cargarDatos = async () => {
     errorGlobal.value = 'Error cargando datos del Catálogo.'
   } finally {
     cargando.value = false
+    usuarioRol.value = obtenerRol()
   }
 }
 
