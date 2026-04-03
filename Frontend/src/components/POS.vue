@@ -119,119 +119,87 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <div class="item-main">
-              <div>
+            <div class="item-main-header">
                 <p class="item-name">{{ item.producto.nombre }}</p>
-                <!-- Selector de Unidad (Solo si el producto es SACO o BALDE) -->
-                <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector">
-                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="KG">Vender por Kilo (Kg)</option>
-                    <option value="SACO">Vender por Saco (Bulto)</option>
-                  </select>
-                  <div class="price-edit-container extra-margin">
-                    <span class="currency-label">S/</span>
-                    <input type="number" 
-                           v-model.number="item.precioVentaUnitario" 
-                           @change="validarPrecioCosto(index)"
-                           class="price-input-editable"
-                           step="0.10" />
-                    <span class="unit-label">x {{ item.tipoVenta }}</span>
-                  </div>
-                </div>
-                <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector">
-                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="UND">Vender por Unidad Suelta</option>
-                    <option value="BALDE">Vender Balde Entero</option>
-                  </select>
-                  <div class="price-edit-container extra-margin">
-                    <span class="currency-label">S/</span>
-                    <input type="number" 
-                           v-model.number="item.precioVentaUnitario" 
-                           @change="validarPrecioCosto(index)"
-                           class="price-input-editable"
-                           step="0.10" />
-                    <span class="unit-label">x {{ item.tipoVenta }}</span>
-                  </div>
-                </div>
-                <div v-else class="unit-selector">
-                   <div class="price-edit-container">
-                     <span class="currency-label">S/</span>
-                     <input type="number" 
-                            v-model.number="item.precioVentaUnitario" 
-                            @change="validarPrecioCosto(index)"
-                            class="price-input-editable"
-                            step="0.10" />
-                     <span class="unit-label">x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</span>
-                   </div>
-                </div>
-              </div>
+                <div class="item-subtotal">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</div>
             </div>
             
-            <div class="item-actions-grouped">
-              <div class="action-column">
-                <span class="action-caption">
-                  {{ item.tipoVenta === 'KG' ? 'Ingresar Cant. (KG)' : (item.tipoVenta === 'SACO' ? 'Nro. de Sacos' : (item.tipoVenta === 'BALDE' ? 'Nro. de Baldes' : 'Ingresar Cantidad')) }}
-                </span>
-                <div class="qty-control">
-                  <button @click="restarCantidad(index)" class="qty-btn">-</button>
-                  <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
-                  <button @click="sumarCantidad(index)" class="qty-btn">+</button>
+            <div class="item-details-row">
+                <!-- Selector de Unidad (Solo si el producto es SACO o BALDE) -->
+                <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector-mini">
+                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-micro">
+                    <option value="KG">Kg</option>
+                    <option value="SACO">Saco</option>
+                  </select>
+                  <div class="price-edit-container-micro">
+                    <span class="currency-label-micro">S/</span>
+                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
+                  </div>
                 </div>
-              </div>
-
-              <!-- Botón para calcular por montos exactos SOLO SI SE VENDE POR KILO -->
-              <div class="action-column" v-if="item.tipoVenta === 'KG'">
-                <span class="action-caption">Monto Exacto</span>
-                <button class="calc-btn-labeled" @click="abrirModalSoles(index)" title="Vender ingresando Soles (S/) exactos">
-                  💰 S/
-                </button>
-              </div>
-
-              <div class="action-column subtotal-col">
-                <span class="action-caption">Subtotal</span>
-                <div class="item-subtotal">
-                  S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}
+                <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector-mini">
+                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-micro">
+                    <option value="UND">Unid</option>
+                    <option value="BALDE">Balde</option>
+                  </select>
+                  <div class="price-edit-container-micro">
+                    <span class="currency-label-micro">S/</span>
+                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
+                  </div>
                 </div>
-              </div>
-              <button class="remove-btn" @click="eliminarDelCarrito(index)" title="Quitar item">✕</button>
+                <div v-else class="price-edit-container-micro no-select">
+                    <span class="currency-label-micro">S/</span>
+                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
+                    <span class="unit-label-micro">x{{ item.producto.unidadMedida }}</span>
+                </div>
+
+                <div class="qty-control-compact">
+                  <button @click="restarCantidad(index)" class="qty-btn-micro">-</button>
+                  <input type="number" v-model.number="item.cantidad" class="qty-input-micro" step="0.001" min="0.001" />
+                  <button @click="sumarCantidad(index)" class="qty-btn-micro">+</button>
+                </div>
+                
+                <button class="remove-btn-micro" @click="eliminarDelCarrito(index)">✕</button>
             </div>
+            
+            <!-- Fila opcional para el botón de Monto Exacto -->
+            <div v-if="item.tipoVenta === 'KG'" class="extra-actions-row">
+                <button class="calc-btn-micro" @click="abrirModalSoles(index)">💰 Calcular por S/</button>
+            </div>
+          </div>
+
           </div>
         </div>
 
         <div class="ticket-divider"></div>
 
-        <!-- Totales y Cobro -->
-        <div class="ticket-footer" style="padding: 0.5rem 1.5rem 1rem 1.5rem;">
-          <!-- Fila Combinada: Subtotal y Descuento -->
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.35rem; font-size: 0.85rem;">
-             <span>Subtotal: <b style="color: #4A5568;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
-             <div style="display: flex; align-items: center; gap: 0.3rem; color: #E53E3E;">
-               <span>Desc: -S/</span>
-               <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" style="width: 55px; text-align: center; border: 1px solid #FED7D7; border-radius: 4px; padding: 0.1rem; font-weight: 700; color: #C53030; background: #FFF5F5;" />
-             </div>
-          </div>
+        <!-- Totales y Cobro Compacto -->
+        <div class="ticket-footer" style="padding: 0.75rem 1.25rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.3rem; font-size: 0.9rem;">
+               <span>Subtotal: <b style="color: #475569;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
+               <div style="display: flex; align-items: center; gap: 0.3rem; color: #BE123C;">
+                 <span>Desc: -S/</span>
+                 <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" style="width: 50px; text-align: center; border: 1px solid #FECDD3; border-radius: 6px; padding: 0.2rem; font-weight: 800; color: #BE123C; background: #FFF1F2;" />
+               </div>
+            </div>
 
-          <!-- Mínima Fila de Notas -->
-          <div style="margin-bottom: 0.4rem;">
-             <input type="text" v-model="ticket.observaciones" placeholder="Notas (Ej: Recoge mañana...)" style="width: 100%; height: 32px; border-radius: 6px; border: 1px solid #E2E8F0; padding: 0 0.5rem; font-size: 0.75rem; color: #4A5568;" />
-          </div>
+            <input type="text" v-model="ticket.observaciones" placeholder="Notas de la venta..." style="width: 100%; height: 34px; border-radius: 8px; border: 1px solid #E2E8F0; padding: 0 0.75rem; font-size: 0.8rem; color: #475569;" />
 
-          <!-- Mínima Fila de Pago (1ola línea) -->
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; overflow-x: hidden;">
-            <button class="metodo-btn-mini" style="font-size: 0.8rem; padding: 0.6rem;" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
-            <button class="metodo-btn-mini" style="font-size: 0.8rem; padding: 0.6rem;" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
-          </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="metodo-btn-mini" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
+              <button class="metodo-btn-mini" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
+            </div>
 
-          <!-- Total Final Reducido -->
-          <div class="total-row" style="margin-bottom: 0.5rem;">
-            <span style="font-size: 1rem; font-weight: 700;">Total</span>
-            <span class="total-monto" style="font-size: 1.4rem;">S/ {{ totalVenta.toFixed(2) }}</span>
-          </div>
+            <div class="total-row" style="margin: 0.2rem 0;">
+              <span style="font-size: 1.1rem; font-weight: 800; color: #1E293B;">TOTAL</span>
+              <span class="total-monto" style="font-size: 1.6rem; font-weight: 900; color: #0F172A;">S/ {{ totalVenta.toFixed(2) }}</span>
+            </div>
 
-          <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.75rem;">
-            <span v-if="vendiendo" class="spinner-small"></span>
-            {{ vendiendo ? 'Procesando...' : 'Generar Venta 💳' }}
-          </button>
+            <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.85rem; border-radius: 12px; font-size: 1.1rem;">
+              <span v-if="vendiendo" class="spinner-small"></span>
+              {{ vendiendo ? 'Procesando...' : 'Generar Venta 💳' }}
+            </button>
+          </div>
         </div>
 
       </div>
