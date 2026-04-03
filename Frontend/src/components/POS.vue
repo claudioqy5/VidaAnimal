@@ -121,32 +121,31 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <!-- Título del Producto -->
+            <!-- Título del Producto (Igual a imagen) -->
             <p class="item-name-bold">{{ item.producto.nombre }}</p>
             
-            <!-- CASO 1: Producto con Unidades fijas (Ej: Huesitos) -->
-            <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-price-line-edit">
-              <span class="currency-label-gray">S/</span>
-              <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-mini-gray" step="0.10" />
-              <span class="unit-label-gray">x {{ item.producto.unidadMedida }}</span>
+            <!-- DESCRIPCIÓN CON PRECIO EDITABLE (Igual a imagen pero campo activo) -->
+            <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-desc-line">
+               <span>S/&nbsp;</span>
+               <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
+               <span>&nbsp;x {{ item.producto.unidadMedida }}</span>
             </div>
 
-            <!-- CASO 2: Producto con Selector de Unidad (Ej: Sacos/Baldes) -->
-            <div v-else class="unit-selector-row">
-              <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini-styled">
-                <option value="KG">Vender por Kilo (Kg)</option>
-                <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
-              </select>
-              
-              <!-- Caja de precio debajo del selector solo para sacos/baldes -->
-              <div class="price-edit-box-mini">
-                 <span class="currency-label-mini">S/</span>
-                 <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-box-mini" step="0.10" />
-                 <span class="unit-label-mini">x {{ item.tipoVenta }}</span>
-              </div>
+            <!-- SELECTOR (Igual a imagen) -->
+            <div v-else class="item-selector-row">
+               <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini">
+                 <option value="KG">Vender por Kilo (Kg) - S/ {{ item.precioVentaUnitario }}</option>
+                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }} - S/ {{ item.precioVentaUnitario }}</option>
+               </select>
+               <!-- Mini descripción editable debajo del selector para cambiar precio actual -->
+               <div class="item-desc-line" style="margin-top: 0.25rem;">
+                 <span>Editar Precio: S/&nbsp;</span>
+                 <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
+                 <span>&nbsp;x {{ item.tipoVenta }}</span>
+               </div>
             </div>
 
-            <!-- Fila de Controles (Cantidad y Subtotal) -->
+            <!-- FILA DE ACCIONES (Igual a imagen) -->
             <div class="item-visual-actions">
               <div class="action-stack">
                 <span class="action-caption-gray">{{ item.tipoVenta === 'KG' ? 'INGRESAR CANT. (KG)' : 'INGRESAR CANTIDAD' }}</span>
@@ -167,7 +166,7 @@
 
               <div class="subtotal-stack">
                 <span class="action-caption-gray">SUBTOTAL</span>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
                    <span class="item-subtotal-big">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
                    <button class="remove-btn-styled" @click="eliminarDelCarrito(index)">✕</button>
                 </div>
@@ -846,29 +845,29 @@ const cerrarModalNuevoCliente = () => {
 .compact-label { display: block; font-size: 0.75rem; font-weight: 600; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
 .btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
-/* Estilos Refinados según Imagen */
-.item-price-line-edit { display: flex; align-items: center; gap: 0.2rem; margin-bottom: 0.25rem; }
-.currency-label-gray { font-size: 0.85rem; color: #718096; font-weight: 500; }
-.unit-label-gray { font-size: 0.85rem; color: #718096; font-weight: 500; }
-.price-input-mini-gray { 
-  border: none; background: transparent; font-size: 0.95rem; font-weight: 700; 
-  color: #4A5568; width: 60px; padding: 0; outline: none;
+/* Estilos Refinados Finales (Imagen Exacta) */
+.cart-item { 
+  background: white; border-radius: 12px; padding: 1rem; border: 1px solid #EBEEF2; 
+  display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.01);
 }
 
-.unit-selector-row { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
-.select-unit-mini-styled { 
-  width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; border-radius: 8px; 
-  border: 1px solid #E2E8F0; background-color: white; font-weight: 600; color: #2D3748;
-}
+.item-name-bold { margin: 0; font-weight: 700; color: #2D3748; font-size: 1.05rem; }
 
-.price-edit-box-mini { 
-  display: flex; align-items: center; background: #F7FAFC; border: 1px solid #E2E8F0; 
-  padding: 0.4rem 0.75rem; border-radius: 8px; gap: 0.4rem;
+.item-desc-line { 
+  display: flex; align-items: center; font-size: 0.9rem; color: #718096; font-weight: 500;
 }
-.currency-label-mini { font-size: 0.8rem; color: #A0AEC0; font-weight: 700; }
-.unit-label-mini { font-size: 0.75rem; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-left: auto; }
-.price-input-box-mini {
-  border: none; background: transparent; font-size: 1rem; font-weight: 800; color: #2D3748; width: 100%; outline: none;
+.desc-price-input { 
+  border: none; background: transparent; font-size: 0.9rem; font-weight: 600; 
+  color: #718096; width: 60px; padding: 0.1rem; outline: none; border-bottom: 1px dashed transparent;
+  transition: all 0.2s;
+}
+.desc-price-input:hover, .desc-price-input:focus { border-bottom-color: #CBD5E0; color: #2D3748; background: #F7FAFC; }
+
+.item-selector-row { display: flex; flex-direction: column; width: 100%; }
+.desc-select-mini { 
+  width: 100%; padding: 0.5rem; font-size: 0.9rem; border-radius: 8px; 
+  border: 1px solid #E2E8F0; background-color: #F8FAFC; font-weight: 600; color: #4A5568; outline: none;
 }
 
 .item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
