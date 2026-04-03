@@ -896,7 +896,7 @@ const cerrarModalNuevoCliente = () => {
 .qty-btn-styled:hover { background: #E2E8F0; }
 .qty-input-styled { 
   width: 50px; border: none; background: #FFF; text-align: center; 
-  font-size: 1rem; font-weight: 800; color: #1E293B; height: 26px; 
+  font-size: 1rem; font-weight: 400; color: #1E293B; height: 26px; 
   margin: 0 4px; border-radius: 4px; outline: none;
   -moz-appearance: textfield; appearance: textfield;
 }
