@@ -844,7 +844,7 @@ const cerrarModalNuevoCliente = () => {
   box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
 
-.item-name-bold { margin: 0; font-weight: 800; color: #2D3748; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em;}
+.item-name-bold { margin: 0; font-weight: 600; color: #2D3748; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em;}
 
 .select-unit-mini { 
   width: 100%; padding: 0.6rem; font-size: 0.95rem; border-radius: 8px; 
@@ -872,18 +872,22 @@ const cerrarModalNuevoCliente = () => {
 .qty-control-styled { display: flex; align-items: center; background: #F1F5F9; border-radius: 8px; border: 1px solid #E2E8F0; height: 36px; overflow: hidden; }
 .qty-btn-styled { width: 32px; height: 100%; border: none; background: transparent; font-size: 1.2rem; font-weight: 900; color: #475569; cursor: pointer; }
 .qty-btn-styled:hover { background: #E2E8F0; }
-.qty-input-styled { width: 50px; border: none; background: #FFF; text-align: center; font-size: 1rem; font-weight: 800; color: #1E293B; height: 26px; margin: 0 4px; border-radius: 4px; }
-
-.calc-btn-styled { 
-  background: #E0F2FE; border: 1px solid #BAE6FD; color: #0369A1; 
-  border-radius: 8px; height: 36px; padding: 0 1rem; font-weight: 800; cursor: pointer;
+.qty-input-styled { 
+  width: 50px; border: none; background: #FFF; text-align: center; 
+  font-size: 1rem; font-weight: 800; color: #1E293B; height: 26px; 
+  margin: 0 4px; border-radius: 4px; outline: none;
+  -moz-appearance: textfield; appearance: textfield;
 }
+.qty-input-styled::-webkit-outer-spin-button, 
+.qty-input-styled::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.item-subtotal-big { font-weight: 900; color: #1a202c; font-size: 1.3rem; }
-.remove-btn-styled { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
-
-.total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 800; color: #2D3748; padding: 0.5rem 0;}
-.total-monto { font-size: 1.8rem; color: #1a202c; font-weight: 900; }
+.price-input-editable {
+  width: 100%; border: none; background: transparent; font-size: 1.15rem; 
+  font-weight: 900; color: #1a202c; padding: 0; outline: none;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.price-input-editable::-webkit-outer-spin-button,
+.price-input-editable::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .extra-actions-row { 
   display: flex; 
