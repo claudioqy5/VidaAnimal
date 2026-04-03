@@ -786,15 +786,50 @@ const cerrarModalNuevoCliente = () => {
 .prod-price { margin-top: 0.75rem; font-size: 1.1rem; font-weight: 800; color: #1A365D; }
 
 /* PANEL COMANDA/TICKET */
-.panel-ticket { flex: 35; display: flex; flex-direction: column; background: #F8FAFC; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid #E2E8F0; overflow: hidden; }
+.panel-ticket { 
+  flex: 45; 
+  display: flex; 
+  flex-direction: column; 
+  background: #F8FAFC; 
+  border-radius: 16px; 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+  border: 1px solid #E2E8F0; 
+  overflow: hidden; 
+}
 
-.ticket-title { margin: 0; padding: 0.75rem 1.25rem; background: white; border-bottom: 1px solid #E2E8F0; font-size: 1rem; font-weight: 700; color: #2D3748;}
-.ticket-header-form { padding: 0.75rem 1.25rem; background: white; }
+.ticket-title { 
+  margin: 0; 
+  padding: 1.25rem 1.5rem; 
+  background: white; 
+  border-bottom: 1px solid #E2E8F0; 
+  font-size: 1.25rem; 
+  font-weight: 800; 
+  color: #1A365D;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+.ticket-header-form { padding: 1.25rem 1.5rem; background: white; }
 
-.row-inline { display: flex; gap: 1rem; }
-.form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: #718096; margin-bottom: 0.2rem;}
-.form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 0.45rem; border-radius: 8px; border: 1px solid #CBD5E0; font-family: inherit; font-size: 0.85rem; outline: none; transition: border-color 0.2s;}
-.form-group input:focus, .form-group select:focus { border-color: #A7C7E7; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4A5568; margin-bottom: 0.4rem;}
+.form-group input, .form-group select { 
+  width: 100%; 
+  box-sizing: border-box; 
+  padding: 0.75rem; 
+  border-radius: 10px; 
+  border: 1px solid #CBD5E0; 
+  font-family: inherit; 
+  font-size: 1rem; 
+  font-weight: 600;
+  color: #2D3748;
+  outline: none; 
+  transition: all 0.2s;
+  background-color: #FDFDFD;
+}
+.form-group input:focus, .form-group select:focus { 
+  border-color: #A7C7E7; 
+  box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.2);
+  background-color: white;
+}
 
 .ticket-divider { height: 4px; background: url('data:image/svg+xml;utf8,<svg width="10" height="4" xmlns="http://www.w3.org/2000/svg"><path d="M0 2h5" stroke="%23CBD5E0" stroke-width="2" fill="none"/></svg>') repeat-x; margin: 0; }
 
