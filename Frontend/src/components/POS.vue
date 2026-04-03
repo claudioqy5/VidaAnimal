@@ -194,17 +194,15 @@
               <span style="font-size: 1.1rem; font-weight: 800; color: #1E293B;">TOTAL</span>
               <span class="total-monto" style="font-size: 1.6rem; font-weight: 900; color: #0F172A;">S/ {{ totalVenta.toFixed(2) }}</span>
             </div>
-
-            <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.85rem; border-radius: 12px; font-size: 1.1rem;">
+            <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.85rem; border-radius: 12px; font-size: 1.1rem; margin-top: 0.5rem; width: 100%;">
               <span v-if="vendiendo" class="spinner-small"></span>
               {{ vendiendo ? 'Procesando...' : 'Generar Venta 💳' }}
             </button>
           </div>
         </div>
-
       </div>
     </div>
-    
+  </div>
     <!-- Modal Calculadora de Soles -->
     <div v-if="mostrarModalSoles" class="modal-overlay" @click.self="cerrarModalSoles">
       <div class="modal-card animate-slide-up" style="max-width: 380px; padding: 1.5rem;">
@@ -242,6 +240,7 @@
         <button class="primary-btn" @click="cerrarModalNuevoCliente">Emitir Nuevo Ticket</button>
       </div>
     </div>
+
     <!-- Modal Nuevo Cliente -->
     <div v-if="mostrarModalNuevoCliente" class="modal-overlay" @click.self="mostrarModalNuevoCliente = false">
       <div class="modal-card animate-slide-up">
@@ -285,7 +284,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 
