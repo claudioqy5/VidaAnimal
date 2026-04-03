@@ -82,28 +82,28 @@
       <div class="panel-ticket">
         <h3 class="ticket-title">Comprobante de Venta</h3>
 
-        <!-- Datos del Comprobante -->
+        <!-- Datos del Comprobante Compacto -->
         <div class="ticket-header-form">
-          <div class="form-group row-inline">
-            <div style="flex: 1;">
-              <label>Serie *</label>
-              <input type="text" v-model="ticket.serie" placeholder="B001" required />
+          <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
+            <div style="flex: 1.5;">
+              <label class="compact-label">Serie *</label>
+              <input type="text" v-model="ticket.serie" class="header-input-mini" placeholder="B001" required />
             </div>
-            <div style="flex: 1;">
-              <label>Número *</label>
-              <input type="text" v-model="ticket.numero" placeholder="0001294" required />
+            <div style="flex: 3;">
+              <label class="compact-label">Nro. de Comprobante *</label>
+              <input type="text" v-model="ticket.numero" class="header-input-mini" placeholder="848129" required />
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 0.5rem;">
+          <div style="margin-top: 0.75rem;">
             <div class="label-with-action">
-              <label>Cliente (Opcional)</label>
-              <button class="btn-text-link" @click="mostrarModalNuevoCliente = true">+ Nuevo Cliente</button>
+              <label class="compact-label">Cliente (Opcional)</label>
+              <button class="btn-text-link-mini" @click="mostrarModalNuevoCliente = true">+ Nuevo</button>
             </div>
-            <select v-model="ticket.clienteID" @change="verificarCumpleanos">
+            <select v-model="ticket.clienteID" @change="verificarCumpleanos" class="header-input-mini">
               <option value="0">Cliente Varios (Consumidor Final)</option>
               <option v-for="c in clientes" :key="c.clienteID" :value="c.clienteID">
-                {{ c.nombreCompleto }} - {{ c.documentoIdentidad }}
+                {{ c.nombreCompleto }}
               </option>
             </select>
           </div>
@@ -119,52 +119,46 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <div class="item-main-header">
-                <p class="item-name">{{ item.producto.nombre }}</p>
-                <div class="item-subtotal">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</div>
+            <div class="item-header-row">
+                <span class="item-name">{{ item.producto.nombre }}</span>
+                <span class="item-total-price">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
             </div>
             
-            <div class="item-details-row">
-                <!-- Selector de Unidad (Solo si el producto es SACO o BALDE) -->
-                <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector-mini">
-                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-micro">
-                    <option value="KG">Kg</option>
-                    <option value="SACO">Saco</option>
-                  </select>
-                  <div class="price-edit-container-micro">
-                    <span class="currency-label-micro">S/</span>
-                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
-                  </div>
-                </div>
-                <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector-mini">
-                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-micro">
-                    <option value="UND">Unid</option>
-                    <option value="BALDE">Balde</option>
-                  </select>
-                  <div class="price-edit-container-micro">
-                    <span class="currency-label-micro">S/</span>
-                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
-                  </div>
-                </div>
-                <div v-else class="price-edit-container-micro no-select">
-                    <span class="currency-label-micro">S/</span>
-                    <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-micro" step="0.10" />
-                    <span class="unit-label-micro">x{{ item.producto.unidadMedida }}</span>
+            <div class="item-controls-grid">
+                <!-- Col 1: Unidad y Precio -->
+                <div class="control-group-box">
+                    <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-toggle-row">
+                        <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="micro-select">
+                            <option value="KG">Unid/Kg</option>
+                            <option :value="item.producto.unidadMedida">{{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
+                        </select>
+                    </div>
+                    <div class="micro-price-box">
+                        <span class="micro-currency">S/</span>
+                        <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="micro-price-input" step="0.10" />
+                        <span class="micro-unit-info" v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'">{{ item.producto.unidadMedida }}</span>
+                    </div>
                 </div>
 
-                <div class="qty-control-compact">
-                  <button @click="restarCantidad(index)" class="qty-btn-micro">-</button>
-                  <input type="number" v-model.number="item.cantidad" class="qty-input-micro" step="0.001" min="0.001" />
-                  <button @click="sumarCantidad(index)" class="qty-btn-micro">+</button>
+                <!-- Col 2: Cantidad -->
+                <div class="control-group-box centered">
+                    <div class="micro-qty-control">
+                        <button @click="restarCantidad(index)" class="micro-qty-btn">-</button>
+                        <input type="number" v-model.number="item.cantidad" class="micro-qty-input" step="0.001" min="0.001" />
+                        <button @click="sumarCantidad(index)" class="micro-qty-btn">+</button>
+                    </div>
                 </div>
-                
-                <button class="remove-btn-micro" @click="eliminarDelCarrito(index)">✕</button>
+
+                <!-- Col 3: Acciones (Monto Exacto / Borrar) -->
+                <div class="control-group-box end">
+                    <button class="micro-delete-btn" @click="eliminarDelCarrito(index)">✕</button>
+                </div>
             </div>
             
-            <!-- Fila opcional para el botón de Monto Exacto -->
-            <div v-if="item.tipoVenta === 'KG'" class="extra-actions-row">
-                <button class="calc-btn-micro" @click="abrirModalSoles(index)">💰 Calcular por S/</button>
-            </div>
+            <!-- Botón opcional solo para Kilos -->
+            <button v-if="item.tipoVenta === 'KG'" class="micro-calc-button" @click="abrirModalSoles(index)">
+               💰 Calcular por Soles
+            </button>
           </div>
         </div>
 
@@ -825,131 +819,39 @@ const cerrarModalNuevoCliente = () => {
 }
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
 
-.item-main-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  border-bottom: 1px solid #F1F5F9; 
-  padding-bottom: 0.35rem;
+.header-input-mini { 
+  width: 100%; padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid #CBD5E0; 
+  font-family: inherit; font-size: 0.9rem; font-weight: 700; color: #2D3748; 
+  background: white; outline: none; transition: all 0.2s;
 }
-.item-name { 
-  margin: 0; 
-  font-weight: 700; 
-  color: #1e293b; 
-  font-size: 0.85rem; 
-  flex: 1; 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.item-subtotal { 
-  font-weight: 800; 
-  color: #0F172A; 
-  font-size: 0.95rem; 
-  margin-left: 0.5rem;
-}
+.header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.2); }
+.compact-label { display: block; font-size: 0.75rem; font-weight: 800; color: #4A5568; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.025em;}
+.btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0;}
 
-.item-details-row { 
-  display: flex; 
-  align-items: center; 
-  gap: 0.4rem; 
-  width: 100%;
-}
+.item-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.35rem; margin-bottom: 0.5rem; }
+.item-total-price { font-weight: 900; color: #1e293b; font-size: 0.95rem; }
 
-.unit-selector-mini { 
-  display: flex; 
-  align-items: center; 
-  gap: 0.3rem; 
-}
-.select-unit-micro { 
-  padding: 0.3rem; 
-  font-size: 0.75rem; 
-  border-radius: 6px; 
-  border: 1px solid #E2E8F0; 
-  background: #FFF; 
-  font-weight: 700; 
-  color: #475569; 
-  width: 55px; 
-  cursor: pointer; 
-  outline: none;
-}
+.item-controls-grid { display: grid; grid-template-columns: 1.2fr 1fr 40px; gap: 0.5rem; align-items: center; }
+.control-group-box { display: flex; flex-direction: column; gap: 0.2rem; }
+.control-group-box.centered { align-items: center; }
 
-.price-edit-container-micro { 
-  display: flex; 
-  align-items: center; 
-  gap: 0.15rem; 
-  background: #F8FAFC; 
-  padding: 0.3rem 0.5rem; 
-  border-radius: 8px; 
-  border: 1px solid #E2E8F0; 
-  width: 85px;
-}
-.price-edit-container-micro.no-select { width: 100px; }
+.micro-select { padding: 0.25rem; font-size: 0.75rem; font-weight: 800; border-radius: 6px; border: 1px solid #E2E8F0; background: #FFF; color: #4A5568; outline: none; width: 100%; cursor: pointer;}
 
-.currency-label-micro { font-size: 0.7rem; color: #94A3B8; font-weight: 700; }
-.price-input-micro { 
-  width: 100%; 
-  border: none; 
-  background: transparent; 
-  font-size: 0.9rem; 
-  font-weight: 800; 
-  color: #1E293B; 
-  padding: 0; 
-  outline: none; 
-  -moz-appearance: textfield; 
-}
-.price-input-micro::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.unit-label-micro { font-size: 0.65rem; color: #94A3B8; font-weight: 700; text-transform: uppercase; margin-left: auto;}
+.micro-price-box { display: flex; align-items: center; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.3rem 0.5rem; gap: 0.2rem; }
+.micro-currency { font-size: 0.75rem; color: #94A3B8; font-weight: 700; }
+.micro-price-input { border: none; background: transparent; font-size: 0.9rem; font-weight: 800; color: #0F172A; width: 100%; outline: none; }
+.micro-unit-info { font-size: 0.65rem; font-weight: 800; color: #94A3B8; text-transform: uppercase; }
 
-.qty-control-compact { 
-  display: flex; 
-  align-items: center; 
-  background: #F1F5F9; 
-  border-radius: 8px; 
-  height: 30px; 
-  border: 1px solid #E2E8F0; 
-  margin-left: auto;
-}
-.qty-btn-micro { 
-  width: 26px; 
-  height: 100%; 
-  border: none; 
-  background: transparent; 
-  cursor: pointer; 
-  font-weight: bold; 
-  font-size: 1rem; 
-  color: #475569; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-.qty-input-micro { 
-  width: 40px; 
-  height: 100%; 
-  border: none; 
-  text-align: center; 
-  background: transparent; 
-  font-size: 0.9rem; 
-  font-weight: 700; 
-  color: #334155; 
-  outline: none; 
-}
+.micro-qty-control { display: flex; align-items: center; background: #F1F5F9; border-radius: 6px; border: 1px solid #E2E8F0; height: 32px; overflow: hidden; }
+.micro-qty-btn { width: 28px; height: 100%; border: none; background: transparent; font-size: 1.1rem; font-weight: 900; color: #475569; cursor: pointer; }
+.micro-qty-btn:hover { background: #E2E8F0; }
+.micro-qty-input { width: 45px; border: none; background: transparent; text-align: center; font-size: 0.95rem; font-weight: 800; color: #1E293B; outline: none; }
 
-.remove-btn-micro { 
-  background: #FFF1F2; 
-  border: 1px solid #FECDD3; 
-  color: #BE123C; 
-  border-radius: 8px; 
-  width: 30px; 
-  height: 30px; 
-  cursor: pointer; 
-  font-size: 0.9rem; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  transition: 0.2s;
-}
-.remove-btn-micro:hover { background: #FECDD3; }
+.micro-delete-btn { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+.micro-delete-btn:hover { background: #FECDD3; }
+
+.micro-calc-button { margin-top: 0.5rem; background: #F0F9FF; border: 1px solid #BAE6FD; color: #0369A1; padding: 0.4rem; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
+.micro-calc-button:hover { background: #BAE6FD; }
 
 .extra-actions-row { 
   display: flex; 
