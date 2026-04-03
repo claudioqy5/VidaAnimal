@@ -166,8 +166,6 @@
                 <button class="calc-btn-micro" @click="abrirModalSoles(index)">💰 Calcular por S/</button>
             </div>
           </div>
-
-          </div>
         </div>
 
         <div class="ticket-divider"></div>
@@ -200,9 +198,9 @@
             </button>
           </div>
         </div>
+
       </div>
     </div>
-  </div>
     <!-- Modal Calculadora de Soles -->
     <div v-if="mostrarModalSoles" class="modal-overlay" @click.self="cerrarModalSoles">
       <div class="modal-card animate-slide-up" style="max-width: 380px; padding: 1.5rem;">
