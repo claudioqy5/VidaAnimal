@@ -124,25 +124,32 @@
             <!-- Título del Producto -->
             <p class="item-name-bold">{{ item.producto.nombre }}</p>
             
-            <!-- Selector de Unidad (Ancho Completo) -->
-            <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-selector">
-              <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
+            <!-- CASO 1: Producto con Unidades fijas (Ej: Huesitos) -->
+            <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-price-line-edit">
+              <span class="currency-label-gray">S/</span>
+              <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-mini-gray" step="0.10" />
+              <span class="unit-label-gray">x {{ item.producto.unidadMedida }}</span>
+            </div>
+
+            <!-- CASO 2: Producto con Selector de Unidad (Ej: Sacos/Baldes) -->
+            <div v-else class="unit-selector-row">
+              <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini-styled">
                 <option value="KG">Vender por Kilo (Kg)</option>
                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
               </select>
+              
+              <!-- Caja de precio debajo del selector solo para sacos/baldes -->
+              <div class="price-edit-box-mini">
+                 <span class="currency-label-mini">S/</span>
+                 <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-box-mini" step="0.10" />
+                 <span class="unit-label-mini">x {{ item.tipoVenta }}</span>
+              </div>
             </div>
 
-            <!-- Caja de Precio Editable (Ancho completo) -->
-            <div class="price-edit-container extra-margin">
-              <span class="currency-label">S/</span>
-              <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-editable" step="0.10" />
-              <span class="unit-label">x {{ item.tipoVenta }}</span>
-            </div>
-
-            <!-- Fila de Controles y Subtotal (Estilo Imagen) -->
+            <!-- Fila de Controles (Cantidad y Subtotal) -->
             <div class="item-visual-actions">
               <div class="action-stack">
-                <span class="action-caption-gray">INGRESAR CANTIDAD</span>
+                <span class="action-caption-gray">{{ item.tipoVenta === 'KG' ? 'INGRESAR CANT. (KG)' : 'INGRESAR CANTIDAD' }}</span>
                 <div class="qty-control-styled">
                   <button @click="restarCantidad(index)" class="qty-btn-styled">-</button>
                   <input type="number" v-model.number="item.cantidad" class="qty-input-styled" step="0.001" min="0.001" />
@@ -150,7 +157,7 @@
                 </div>
               </div>
 
-              <!-- Botón Monto Exacto (Solo si es KG) -->
+              <!-- Botón Monto Exacto -->
               <div v-if="item.tipoVenta === 'KG'" class="action-stack" style="margin-left: 0.5rem;">
                 <span class="action-caption-gray">MONTO EXACTO</span>
                 <button class="calc-btn-styled" @click="abrirModalSoles(index)">
@@ -840,29 +847,28 @@ const cerrarModalNuevoCliente = () => {
 .btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
 /* Estilos Refinados según Imagen */
-.cart-item { 
-  background: white; border-radius: 12px; padding: 1rem; border: 1px solid #E2E8F0; 
-  display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+.item-price-line-edit { display: flex; align-items: center; gap: 0.2rem; margin-bottom: 0.25rem; }
+.currency-label-gray { font-size: 0.85rem; color: #718096; font-weight: 500; }
+.unit-label-gray { font-size: 0.85rem; color: #718096; font-weight: 500; }
+.price-input-mini-gray { 
+  border: none; background: transparent; font-size: 0.95rem; font-weight: 700; 
+  color: #4A5568; width: 60px; padding: 0; outline: none;
 }
 
-.item-name-bold { margin: 0; font-weight: 600; color: #2D3748; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em;}
-
-.select-unit-mini { 
-  width: 100%; padding: 0.6rem; font-size: 0.95rem; border-radius: 8px; 
-  border: 1px solid #E2E8F0; background-color: #F8FAFC; font-weight: 700; color: #4A5568;
-  outline: none; cursor: pointer;
+.unit-selector-row { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem; }
+.select-unit-mini-styled { 
+  width: 100%; padding: 0.5rem 0.75rem; font-size: 0.9rem; border-radius: 8px; 
+  border: 1px solid #E2E8F0; background-color: white; font-weight: 600; color: #2D3748;
 }
 
-.price-edit-container {
-  display: flex; align-items: center; gap: 0.5rem; background: #F8FAFC; padding: 0.6rem 0.85rem; 
-  border-radius: 10px; border: 1px solid #E2E8F0; width: 100%;
+.price-edit-box-mini { 
+  display: flex; align-items: center; background: #F7FAFC; border: 1px solid #E2E8F0; 
+  padding: 0.4rem 0.75rem; border-radius: 8px; gap: 0.4rem;
 }
-.currency-label { font-size: 0.95rem; color: #718096; font-weight: 700; }
-.unit-label { font-size: 0.8rem; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-left: auto; }
-.price-input-editable {
-  width: 100%; border: none; background: transparent; font-size: 1.15rem; 
-  font-weight: 900; color: #1a202c; padding: 0; outline: none;
+.currency-label-mini { font-size: 0.8rem; color: #A0AEC0; font-weight: 700; }
+.unit-label-mini { font-size: 0.75rem; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-left: auto; }
+.price-input-box-mini {
+  border: none; background: transparent; font-size: 1rem; font-weight: 800; color: #2D3748; width: 100%; outline: none;
 }
 
 .item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
