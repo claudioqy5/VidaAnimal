@@ -403,21 +403,21 @@ const formatStock = (prod) => {
 const cargarDatos = async () => {
   cargando.value = true
   errorGlobal.value = ''
-  try {
     const headers = { 'Authorization': `Bearer ${getToken()}` }
-    
-    // Concurrent requests for fast load
-    const [resProd, resProv] = await Promise.all([
-      fetch('/api/Productos', { headers }),
-      fetch(`${API_URL}/Proveedores`, { headers })
-    ])
+    const rol = obtenerRol()
+    usuarioRol.value = rol
 
+    // 1. Cargar productos (Siempre necesario)
+    const resProd = await fetch('/api/Productos', { headers })
     const dProd = await resProd.json()
-    const dProv = await resProv.json()
-
     if (dProd.success) productos.value = dProd.data
-    if (dProv.success) proveedores.value = dProv.data.filter(p => p.activo)
 
+    // 2. Cargar proveedores (SOLO si es Administrador, para evitar 403 Forbidden al cajero)
+    if (rol === 'ADMINISTRADOR') {
+      const resProv = await fetch(`${API_URL}/Proveedores`, { headers })
+      const dProv = await resProv.json()
+      if (dProv.success) proveedores.value = dProv.data.filter(p => p.activo)
+    }
   } catch (err) {
     errorGlobal.value = 'Error cargando datos del Catálogo.'
   } finally {
