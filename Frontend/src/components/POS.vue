@@ -121,23 +121,25 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <!-- Título del Producto (Igual a imagen) -->
+            <!-- Botón Borrar (Esquina Superior Derecha - Igual a imagen) -->
+            <button class="remove-btn-styled" @click="eliminarDelCarrito(index)">✕</button>
+
+            <!-- Título del Producto -->
             <p class="item-name-bold">{{ item.producto.nombre }}</p>
             
-            <!-- DESCRIPCIÓN CON PRECIO EDITABLE (Igual a imagen pero campo activo) -->
+            <!-- DESCRIPCIÓN CON PRECIO EDITABLE -->
             <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-desc-line">
                <span>S/&nbsp;</span>
                <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
                <span>&nbsp;x {{ item.producto.unidadMedida }}</span>
             </div>
 
-            <!-- SELECTOR (Igual a imagen) -->
+            <!-- SELECTOR -->
             <div v-else class="item-selector-row">
                <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini">
                  <option value="KG">Vender por Kilo (Kg) - S/ {{ item.precioVentaUnitario }}</option>
                  <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }} - S/ {{ item.precioVentaUnitario }}</option>
                </select>
-               <!-- Mini descripción editable debajo del selector para cambiar precio actual -->
                <div class="item-desc-line" style="margin-top: 0.25rem;">
                  <span>Editar Precio: S/&nbsp;</span>
                  <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
@@ -145,7 +147,7 @@
                </div>
             </div>
 
-            <!-- FILA DE ACCIONES (Igual a imagen) -->
+            <!-- FILA DE ACCIONES -->
             <div class="item-visual-actions">
               <div class="action-stack">
                 <span class="action-caption-gray">{{ item.tipoVenta === 'KG' ? 'INGRESAR CANT. (KG)' : 'INGRESAR CANTIDAD' }}</span>
@@ -156,11 +158,11 @@
                 </div>
               </div>
 
-              <!-- Botón Monto Exacto -->
+              <!-- Botón Monto Exacto (Igual a imagen) -->
               <div v-if="item.tipoVenta === 'KG'" class="action-stack" style="margin-left: 0.5rem;">
                 <span class="action-caption-gray">MONTO EXACTO</span>
                 <button class="calc-btn-styled" @click="abrirModalSoles(index)">
-                   💰 S/
+                   💰 <span style="font-weight: 800;">S/</span>
                 </button>
               </div>
 
@@ -168,7 +170,6 @@
                 <span class="action-caption-gray">SUBTOTAL</span>
                 <div style="display: flex; align-items: center; gap: 0.6rem;">
                    <span class="item-subtotal-big">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
-                   <button class="remove-btn-styled" @click="eliminarDelCarrito(index)">✕</button>
                 </div>
               </div>
             </div>
@@ -847,28 +848,43 @@ const cerrarModalNuevoCliente = () => {
 
 /* Estilos Refinados Finales (Imagen Exacta) */
 .cart-item { 
-  background: white; border-radius: 12px; padding: 1rem; border: 1px solid #EBEEF2; 
+  background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid #EBEEF2; 
   display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+  position: relative; /* Para la X en la esquina */
 }
 
-.item-name-bold { margin: 0; font-weight: 700; color: #2D3748; font-size: 1.05rem; }
+.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 700; color: #2D3748; font-size: 1.05rem; }
 
-.item-desc-line { 
-  display: flex; align-items: center; font-size: 0.9rem; color: #718096; font-weight: 500;
-}
-.desc-price-input { 
-  border: none; background: transparent; font-size: 0.9rem; font-weight: 600; 
-  color: #718096; width: 60px; padding: 0.1rem; outline: none; border-bottom: 1px dashed transparent;
+.remove-btn-styled { 
+  position: absolute; top: 12px; right: 12px;
+  background: #FFF1F2; border: 1px solid #FDA4AF; color: #E11D48; 
+  border-radius: 6px; width: 30px; height: 30px; cursor: pointer; 
+  font-size: 0.9rem; display: flex; align-items: center; justify-content: center; 
   transition: all 0.2s;
 }
-.desc-price-input:hover, .desc-price-input:focus { border-bottom-color: #CBD5E0; color: #2D3748; background: #F7FAFC; }
+.remove-btn-styled:hover { background: #FDA4AF; color: white; }
 
-.item-selector-row { display: flex; flex-direction: column; width: 100%; }
-.desc-select-mini { 
-  width: 100%; padding: 0.5rem; font-size: 0.9rem; border-radius: 8px; 
-  border: 1px solid #E2E8F0; background-color: #F8FAFC; font-weight: 600; color: #4A5568; outline: none;
+.item-desc-line { 
+  display: flex; align-items: center; font-size: 0.95rem; color: #718096; font-weight: 500;
 }
+.desc-price-input { 
+  border: none; background: transparent; font-size: 0.95rem; font-weight: 600; 
+  color: #718096; width: 65px; padding: 0.1rem; outline: none;
+}
+
+.item-selector-row { display: flex; flex-direction: column; width: 100%; margin: 0.25rem 0; }
+.desc-select-mini { 
+  width: 100%; padding: 0.6rem; font-size: 0.95rem; border-radius: 8px; 
+  border: 1px solid #E2E8F0; background-color: white; font-weight: 500; color: #4A5568; outline: none;
+}
+
+.calc-btn-styled { 
+  background: #EBF8FF; border: 1px solid #90CDF4; color: #2B6CB0; 
+  border-radius: 8px; height: 36px; padding: 0 1rem; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; gap: 0.3rem; transition: 0.2s;
+}
+.calc-btn-styled:hover { background: #BEE3F8; }
 
 .item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
 .action-stack { display: flex; flex-direction: column; gap: 0.3rem; }
