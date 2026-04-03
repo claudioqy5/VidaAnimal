@@ -52,7 +52,7 @@
         <tbody>
           <tr v-for="m in filteredMovimientos" :key="m.movimientoID">
             <td class="id-cell">{{ m.movimientoID }}</td>
-            <td style="white-space: nowrap;">{{ formatDate(m.fecha) }}</td>
+            <td>{{ formatDate(m.fecha) }}</td>
             <td>
               <span :class="['tipo-badge', m.tipo.toLowerCase()]">
                 {{ m.tipo === 'ENTRADA' ? '📥' : m.tipo === 'SALIDA' ? '📤' : '🔧' }} {{ m.tipo }}
@@ -62,12 +62,12 @@
               <span class="prod-name">{{ m.productoNombre }}</span>
             </td>
             <td class="qty-cell">
-              <span :class="m.tipo === 'SALIDA' || m.tipo === 'DEVOLUCION' && m.cantidad < 0 ? 'qty-out' : 'qty-in'">
-                {{ m.cantidad >= 0 ? '+' : '' }}{{ formatKardexQty(m, m.cantidad) }}
+              <span :class="m.tipo === 'SALIDA' ? 'qty-out' : 'qty-in'">
+                {{ m.tipo === 'SALIDA' ? '-' : '+' }}{{ m.cantidad }}
               </span>
             </td>
-            <td class="font-bold">{{ formatKardexQty(m, m.stockAnterior) }}</td>
-            <td class="font-bold highlight-new-stock">{{ formatKardexQty(m, m.stockNuevo) }}</td>
+            <td>{{ m.stockAnterior ?? '---' }}</td>
+            <td>{{ m.stockNuevo ?? '---' }}</td>
             <td class="font-medium">{{ m.usuarioNombre || 'Sistema' }}</td>
             <td>
               <span v-if="m.referenciaID" class="ref-badge">
@@ -126,21 +126,6 @@ const filteredMovimientos = computed(() => {
   }
   return list;
 });
-
-const formatKardexQty = (mov, valorSaco) => {
-  if (valorSaco === null || valorSaco === undefined) return '---';
-  
-  // Si no hay info de capacidad o no es SACO/BALDE, mostrar normal
-  if (!mov.cantidadMayorista || mov.cantidadMayorista <= 0) {
-    return `${Number(valorSaco).toFixed(2)}`;
-  }
-
-  // Lógica igual al POS: Convertir sacos/baldes a Kilos o Unidades individuales
-  const valorConvertido = valorSaco * mov.cantidadMayorista;
-  const unidadTexto = (mov.unidadMedida === 'SACO') ? 'KG' : (mov.unidadMedida === 'BALDE' ? 'UDS' : mov.unidadMedida);
-  
-  return `${valorConvertido.toFixed(3)} ${unidadTexto}`;
-};
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '---';
