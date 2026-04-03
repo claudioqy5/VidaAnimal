@@ -82,25 +82,27 @@
       <div class="panel-ticket">
         <h3 class="ticket-title">Comprobante de Venta</h3>
 
-        <!-- Datos del Comprobante Compacto -->
+        <!-- Datos del Comprobante Compacto Organizado -->
         <div class="ticket-header-form">
-          <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
-            <div style="flex: 1.5;">
+          <!-- Fila 1: Serie y Número en paralelo -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group-compact">
               <label class="compact-label">Serie *</label>
               <input type="text" v-model="ticket.serie" class="header-input-mini" placeholder="B001" required />
             </div>
-            <div style="flex: 3;">
-              <label class="compact-label">Nro. de Comprobante *</label>
-              <input type="text" v-model="ticket.numero" class="header-input-mini" placeholder="848129" required />
+            <div class="form-group-compact">
+              <label class="compact-label">Nro. Comprobante *</label>
+              <input type="text" v-model="ticket.numero" class="header-input-mini" placeholder="868302" required />
             </div>
           </div>
 
+          <!-- Fila 2: Cliente -->
           <div style="margin-top: 0.75rem;">
             <div class="label-with-action">
               <label class="compact-label">Cliente (Opcional)</label>
-              <button class="btn-text-link-mini" @click="mostrarModalNuevoCliente = true">+ Nuevo</button>
+              <button class="btn-text-link-mini" @click="mostrarModalNuevoCliente = true">+ Nuevo Cliente</button>
             </div>
-            <select v-model="ticket.clienteID" @change="verificarCumpleanos" class="header-input-mini">
+            <select v-model="ticket.clienteID" @change="verificarCumpleanos" class="header-input-mini" style="width: 100%;">
               <option value="0">Cliente Varios (Consumidor Final)</option>
               <option v-for="c in clientes" :key="c.clienteID" :value="c.clienteID">
                 {{ c.nombreCompleto }}
@@ -822,6 +824,17 @@ const cerrarModalNuevoCliente = () => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
+
+.header-input-mini { 
+  width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #CBD5E0; 
+  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #2D3748; 
+  background: white; outline: none; transition: all 0.2s; box-sizing: border-box;
+}
+.header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.15); }
+
+.form-group-compact { display: flex; flex-direction: column; gap: 2px; }
+.compact-label { display: block; font-size: 0.75rem; font-weight: 800; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
+.btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
 /* Estilos para el carrito y edición de precios (Diseño Amplio) */
 .unit-selector { margin-bottom: 0.5rem; width: 100%; }
