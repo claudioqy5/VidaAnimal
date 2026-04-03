@@ -680,7 +680,7 @@ const cerrarModalNuevoCliente = () => {
 </script>
 
 <style scoped>
-.pos-module { animation: fadeIn 0.4s ease; padding-bottom: 2rem; }
+.pos-module { animation: fadeIn 0.4s ease; padding-bottom: 0; }
 
 .pos-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
 .title { font-size: 1.75rem; font-weight: 700; color: #1A202C; margin: 0 0 0.25rem 0; }
@@ -697,7 +697,7 @@ const cerrarModalNuevoCliente = () => {
 .success-banner { background-color: #F0FFF4; color: #2F855A; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-weight: 500; border: 1px solid #C6F6D5;}
 
 /* LAYOUT PRINCIPAL DEL POS */
-.pos-layout { display: flex; gap: 2rem; height: calc(100vh - 120px); min-height: 500px;}
+.pos-layout { display: flex; gap: 2rem; height: calc(100vh - 100px); min-height: 500px; align-items: stretch; margin-top: 1rem; }
 
 /* Panel Catálogo */
 .panel-catalogo { flex: 65; display: flex; flex-direction: column; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #E2E8F0; padding: 1.5rem; overflow: hidden;}
@@ -752,14 +752,16 @@ const cerrarModalNuevoCliente = () => {
 
 /* PANEL COMANDA/TICKET */
 .panel-ticket { 
-  flex: 45; 
+  flex: 40; 
   display: flex; 
   flex-direction: column; 
-  background: #F8FAFC; 
+  background: white; 
   border-radius: 16px; 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
   border: 1px solid #E2E8F0; 
   overflow: hidden; 
+  margin-top: -6rem; /* Sube el panel hasta arriba */
+  z-index: 10;
 }
 
 .ticket-title { 
