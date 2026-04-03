@@ -121,48 +121,49 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <div class="item-main">
-              <div style="flex: 1;">
-                <p class="item-name">{{ item.producto.nombre }}</p>
-                
-                <!-- Selector de Unidad -->
-                <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-selector">
-                  <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="KG">Vender por Kilo (Kg)</option>
-                    <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
-                  </select>
+            <!-- Título del Producto -->
+            <p class="item-name-bold">{{ item.producto.nombre }}</p>
+            
+            <!-- Selector de Unidad (Ancho Completo) -->
+            <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" class="unit-selector">
+              <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
+                <option value="KG">Vender por Kilo (Kg)</option>
+                <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
+              </select>
+            </div>
+
+            <!-- Caja de Precio Editable (Ancho completo) -->
+            <div class="price-edit-container extra-margin">
+              <span class="currency-label">S/</span>
+              <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-editable" step="0.10" />
+              <span class="unit-label">x {{ item.tipoVenta }}</span>
+            </div>
+
+            <!-- Fila de Controles y Subtotal (Estilo Imagen) -->
+            <div class="item-visual-actions">
+              <div class="action-stack">
+                <span class="action-caption-gray">INGRESAR CANTIDAD</span>
+                <div class="qty-control-styled">
+                  <button @click="restarCantidad(index)" class="qty-btn-styled">-</button>
+                  <input type="number" v-model.number="item.cantidad" class="qty-input-styled" step="0.001" min="0.001" />
+                  <button @click="sumarCantidad(index)" class="qty-btn-styled">+</button>
                 </div>
+              </div>
 
-                <!-- Caja de Precio (Ancho completo) -->
-                <div class="price-edit-container extra-margin">
-                  <span class="currency-label">S/</span>
-                  <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="price-input-editable" step="0.10" />
-                  <span class="unit-label" v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE' && item.tipoVenta !== 'KG'">x {{ item.producto.unidadMedida }}</span>
-                  <span class="unit-label" v-else>x {{ item.tipoVenta }}</span>
-                </div>
-
-                <!-- Fila de Cantidad y Subtotal -->
-                <div class="item-actions-grouped">
-                  <div class="action-column">
-                    <span class="action-caption">Cantidad</span>
-                    <div class="qty-control">
-                      <button @click="restarCantidad(index)" class="qty-btn">-</button>
-                      <input type="number" v-model.number="item.cantidad" class="qty-input editable" step="0.001" min="0.001" />
-                      <button @click="sumarCantidad(index)" class="qty-btn">+</button>
-                    </div>
-                  </div>
-
-                  <div class="action-column subtotal-col">
-                    <span class="action-caption">Subtotal</span>
-                    <div class="item-subtotal">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</div>
-                  </div>
-                  <button class="remove-btn" @click="eliminarDelCarrito(index)">✕</button>
-                </div>
-
-                <!-- Botón opcional solo para Kilos -->
-                <button v-if="item.tipoVenta === 'KG'" class="calc-btn-labeled" @click="abrirModalSoles(index)" style="margin-top: 0.5rem; width: 100%;">
-                   💰 Calcular por Soles (S/)
+              <!-- Botón Monto Exacto (Solo si es KG) -->
+              <div v-if="item.tipoVenta === 'KG'" class="action-stack" style="margin-left: 0.5rem;">
+                <span class="action-caption-gray">MONTO EXACTO</span>
+                <button class="calc-btn-styled" @click="abrirModalSoles(index)">
+                   💰 S/
                 </button>
+              </div>
+
+              <div class="subtotal-stack">
+                <span class="action-caption-gray">SUBTOTAL</span>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                   <span class="item-subtotal-big">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
+                   <button class="remove-btn-styled" @click="eliminarDelCarrito(index)">✕</button>
+                </div>
               </div>
             </div>
           </div>
@@ -827,60 +828,62 @@ const cerrarModalNuevoCliente = () => {
 
 .header-input-mini { 
   width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #CBD5E0; 
-  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #2D3748; 
+  font-family: inherit; font-size: 0.95rem; color: #2D3748; 
   background: white; outline: none; transition: all 0.2s; box-sizing: border-box;
 }
 .header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.15); }
 
 .form-group-compact { display: flex; flex-direction: column; gap: 2px; }
-.compact-label { display: block; font-size: 0.75rem; font-weight: 800; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
+.compact-label { display: block; font-size: 0.75rem; font-weight: 600; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
 .btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
-/* Estilos para el carrito y edición de precios (Diseño Amplio) */
-.unit-selector { margin-bottom: 0.5rem; width: 100%; }
+/* Estilos Refinados según Imagen */
+.cart-item { 
+  background: white; border-radius: 12px; padding: 1rem; border: 1px solid #E2E8F0; 
+  display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.item-name-bold { margin: 0; font-weight: 800; color: #2D3748; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.02em;}
 
 .select-unit-mini { 
-  width: 100%; padding: 0.5rem; font-size: 0.9rem; border-radius: 8px; 
-  border: 1px solid #CBD5E0; background-color: white; font-weight: 700; color: #2D3748;
-  outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A5568%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;
+  width: 100%; padding: 0.6rem; font-size: 0.95rem; border-radius: 8px; 
+  border: 1px solid #E2E8F0; background-color: #F8FAFC; font-weight: 700; color: #4A5568;
+  outline: none; cursor: pointer;
 }
 
 .price-edit-container {
-  display: flex; align-items: center; gap: 0.5rem; background: #EDF2F7; padding: 0.6rem 0.85rem; 
-  border-radius: 10px; border: 1px solid #E2E8F0; width: 100%; box-sizing: border-box;
+  display: flex; align-items: center; gap: 0.5rem; background: #F8FAFC; padding: 0.6rem 0.85rem; 
+  border-radius: 10px; border: 1px solid #E2E8F0; width: 100%;
 }
-.price-edit-container.extra-margin { margin-top: 0.25rem; }
-
-.currency-label { font-size: 0.9rem; color: #4A5568; font-weight: 800; font-style: italic; }
-.unit-label { font-size: 0.75rem; color: #718096; font-weight: 800; text-transform: uppercase; margin-left: auto; }
-
+.currency-label { font-size: 0.95rem; color: #718096; font-weight: 700; }
+.unit-label { font-size: 0.8rem; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-left: auto; }
 .price-input-editable {
-  width: 100%; border: none; background: transparent; font-size: 1.1rem; 
-  font-weight: 900; color: #1A365D; padding: 0; outline: none; -moz-appearance: textfield; appearance: textfield;
+  width: 100%; border: none; background: transparent; font-size: 1.15rem; 
+  font-weight: 900; color: #1a202c; padding: 0; outline: none;
 }
-.price-input-editable::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.item-actions-grouped { display: flex; align-items: flex-end; gap: 0.5rem; margin-top: 0.75rem; justify-content: space-between; align-items: center;}
-.action-column { display: flex; flex-direction: column; gap: 0.25rem; }
-.action-caption { font-size: 0.65rem; color: #718096; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; }
-.subtotal-col { align-items: flex-end; flex: 1; }
+.item-visual-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
+.action-stack { display: flex; flex-direction: column; gap: 0.3rem; }
+.subtotal-stack { display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-end; }
 
-.qty-control { display: flex; align-items: center; background: #FFF; border-radius: 6px; border: 1px solid #CBD5E0; height: 34px; overflow: hidden; }
-.qty-btn { width: 30px; height: 100%; border: none; background: #F7FAFC; font-weight: bold; font-size: 1.2rem; color: #4A5568; cursor: pointer; }
-.qty-btn:hover { background: #EDF2F7; }
-.qty-input { width: 50px; border: none; text-align: center; font-size: 1rem; font-weight: 800; color: #2D3748; outline: none; }
+.action-caption-gray { font-size: 0.7rem; color: #718096; font-weight: 900; letter-spacing: 0.05em; }
 
-.item-subtotal { font-weight: 800; color: #1A365D; font-size: 1.1rem;}
-.remove-btn { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 34px; height: 34px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1rem; font-weight: bold;}
-.remove-btn:hover { background: #FECDD3; }
+.qty-control-styled { display: flex; align-items: center; background: #F1F5F9; border-radius: 8px; border: 1px solid #E2E8F0; height: 36px; overflow: hidden; }
+.qty-btn-styled { width: 32px; height: 100%; border: none; background: transparent; font-size: 1.2rem; font-weight: 900; color: #475569; cursor: pointer; }
+.qty-btn-styled:hover { background: #E2E8F0; }
+.qty-input-styled { width: 50px; border: none; background: #FFF; text-align: center; font-size: 1rem; font-weight: 800; color: #1E293B; height: 26px; margin: 0 4px; border-radius: 4px; }
 
-.calc-btn-labeled { 
-  background: #EBF8FF; border: 1px solid #BEE3F8; color: #2B6CB0; 
-  border-radius: 8px; padding: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: 800; transition: 0.2s;
+.calc-btn-styled { 
+  background: #E0F2FE; border: 1px solid #BAE6FD; color: #0369A1; 
+  border-radius: 8px; height: 36px; padding: 0 1rem; font-weight: 800; cursor: pointer;
 }
-.calc-btn-labeled:hover { background: #BEE3F8; }
+
+.item-subtotal-big { font-weight: 900; color: #1a202c; font-size: 1.3rem; }
+.remove-btn-styled { background: #FFF1F2; border: 1px solid #FECDD3; color: #BE123C; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+
+.total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 800; color: #2D3748; padding: 0.5rem 0;}
+.total-monto { font-size: 1.8rem; color: #1a202c; font-weight: 900; }
 
 .extra-actions-row { 
   display: flex; 
