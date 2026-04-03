@@ -128,14 +128,14 @@
                     <option value="KG">Vender por Kilo (Kg)</option>
                     <option value="SACO">Vender por Saco (Bulto)</option>
                   </select>
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.35rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
-                    <span style="font-size: 0.75rem; color: #718096; font-weight: 700;">S/</span>
+                  <div class="price-edit-container extra-margin">
+                    <span class="currency-label">S/</span>
                     <input type="number" 
                            v-model.number="item.precioVentaUnitario" 
                            @change="validarPrecioCosto(index)"
                            class="price-input-editable"
                            step="0.10" />
-                    <span style="font-size: 0.7rem; color: #A0AEC0;">x {{ item.tipoVenta }}</span>
+                    <span class="unit-label">x {{ item.tipoVenta }}</span>
                   </div>
                 </div>
                 <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector">
@@ -143,25 +143,25 @@
                     <option value="UND">Vender por Unidad Suelta</option>
                     <option value="BALDE">Vender Balde Entero</option>
                   </select>
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.35rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
-                    <span style="font-size: 0.75rem; color: #718096; font-weight: 700;">S/</span>
+                  <div class="price-edit-container extra-margin">
+                    <span class="currency-label">S/</span>
                     <input type="number" 
                            v-model.number="item.precioVentaUnitario" 
                            @change="validarPrecioCosto(index)"
                            class="price-input-editable"
                            step="0.10" />
-                    <span style="font-size: 0.7rem; color: #A0AEC0;">x {{ item.tipoVenta }}</span>
+                    <span class="unit-label">x {{ item.tipoVenta }}</span>
                   </div>
                 </div>
                 <div v-else class="unit-selector">
-                   <div style="display: flex; align-items: center; gap: 0.5rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
-                     <span style="font-size: 0.8rem; color: #718096; font-weight: 700;">S/</span>
+                   <div class="price-edit-container">
+                     <span class="currency-label">S/</span>
                      <input type="number" 
                             v-model.number="item.precioVentaUnitario" 
                             @change="validarPrecioCosto(index)"
                             class="price-input-editable"
                             step="0.10" />
-                     <span style="font-size: 0.75rem; color: #A0AEC0;">x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</span>
+                     <span class="unit-label">x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</span>
                    </div>
                 </div>
               </div>
@@ -817,56 +817,64 @@ const cerrarModalNuevoCliente = () => {
 .action-caption { font-size: 0.6rem; color: #718096; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; line-height: 1; }
 .subtotal-col { align-items: flex-end; flex: 1; margin-right: 0.25rem; }
 
+/* Estilos para el carrito y edición de precios */
+.unit-selector { margin: 0.35rem 0; width: 100%; max-width: 250px; }
+
+.select-unit-mini { 
+  width: 100%; 
+  padding: 0.4rem; 
+  font-size: 0.85rem; 
+  border-radius: 8px; 
+  border: 1px solid #CBD5E0; 
+  background-color: white;
+  font-weight: 600;
+  color: #2D3748;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A5568%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+.price-edit-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #EDF2F7;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.price-edit-container.extra-margin { margin-top: 0.5rem; }
+
+.currency-label { font-size: 0.85rem; color: #4A5568; font-weight: 700; font-style: italic; }
+.unit-label { font-size: 0.75rem; color: #A0AEC0; font-weight: 600; text-transform: uppercase; margin-left: auto; }
+
 .price-input-editable {
-  width: 70px;
+  width: 80px;
   border: none;
   background: transparent;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
-  color: #2D3748;
+  color: #1A365D;
   padding: 0;
   outline: none;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
-.price-input-mini {
-  width: 70px;
-  border: 1px solid #CBD5E0;
-  border-radius: 4px;
-  background: white;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #2D3748;
-  padding: 2px 4px;
-  outline: none;
-}
-.price-input-editable::-webkit-inner-spin-button, .price-input-mini::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.price-input-editable::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0; height: 26px;}
-.qty-btn { width: 24px; height: 100%; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: #4A5568; display: flex; align-items: center; justify-content: center; padding: 0;}
+.qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0; height: 32px;}
+.qty-btn { width: 30px; height: 100%; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #4A5568; display: flex; align-items: center; justify-content: center; padding: 0;}
 .qty-btn:hover { background: #E2E8F0; }
-.qty-input { width: 50px; height: 100%; border: none; text-align: center; background: transparent; font-size: 0.85rem; font-weight: 600; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
+.qty-input { width: 50px; height: 100%; border: none; text-align: center; background: transparent; font-size: 0.9rem; font-weight: 700; font-family: inherit; -moz-appearance: textfield; appearance: textfield; }
 .qty-input.editable { background-color: #fff; cursor: text; border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); width: 60px;}
 .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
-
-.calc-btn-labeled { 
-  background: #EBF8FF; border: 1px solid #BEE3F8; color: #2B6CB0; 
-  border-radius: 6px; height: 26px; padding: 0 0.5rem;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 0.75rem; font-weight: 700; gap: 0.25rem;
-}
-.calc-btn-labeled:hover { background: #BEE3F8; }
-
-.unit-selector { margin: 0.3rem 0; }
-.select-unit-mini { 
-  width: 100%; 
-  padding: 0.2rem; 
-  font-size: 0.7rem; 
-  border-radius: 4px; 
-  border: 1px solid #CBD5E0; 
-  background-color: #F7FAFC;
-  font-weight: 600;
-  color: #2D3748;
-}
 
 .item-subtotal { font-weight: 700; color: #2D3748; font-size: 0.95rem;}
 .remove-btn { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; border-radius: 6px; width: 24px; height: 24px; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; font-size: 0.9rem;}
