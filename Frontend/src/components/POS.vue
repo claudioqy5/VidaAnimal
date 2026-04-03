@@ -131,7 +131,7 @@
             <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-desc-line">
                <span>S/&nbsp;</span>
                <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
-               <span>&nbsp;x {{ item.producto.unidadMedida }}</span>
+               <span>&nbsp;x {{ item.producto.unidadMedida.toLowerCase() }}</span>
             </div>
 
             <!-- SELECTOR -->
@@ -854,7 +854,7 @@ const cerrarModalNuevoCliente = () => {
   position: relative; /* Para la X en la esquina */
 }
 
-.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 700; color: #2D3748; font-size: 1.05rem; }
+.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 600; color: #2D3748; font-size: 1.05rem; }
 
 .remove-btn-styled { 
   position: absolute; top: 12px; right: 12px;
