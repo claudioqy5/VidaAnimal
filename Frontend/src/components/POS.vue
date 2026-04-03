@@ -137,13 +137,13 @@
             <!-- SELECTOR -->
             <div v-else class="item-selector-row">
                <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini">
-                 <option value="KG">Vender por Kilo (Kg) - S/ {{ item.precioVentaUnitario }}</option>
-                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }} - S/ {{ item.precioVentaUnitario }}</option>
+                 <option value="KG">Vender por Kilo (Kg)</option>
+                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
                </select>
                <div class="item-desc-line" style="margin-top: 0.25rem;">
                  <span>Editar Precio: S/&nbsp;</span>
                  <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
-                 <span>&nbsp;x {{ item.tipoVenta }}</span>
+                 <span>&nbsp;x {{ item.tipoVenta.toLowerCase() }}</span>
                </div>
             </div>
 
