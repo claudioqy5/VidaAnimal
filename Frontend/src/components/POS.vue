@@ -125,17 +125,45 @@
                 <!-- Selector de Unidad (Solo si el producto es SACO o BALDE) -->
                 <div v-if="item.producto.unidadMedida === 'SACO'" class="unit-selector">
                   <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="KG">Vender por Kilo (Kg) - S/ {{ item.producto.precioVenta.toFixed(2) }}</option>
-                    <option value="SACO">Vender por Saco (Bulto) - S/ {{ (item.producto.precioMayorista || 0).toFixed(2) }}</option>
+                    <option value="KG">Vender por Kilo (Kg)</option>
+                    <option value="SACO">Vender por Saco (Bulto)</option>
                   </select>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.35rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                    <span style="font-size: 0.75rem; color: #718096; font-weight: 700;">S/</span>
+                    <input type="number" 
+                           v-model.number="item.precioVentaUnitario" 
+                           @change="validarPrecioCosto(index)"
+                           class="price-input-editable"
+                           step="0.10" />
+                    <span style="font-size: 0.7rem; color: #A0AEC0;">x {{ item.tipoVenta }}</span>
+                  </div>
                 </div>
                 <div v-else-if="item.producto.unidadMedida === 'BALDE'" class="unit-selector">
                   <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="select-unit-mini">
-                    <option value="UND">Vender por Unidad Suelta - S/ {{ item.producto.precioVenta.toFixed(2) }}</option>
-                    <option value="BALDE">Vender Balde Entero - S/ {{ (item.producto.precioMayorista || 0).toFixed(2) }}</option>
+                    <option value="UND">Vender por Unidad Suelta</option>
+                    <option value="BALDE">Vender Balde Entero</option>
                   </select>
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.35rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                    <span style="font-size: 0.75rem; color: #718096; font-weight: 700;">S/</span>
+                    <input type="number" 
+                           v-model.number="item.precioVentaUnitario" 
+                           @change="validarPrecioCosto(index)"
+                           class="price-input-editable"
+                           step="0.10" />
+                    <span style="font-size: 0.7rem; color: #A0AEC0;">x {{ item.tipoVenta }}</span>
+                  </div>
                 </div>
-                <p v-else class="item-price-unit">S/ {{ item.precioVentaUnitario.toFixed(2) }} x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</p>
+                <div v-else class="unit-selector">
+                   <div style="display: flex; align-items: center; gap: 0.5rem; background: #EDF2F7; padding: 4px 8px; border-radius: 8px; border: 1px solid #E2E8F0;">
+                     <span style="font-size: 0.8rem; color: #718096; font-weight: 700;">S/</span>
+                     <input type="number" 
+                            v-model.number="item.precioVentaUnitario" 
+                            @change="validarPrecioCosto(index)"
+                            class="price-input-editable"
+                            step="0.10" />
+                     <span style="font-size: 0.75rem; color: #A0AEC0;">x {{ item.producto.unidadMedida === 'UND' ? 'Unidad' : item.producto.unidadMedida }}</span>
+                   </div>
+                </div>
               </div>
             </div>
             
@@ -593,6 +621,30 @@ const confirmarCalculoSoles = () => {
   cerrarModalSoles()
 }
 
+const validarPrecioCosto = (idx) => {
+  const item = carrito.value[idx];
+  const costoBase = item.producto.precioCosto || 0;
+  
+  // Si vendemos por SACO o BALDE, el costo total del bulto es precioCosto * cantidadMayorista
+  // Pero aquí item.precioVentaUnitario es el precio DE VENTA del bulto completo.
+  // Debemos comparar peras con peras.
+  
+  let costoMinimoPermitido = 0;
+  
+  if (item.tipoVenta === 'SACO' || item.tipoVenta === 'BALDE') {
+    // Si vende bulto entero, el costo es el precio de costo * la cantidad de unidades en el bulto
+    costoMinimoPermitido = costoBase * (item.producto.cantidadMayorista || 1);
+  } else {
+    // Si vende por kilo o unidad suelta, el costo es el precio de costo unitario
+    costoMinimoPermitido = costoBase;
+  }
+
+  if (item.precioVentaUnitario < costoMinimoPermitido) {
+    alert(`⚠️ El precio ingresado (S/ ${item.precioVentaUnitario.toFixed(2)}) es menor al precio de costo (S/ ${costoMinimoPermitido.toFixed(2)}). Se ajustará automáticamente al costo mínimo.`);
+    item.precioVentaUnitario = costoMinimoPermitido;
+  }
+}
+
 const cerrarModalSoles = () => {
   mostrarModalSoles.value = false
   inputSoles.value = ''
@@ -764,6 +816,30 @@ const cerrarModalNuevoCliente = () => {
 .action-column { display: flex; flex-direction: column; gap: 0.25rem; }
 .action-caption { font-size: 0.6rem; color: #718096; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; line-height: 1; }
 .subtotal-col { align-items: flex-end; flex: 1; margin-right: 0.25rem; }
+
+.price-input-editable {
+  width: 70px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #2D3748;
+  padding: 0;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.price-input-mini {
+  width: 70px;
+  border: 1px solid #CBD5E0;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2D3748;
+  padding: 2px 4px;
+  outline: none;
+}
+.price-input-editable::-webkit-inner-spin-button, .price-input-mini::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .qty-control { display: flex; align-items: center; background: #EDF2F7; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0; height: 26px;}
 .qty-btn { width: 24px; height: 100%; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 0.9rem; color: #4A5568; display: flex; align-items: center; justify-content: center; padding: 0;}
