@@ -162,7 +162,7 @@
               <div v-if="item.tipoVenta === 'KG'" class="action-stack" style="margin-left: 0.5rem;">
                 <span class="action-caption-gray">MONTO EXACTO</span>
                 <button class="calc-btn-styled" @click="abrirModalSoles(index)">
-                   💰 <span style="font-weight: 800;">S/</span>
+                   💰 <span style="font-weight: 600;">S/</span>
                 </button>
               </div>
 
@@ -779,8 +779,7 @@ const cerrarModalNuevoCliente = () => {
   font-size: 1.25rem; 
   font-weight: 800; 
   color: #1A365D;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  text-transform: uppercase;  
 }
 .ticket-header-form { padding: 1.25rem 1.5rem; background: white; }
 
