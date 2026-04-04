@@ -49,13 +49,18 @@
           <div class="form-group" style="margin-bottom: 1rem;">
             <label>Producto a ingresar *</label>
             <div class="select-with-button">
-              <select v-model="detalleTemp.productoID">
-                <option value="0" disabled>Selecciona un producto del catálogo...</option>
-                <option v-for="prod in productos" :key="prod.productoID" :value="prod.productoID">
-                  [{{ prod.codigo }}] {{ prod.nombre }} - Costo ref: S/ {{ prod.precioCosto }}
+              <input 
+                list="productosList"
+                v-model="busquedaDetalleTemp"
+                placeholder="Escribe nombre o código..."
+                class="search-input-select"
+                @input="onInputProducto"
+              />
+              <datalist id="productosList">
+                <option v-for="prod in productos" :key="prod.productoID" :value="`[${prod.codigo}] ${prod.nombre}`">
+                  Ref: S/ {{ prod.precioCosto }}
                 </option>
-              </select>
-              <!-- Deshabilitar la creación rápida si no se ha completado paso 1 está manejado por el fieldset -->
+              </datalist>
               <button class="quick-btn" @click.prevent="abrirModalProducto" title="Crear Producto Nuevo">
                 ➕
               </button>
