@@ -55,7 +55,7 @@
           <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': evaluarPerdida(prod) }">
             <td class="img-cell" @click="verImagenAmpliada(prod)">
               <img v-if="prod.imagen" :src="`${IMAGE_BASE}${prod.imagen}`" alt="prod-img" class="table-img-mini" />
-              <img v-else src="../assets/no-product.png" alt="no-img" class="table-img-mini no-img" />
+              <div v-else class="img-placeholder-mini">🐾</div>
             </td>
             <td class="font-medium text-muted">{{ prod.codigo }}</td>
             <td class="font-medium">
