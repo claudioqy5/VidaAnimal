@@ -311,7 +311,6 @@
           <img :src="`${IMAGE_BASE}${imagenParaVer.imagen}`" :alt="imagenParaVer.nombre" class="full-view-img" />
           <div class="image-viewer-footer">
             <span class="view-prod-name">{{ imagenParaVer.nombre }}</span>
-          </div>
         </div>
       </div>
     </div>
