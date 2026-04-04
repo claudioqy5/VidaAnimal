@@ -294,22 +294,24 @@
             <span v-else>Volverá a estar Activo y disponible para comercializar.</span>
           </p>
 
-          <div class="modal-footer" style="justify-content: center; gap: 1rem; padding-top: 0; border-top: none;">
-            <button type="button" class="cancel-btn" @click="cerrarModalToggle">Cancelar</button>
-            <button type="button" class="primary-btn" @click="confirmarToggle" :disabled="togglando" :style="prodAToggle?.activo ? 'background-color: #E53E3E; color: white;' : 'background-color: #48BB78; color: white;'">
-              {{ togglando ? 'Procesando...' : 'Confirmar Cambio' }}
-            </button>
+            <div class="modal-footer" style="justify-content: center; gap: 1rem; padding-top: 0; border-top: none;">
+              <button type="button" class="cancel-btn" @click="cerrarModalToggle">Cancelar</button>
+              <button type="button" class="primary-btn" @click="confirmarToggle" :disabled="togglando" :style="prodAToggle?.activo ? 'background-color: #E53E3E; color: white;' : 'background-color: #48BB78; color: white;'">
+                {{ togglando ? 'Procesando...' : 'Confirmar Cambio' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Modal de Vista Previa de Imagen -->
-    <div v-if="imagenParaVer" class="image-viewer-overlay animate-fade-in" @click="imagenParaVer = null">
-      <div class="image-viewer-content glass" @click.stop>
-        <button class="close-viewer" @click="imagenParaVer = null">✕</button>
-        <img :src="`${IMAGE_BASE}${imagenParaVer.imagen}`" :alt="imagenParaVer.nombre" class="full-view-img" />
-        <div class="image-viewer-footer">
-          <span class="view-prod-name">{{ imagenParaVer.nombre }}</span>
+
+      <!-- Modal de Vista Previa de Imagen -->
+      <div v-if="imagenParaVer" class="image-viewer-overlay animate-fade-in" @click="imagenParaVer = null">
+        <div class="image-viewer-content glass" @click.stop>
+          <button class="close-viewer" @click="imagenParaVer = null">✕</button>
+          <img :src="`${IMAGE_BASE}${imagenParaVer.imagen}`" :alt="imagenParaVer.nombre" class="full-view-img" />
+          <div class="image-viewer-footer">
+            <span class="view-prod-name">{{ imagenParaVer.nombre }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1063,4 +1065,4 @@ const confirmarToggle = async () => {
 .img-cell:hover .table-img-mini {
   transform: scale(1.1);
 }
-
+</style>
