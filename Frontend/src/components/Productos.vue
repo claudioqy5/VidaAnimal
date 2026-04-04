@@ -54,7 +54,7 @@
         <tbody>
           <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': evaluarPerdida(prod) }">
             <td class="img-cell" @click="verImagenAmpliada(prod)">
-              <img v-if="prod.imagen" :src="`${IMAGE_BASE}${prod.imagen}`" class="table-img-mini" alt="Product thumbnail" />
+              <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="table-img-mini" alt="Product thumbnail" />
               <div v-else class="img-placeholder-mini">🐾</div>
             </td>
             <td class="font-medium text-muted">{{ prod.codigo }}</td>
@@ -308,7 +308,7 @@
     <div v-if="imagenParaVer" class="image-viewer-overlay animate-fade-in" @click="imagenParaVer = null">
       <div class="image-viewer-content glass" @click.stop>
         <button class="close-viewer" @click="imagenParaVer = null">✕</button>
-        <img :src="`${IMAGE_BASE}${imagenParaVer.imagen}`" :alt="imagenParaVer.nombre" class="full-view-img" />
+        <img :src="`${IMAGE_BASE}${imagenParaVer.imagenURL}`" :alt="imagenParaVer.nombre" class="full-view-img" />
         <div class="image-viewer-footer">
           <span class="view-prod-name">{{ imagenParaVer.nombre }}</span>
         </div>
@@ -328,7 +328,7 @@ const imagenParaVer = ref(null)
 const usuarioRol = ref('')
 
 const verImagenAmpliada = (prod) => {
-  if (prod.imagen) {
+  if (prod.imagenURL) {
     imagenParaVer.value = prod
   }
 }
