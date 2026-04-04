@@ -59,7 +59,7 @@
                   @input="onInputBusqueda"
                 />
                 <!-- Flechita para indicar que es un select -->
-                <span class="combobox-arrow" @click="mostrarDropdownProductos = !mostrarDropdownProductos">▼</span>
+                <span class="combobox-arrow" @click="mostrarDropdownProductos = mostrarDropdownProductos">▼</span>
                 
                 <div v-if="mostrarDropdownProductos && productosFiltradosBusqueda.length > 0" class="custom-dropdown custom-scrollbar" v-click-outside="() => mostrarDropdownProductos = false">
                   <div 
