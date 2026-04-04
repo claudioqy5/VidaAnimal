@@ -715,7 +715,7 @@ const confirmarToggle = async () => {
 .img-placeholder-mini { width: 45px; height: 45px; border-radius: 8px; background: #EDF2F7; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
 
 /* VISOR DE IMAGEN (LIGHTBOX) */
-.image-viewer-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.image-viewer-overlay { position: fixed; inset: 0; background:#0009; backdrop-filter: blur(0px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 2rem; }
 .image-viewer-content { position: relative; max-width: 600px; width: 100%; background: white; padding: 10px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
 .full-view-img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 18px; }
 .image-viewer-footer { padding: 1rem; text-align: center; }
