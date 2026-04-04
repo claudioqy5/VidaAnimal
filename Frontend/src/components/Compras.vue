@@ -49,18 +49,36 @@
           <div class="form-group" style="margin-bottom: 1rem;">
             <label>Producto a ingresar *</label>
             <div class="select-with-button">
-              <input 
-                list="productosList"
-                v-model="busquedaDetalleTemp"
-                placeholder="Escribe nombre o código..."
-                class="search-input-select"
-                @input="onInputProducto"
-              />
-              <datalist id="productosList">
-                <option v-for="prod in productos" :key="prod.productoID" :value="`[${prod.codigo}] ${prod.nombre}`">
-                  Ref: S/ {{ prod.precioCosto }}
-                </option>
-              </datalist>
+              <div class="custom-combobox">
+                <input 
+                  type="text"
+                  v-model="busquedaDetalleTemp"
+                  placeholder="Busca por nombre o código..."
+                  class="search-input-select"
+                  @focus="mostrarDropdownProductos = true"
+                  @input="onInputBusqueda"
+                />
+                <!-- Flechita para indicar que es un select -->
+                <span class="combobox-arrow" @click="mostrarDropdownProductos = !mostrarDropdownProductos">▼</span>
+                
+                <div v-if="mostrarDropdownProductos && productosFiltradosBusqueda.length > 0" class="custom-dropdown custom-scrollbar" v-click-outside="() => mostrarDropdownProductos = false">
+                  <div 
+                    v-for="prod in productosFiltradosBusqueda" 
+                    :key="prod.productoID" 
+                    class="dropdown-option"
+                    @click="seleccionarProductoDropdown(prod)"
+                  >
+                    <div class="option-main">
+                      <span class="option-code">[{{ prod.codigo }}]</span>
+                      <span class="option-name">{{ prod.nombre }}</span>
+                    </div>
+                    <span class="option-price">Costo: S/ {{ prod.precioCosto }}</span>
+                  </div>
+                </div>
+                <div v-else-if="mostrarDropdownProductos && busquedaDetalleTemp && productosFiltradosBusqueda.length === 0" class="custom-dropdown-empty">
+                  No se encontró el producto 🐾
+                </div>
+              </div>
               <button class="quick-btn" @click.prevent="abrirModalProducto" title="Crear Producto Nuevo">
                 ➕
               </button>
@@ -315,6 +333,49 @@ const cargando = ref(true)
 const guardando = ref(false)
 const errorGlobal = ref('')
 const successGlobal = ref('')
+
+// LÓGICA DE COMBOBOX PREMIUM
+const busquedaDetalleTemp = ref('')
+const mostrarDropdownProductos = ref(false)
+
+const productosFiltradosBusqueda = computed(() => {
+  if (!busquedaDetalleTemp.value) return productos.value.slice(0, 10);
+  const find = busquedaDetalleTemp.value.toLowerCase();
+  return productos.value.filter(p => 
+    p.nombre.toLowerCase().includes(find) || 
+    p.codigo.toLowerCase().includes(find)
+  ).slice(0, 15);
+})
+
+const onInputBusqueda = () => {
+  mostrarDropdownProductos.value = true;
+  // Limpiar seleccion si borra todo
+  if (!busquedaDetalleTemp.value) {
+    detalleTemp.value.productoID = 0;
+  }
+}
+
+const seleccionarProductoDropdown = (prod) => {
+  detalleTemp.value.productoID = prod.productoID;
+  detalleTemp.value.precioCostoUnitario = prod.precioCosto;
+  busquedaDetalleTemp.value = `[${prod.codigo}] ${prod.nombre}`;
+  mostrarDropdownProductos.value = false;
+}
+
+// Directiva para cerrar al hacer clic afuera
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
 
 const mostrarModalExitoCompra = ref(false)
 const cerrarModalExito = () => {
@@ -641,6 +702,49 @@ const registrarCompra = async () => {
 .select-with-button select { flex: 1; }
 .quick-btn { background-color: #EDF2F7; border: 1.5px solid #E2E8F0; border-radius: 10px; width: 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; }
 .quick-btn:hover { background-color: #E2E8F0; }
+
+/* COMBOBOX PERSONALIZADO (STYLE VIDA ANIMAL) */
+.custom-combobox { position: relative; flex: 1; display: flex; align-items: center; }
+.search-input-select { width: 100% !important; padding-right: 2.5rem !important; }
+.combobox-arrow { position: absolute; right: 12px; font-size: 0.7rem; color: #A0AEC0; cursor: pointer; user-select: none; }
+
+.custom-dropdown {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: white; border-radius: 14px; border: 1px solid #E2E8F0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 999;
+  max-height: 320px; overflow-y: auto; overflow-x: hidden;
+  animation: slideInDown 0.2s ease-out;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-option {
+  padding: 0.85rem 1.2rem; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #F7FAFC; cursor: pointer; transition: all 0.2s;
+}
+
+.dropdown-option:last-child { border-bottom: none; }
+.dropdown-option:hover { background: #E6FFFA; border-left: 5px solid #4FD1C5; }
+
+.option-main { display: flex; flex-direction: column; gap: 0.1rem; }
+.option-code { font-size: 0.75rem; color: #718096; font-weight: 700; text-transform: uppercase; }
+.option-name { font-size: 0.95rem; color: #2D3748; font-weight: 500; line-height: 1.2; }
+.option-price { font-size: 0.85rem; color: #F6AD55; font-weight: 750; white-space: nowrap; }
+
+.custom-dropdown-empty {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: #F7FAFC; padding: 1.5rem; text-align: center; border-radius: 14px;
+  color: #A0AEC0; font-style: italic; z-index: 999; font-size: 0.9rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E0; }
+
 
 /* MODAL STANDARD PARA PRODUCTO RÁPIDO */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
