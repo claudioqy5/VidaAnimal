@@ -14,14 +14,9 @@
     <div v-if="successGlobal" class="success-banner">{{ successGlobal }}</div>
 
     <div class="filters-bar">
-      <div class="search-info-row">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" v-model="busqueda" placeholder="Buscar por nombre o código..." />
-        </div>
-        <div class="results-badge" v-if="productos.length > 0">
-          <span class="count-now">{{ productosFiltrados.length }}</span> de <span class="count-total">{{ productos.length }}</span> productos
-        </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" v-model="busqueda" placeholder="Buscar por nombre o código..." />
       </div>
       <div class="sort-box">
         <label>Ordenar por fecha:</label>
@@ -53,9 +48,9 @@
         </thead>
         <tbody>
           <tr v-for="prod in productosFiltrados" :key="prod.productoID" :class="{ 'inactive-row': !prod.activo, 'loss-alert-row': evaluarPerdida(prod) }">
-            <td class="img-cell" @click="verImagenAmpliada(prod)">
-              <img v-if="prod.imagen" :src="`${IMAGE_BASE}${prod.imagen}`" alt="prod-img" class="table-img-mini" />
-              <div v-else class="img-placeholder-mini">🐾</div>
+            <td class="img-cell">
+              <img v-if="prod.imagenURL" :src="`${IMAGE_BASE}${prod.imagenURL}`" class="prod-thumb" alt="Product thumbnail" />
+              <div v-else class="img-placeholder">🐾</div>
             </td>
             <td class="font-medium text-muted">{{ prod.codigo }}</td>
             <td class="font-medium">
@@ -191,11 +186,11 @@
                   </div>
                   <div class="form-group">
                     <label>Stock Actual (Bultos) *</label>
-                    <input type="number" v-model.number="formProd.stockActual" step="0.0001" required />
+                    <input type="number" step="0.01" v-model="formProd.stockActual" required />
                   </div>
                   <div class="form-group">
                     <label>Min. Alerta (En bultos) *</label>
-                    <input type="number" v-model.number="formProd.stockMinimo" step="0.0001" required />
+                    <input type="number" v-model="formProd.stockMinimo" required />
                   </div>
                 </div>
               </div>
@@ -294,27 +289,18 @@
             <span v-else>Volverá a estar Activo y disponible para comercializar.</span>
           </p>
 
-            <div class="modal-footer" style="justify-content: center; gap: 1rem; padding-top: 0; border-top: none;">
-              <button type="button" class="cancel-btn" @click="cerrarModalToggle">Cancelar</button>
-              <button type="button" class="primary-btn" @click="confirmarToggle" :disabled="togglando" :style="prodAToggle?.activo ? 'background-color: #E53E3E; color: white;' : 'background-color: #48BB78; color: white;'">
-                {{ togglando ? 'Procesando...' : 'Confirmar Cambio' }}
-              </button>
-            </div>
+          <div class="modal-footer" style="justify-content: center; gap: 1rem; padding-top: 0; border-top: none;">
+            <button type="button" class="cancel-btn" @click="cerrarModalToggle">Cancelar</button>
+            <button type="button" class="primary-btn" @click="confirmarToggle" :disabled="togglando" :style="prodAToggle?.activo ? 'background-color: #E53E3E; color: white;' : 'background-color: #48BB78; color: white;'">
+              {{ togglando ? 'Procesando...' : 'Confirmar Cambio' }}
+            </button>
           </div>
         </div>
       </div>
-
-      <!-- Modal de Vista Previa de Imagen -->
-      <div v-if="imagenParaVer" class="image-viewer-overlay animate-fade-in" @click="imagenParaVer = null">
-        <div class="image-viewer-content glass" @click.stop>
-          <button class="close-viewer" @click="imagenParaVer = null">✕</button>
-          <img :src="`${IMAGE_BASE}${imagenParaVer.imagen}`" :alt="imagenParaVer.nombre" class="full-view-img" />
-          <div class="image-viewer-footer">
-            <span class="view-prod-name">{{ imagenParaVer.nombre }}</span>
-        </div>
-      </div>
     </div>
-  </div>
+
+    
+  
 </template>
 
 <script setup>
@@ -324,14 +310,7 @@ const API_URL = '/api'
 const IMAGE_BASE = '/api'
 
 const productos = ref([])
-const imagenParaVer = ref(null)
 const usuarioRol = ref('')
-
-const verImagenAmpliada = (prod) => {
-  if (prod.imagen) {
-    imagenParaVer.value = prod
-  }
-}
 
 const obtenerRol = () => {
     const token = localStorage.getItem('jwt_token');
@@ -680,35 +659,6 @@ const confirmarToggle = async () => {
 .sort-box select { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid #E2E8F0; background: #F7FAFC; color: #2D3748; outline: none; font-weight: 500; cursor: pointer; transition: border-color 0.2s;}
 .sort-box select:focus { border-color: #A3E4D7; }
 
-/* CONTADOR DE RESULTADOS */
-.search-info-row {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex: 1;
-}
-
-.results-badge {
-  background: rgba(241, 245, 249, 0.8);
-  padding: 0.5rem 1rem;
-  border-radius: 99px;
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 500;
-  border: 1px solid #e2e8f0;
-  white-space: nowrap;
-}
-
-.count-now {
-  color: #fb923c; /* Naranja para resaltar búsqueda */
-  font-weight: 700;
-}
-
-.count-total {
-  color: #334155;
-  font-weight: 700;
-}
-
 /* Aprovechamos la UI común */
 .productos-module { animation: fadeIn 0.4s ease; }
 .module-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
@@ -983,85 +933,5 @@ const confirmarToggle = async () => {
   .modal-body-scroll {
     max-height: 70vh;
   }
-}
-/* VISOR DE IMAGEN (LIGHTBOX) */
-.image-viewer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.85); /* Slate 900 con transparencia */
-  backdrop-filter: blur(8px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.image-viewer-content {
-  position: relative;
-  max-width: 600px;
-  width: 100%;
-  background: white;
-  padding: 10px;
-  border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.full-view-img {
-  width: 100%;
-  height: auto;
-  max-height: 80vh;
-  object-fit: contain;
-  border-radius: 18px;
-}
-
-.image-viewer-footer {
-  padding: 1rem;
-  text-align: center;
-}
-
-.view-prod-name {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: #1e293b;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.close-viewer {
-  position: absolute;
-  top: -15px;
-  right: -15px;
-  width: 40px;
-  height: 40px;
-  background: #ff4757;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
-  transition: transform 0.2s ease;
-  z-index: 10;
-}
-
-.close-viewer:hover {
-  transform: scale(1.1) rotate(90deg);
-}
-
-.img-cell {
-  cursor: zoom-in;
-}
-
-.table-img-mini {
-  transition: transform 0.2s ease;
-}
-
-.img-cell:hover .table-img-mini {
-  transform: scale(1.1);
 }
 </style>
