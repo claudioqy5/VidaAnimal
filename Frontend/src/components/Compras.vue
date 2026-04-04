@@ -46,19 +46,47 @@
             * Completa los datos del paso 1 para habilitar este panel.
           </p>
 
-          <div class="form-group" style="margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 1.5rem; position: relative;">
             <label>Producto a ingresar *</label>
             <div class="select-with-button">
-              <select v-model="detalleTemp.productoID">
-                <option value="0" disabled>Selecciona un producto del catálogo...</option>
-                <option v-for="prod in productos" :key="prod.productoID" :value="prod.productoID">
-                  [{{ prod.codigo }}] {{ prod.nombre }} - Costo ref: S/ {{ prod.precioCosto }}
-                </option>
-              </select>
-              <!-- Deshabilitar la creación rápida si no se ha completado paso 1 está manejado por el fieldset -->
+              <div class="searchable-select-container">
+                <div class="search-input-wrapper">
+                  <span class="search-icon-inside">🔍</span>
+                  <input 
+                    type="text" 
+                    v-model="busquedaProducto" 
+                    placeholder="Escribe nombre o código del producto..." 
+                    @focus="mostrarDropdown = true"
+                    class="search-input"
+                  />
+                  <button v-if="busquedaProducto" class="clear-search" @click="limpiarBusqueda">✕</button>
+                </div>
+                
+                <!-- Dropdown de resultados -->
+                <div v-if="mostrarDropdown && productosFiltradosBusqueda.length > 0" class="search-dropdown custom-scrollbar" v-click-outside="() => mostrarDropdown = false">
+                  <div 
+                    v-for="prod in productosFiltradosBusqueda" 
+                    :key="prod.productoID" 
+                    class="dropdown-item"
+                    @click="seleccionarProducto(prod)"
+                  >
+                    <div class="item-info">
+                      <span class="item-code">[{{ prod.codigo }}]</span>
+                      <span class="item-name">{{ prod.nombre }}</span>
+                    </div>
+                    <span class="item-price">Ref: S/ {{ prod.precioCosto }}</span>
+                  </div>
+                </div>
+                <div v-else-if="mostrarDropdown && busquedaProducto && productosFiltradosBusqueda.length === 0" class="search-dropdown-empty">
+                  No se encontraron productos.
+                </div>
+              </div>
               <button class="quick-btn" @click.prevent="abrirModalProducto" title="Crear Producto Nuevo">
                 ➕
               </button>
+            </div>
+            <div v-if="productoSeleccionadoNombre" class="selection-badge">
+              Seleccionado: <strong>{{ productoSeleccionadoNombre }}</strong>
             </div>
           </div>
 
@@ -311,6 +339,49 @@ const guardando = ref(false)
 const errorGlobal = ref('')
 const successGlobal = ref('')
 
+// Lógica de Combobox de Productos
+const busquedaProducto = ref('')
+const mostrarDropdown = ref(false)
+const productoSeleccionadoNombre = ref('')
+
+const productosFiltradosBusqueda = computed(() => {
+  if (!busquedaProducto.value) return productos.value.slice(0, 10); // Mostrar top 10 si está vacío
+  const search = busquedaProducto.value.toLowerCase();
+  return productos.value.filter(p => 
+    p.nombre.toLowerCase().includes(search) || 
+    p.codigo.toLowerCase().includes(search)
+  ).slice(0, 15); // Limitar a 15 resultados para rendimiento
+})
+
+const seleccionarProducto = (prod) => {
+  detalleTemp.value.productoID = prod.productoID
+  productoSeleccionadoNombre.value = prod.nombre
+  busquedaProducto.value = prod.nombre
+  mostrarDropdown.value = false
+}
+
+const limpiarBusqueda = () => {
+  busquedaProducto.value = ''
+  detalleTemp.value.productoID = 0
+  productoSeleccionadoNombre.value = ''
+  mostrarDropdown.value = true
+}
+
+// Directiva simple para cerrar al hacer clic fuera
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
+
 const mostrarModalExitoCompra = ref(false)
 const cerrarModalExito = () => {
   mostrarModalExitoCompra.value = false
@@ -391,6 +462,8 @@ const agregarAlCarrito = () => {
   detalleTemp.value.productoID = 0
   detalleTemp.value.cantidad = ''
   detalleTemp.value.precioCostoUnitario = ''
+  busquedaProducto.value = ''
+  productoSeleccionadoNombre.value = ''
 }
 
 // LÓGICA DE PROVEEDOR RÁPIDO
@@ -602,6 +675,55 @@ const registrarCompra = async () => {
 .form-group label { font-size: 0.85rem; font-weight: 600; color: #4A5568; }
 .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 0.85rem 1rem; border: 1.5px solid #E2E8F0; border-radius: 10px; color: #2D3748; font-family: inherit; font-size: 0.95rem; transition: border-color 0.2s;}
 .form-group input:focus, .form-group select:focus { border-color: #F6AD55; box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.2); outline: none; }
+
+/* SEARCHABLE SELECT (COMBOBOX) */
+.searchable-select-container { position: relative; flex: 1; }
+.search-input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+.search-icon-inside { position: absolute; left: 12px; color: #A0AEC0; font-size: 0.9rem; pointer-events: none; }
+.search-input { padding-left: 2.5rem !important; }
+.clear-search { position: absolute; right: 12px; background: none; border: none; color: #A0AEC0; cursor: pointer; font-size: 0.8rem; padding: 5px; }
+.clear-search:hover { color: #4A5568; }
+
+.search-dropdown {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0; 
+  background: white; border: 1px solid #E2E8F0; border-radius: 12px; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100;
+  max-height: 300px; overflow-y: auto; overflow-x: hidden;
+  animation: fadeInDown 0.2s ease-out;
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.8rem 1rem; border-bottom: 1px solid #F7FAFC; cursor: pointer; transition: all 0.2s;
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background-color: #FFF5F7; border-left: 4px solid #F6AD55; }
+
+.item-info { display: flex; flex-direction: column; gap: 0.1rem; }
+.item-code { font-size: 0.75rem; color: #718096; font-weight: 600; text-transform: uppercase; }
+.item-name { font-size: 0.9rem; color: #2D3748; font-weight: 500; }
+.item-price { font-size: 0.8rem; color: #F6AD55; font-weight: 700; white-space: nowrap; }
+
+.search-dropdown-empty {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: #F7FAFC; padding: 1.5rem; text-align: center;
+  border-radius: 12px; color: #A0AEC0; font-style: italic; z-index: 100; font-size: 0.9rem;
+}
+
+.selection-badge {
+  margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: #FFF5F7; 
+  border-radius: 8px; font-size: 0.8rem; color: #2D3748; border-left: 3px solid #F6AD55;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E0; }
+
 .fieldset-no-border { border: none; padding: 0; margin: 0; }
 .fieldset-no-border:disabled { opacity: 0.6; cursor: not-allowed; }
 
