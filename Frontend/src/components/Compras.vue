@@ -55,28 +55,31 @@
                   v-model="busquedaDetalleTemp"
                   placeholder="Busca por nombre o código..."
                   class="search-input-select"
-                  @focus="mostrarDropdownProductos = true"
+                  @focus="abrirDropdownAlEnfocar"
                   @input="onInputBusqueda"
+                  @click.stop="toggleDropdownProductos"
                 />
                 <!-- Flechita para indicar que es un select -->
-                <span class="combobox-arrow" @click="mostrarDropdownProductos = mostrarDropdownProductos">▼</span>
+                <span class="combobox-arrow" @click.stop="toggleDropdownProductos">▼</span>
                 
-                <div v-if="mostrarDropdownProductos && productosFiltradosBusqueda.length > 0" class="custom-dropdown custom-scrollbar" v-click-outside="() => mostrarDropdownProductos = false">
-                  <div 
-                    v-for="prod in productosFiltradosBusqueda" 
-                    :key="prod.productoID" 
-                    class="dropdown-option"
-                    @click="seleccionarProductoDropdown(prod)"
-                  >
-                    <div class="option-main">
-                      <span class="option-code">[{{ prod.codigo }}]</span>
-                      <span class="option-name">{{ prod.nombre }}</span>
+                <div v-if="mostrarDropdownProductos" class="custom-dropdown custom-scrollbar" v-click-outside="cerrarDropdownSafe">
+                  <div v-if="productosFiltradosBusqueda.length > 0">
+                    <div 
+                      v-for="prod in productosFiltradosBusqueda" 
+                      :key="prod.productoID" 
+                      class="dropdown-option"
+                      @click.stop="seleccionarProductoDropdown(prod)"
+                    >
+                      <div class="option-main">
+                        <span class="option-code">[{{ prod.codigo }}]</span>
+                        <span class="option-name">{{ prod.nombre }}</span>
+                      </div>
+                      <span class="option-price">Costo: S/ {{ prod.precioCosto }}</span>
                     </div>
-                    <span class="option-price">Costo: S/ {{ prod.precioCosto }}</span>
                   </div>
-                </div>
-                <div v-else-if="mostrarDropdownProductos && busquedaDetalleTemp && productosFiltradosBusqueda.length === 0" class="custom-dropdown-empty">
-                  No se encontró el producto 🐾
+                  <div v-else class="custom-dropdown-empty">
+                    No se encontró el producto 🐾
+                  </div>
                 </div>
               </div>
               <button class="quick-btn" @click.prevent="abrirModalProducto" title="Crear Producto Nuevo">
@@ -349,14 +352,29 @@ const productosFiltradosBusqueda = computed(() => {
 
 const onInputBusqueda = () => {
   mostrarDropdownProductos.value = true;
-  // Limpiar seleccion si borra todo
   if (!busquedaDetalleTemp.value) {
     detalleTemp.value.productoID = 0;
   }
 }
 
+const toggleDropdownProductos = () => {
+  mostrarDropdownProductos.value = !mostrarDropdownProductos.value;
+}
+
+const abrirDropdownAlEnfocar = () => {
+  // Pequeño delay para asegurar que el click-outside no interfiera
+  setTimeout(() => {
+    mostrarDropdownProductos.value = true;
+  }, 100);
+}
+
+const cerrarDropdownSafe = () => {
+  mostrarDropdownProductos.value = false;
+}
+
 const seleccionarProductoDropdown = (prod) => {
   detalleTemp.value.productoID = prod.productoID;
+  // Sugerir el costo actual
   detalleTemp.value.precioCostoUnitario = prod.precioCosto;
   busquedaDetalleTemp.value = `[${prod.codigo}] ${prod.nombre}`;
   mostrarDropdownProductos.value = false;
