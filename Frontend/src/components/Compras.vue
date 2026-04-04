@@ -41,9 +41,8 @@
         <div class="divider"></div>
 
         <h3 class="panel-title" :style="{ opacity: puedeUsarPanelSecundario ? 1 : 0.5 }">2. Agregar Productos al Lote</h3>
-        <fieldset :disabled="!puedeUsarPanelSecundario" class="fieldset-no-border">
           <p v-if="!puedeUsarPanelSecundario" style="color: #E53E3E; font-size: 0.85rem; margin-top: -10px; margin-bottom: 1rem;">
-            * Completa los datos del paso 1 para habilitar este panel.
+            * Completa el Proveedor y Factura para habilitar el ingreso.
           </p>
 
           <div class="form-group" style="margin-bottom: 1.5rem; position: relative;">
@@ -57,6 +56,7 @@
                     v-model="busquedaProducto" 
                     placeholder="Escribe nombre o código del producto..." 
                     @focus="mostrarDropdown = true"
+                    @input="mostrarDropdown = true"
                     class="search-input"
                   />
                   <button v-if="busquedaProducto" class="clear-search" @click="limpiarBusqueda">✕</button>
@@ -90,10 +90,11 @@
             </div>
           </div>
 
+          <fieldset :disabled="!puedeUsarPanelSecundario" class="fieldset-no-border">
           <div class="form-grid">
             <div class="form-group">
               <label>Cantidad *</label>
-              <input type="number" min="1" step="0.01" v-model="detalleTemp.cantidad" :disabled="detalleTemp.productoID === 0" :placeholder="detalleTemp.productoID === 0 ? 'Selecciona un prod. primero' : '0'" />
+              <input type="number" min="1" step="0.0001" v-model="detalleTemp.cantidad" :disabled="detalleTemp.productoID === 0" :placeholder="detalleTemp.productoID === 0 ? 'Selecciona un prod. primero' : '0'" />
             </div>
             <div class="form-group">
               <label>Precio Costo Unitario (S/) *</label>
@@ -104,7 +105,7 @@
           <button class="add-btn" @click="agregarAlCarrito" :disabled="!puedeAgregarAlCarrito">
             <span>⬇️</span> Añadir a la lista
           </button>
-        </fieldset>
+          </fieldset>
       </div>
 
       <!-- Panel Derecho: Lista de la Compra -->
