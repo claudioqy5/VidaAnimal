@@ -342,12 +342,12 @@ const busquedaDetalleTemp = ref('')
 const mostrarDropdownProductos = ref(false)
 
 const productosFiltradosBusqueda = computed(() => {
-  if (!busquedaDetalleTemp.value) return productos.value.slice(0, 10);
+  if (!busquedaDetalleTemp.value) return productos.value;
   const find = busquedaDetalleTemp.value.toLowerCase();
   return productos.value.filter(p => 
     p.nombre.toLowerCase().includes(find) || 
     p.codigo.toLowerCase().includes(find)
-  ).slice(0, 15);
+  );
 })
 
 const onInputBusqueda = () => {
