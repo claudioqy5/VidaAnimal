@@ -376,6 +376,8 @@ const seleccionarProductoDropdown = (prod) => {
   detalleTemp.value.productoID = prod.productoID;
   // Sugerir el costo actual
   detalleTemp.value.precioCostoUnitario = prod.precioCosto;
+  // Poner cantidad 1 por defecto para que el botón de añadir se active de inmediato
+  detalleTemp.value.cantidad = 1;
   busquedaDetalleTemp.value = `[${prod.codigo}] ${prod.nombre}`;
   mostrarDropdownProductos.value = false;
 }
