@@ -587,17 +587,18 @@ const guardarProductoRapido = async () => {
   errorModalProd.value = ''
 
   const formData = new FormData()
-  // Aseguramos de enviar el 0 explícito para precioVenta (y cualquier otro número falsy)
+  // Recorremos los datos del producto
   Object.keys(nuevoProd.value).forEach(key => {
-    // No queremos mandar cantidadLlegando a la API de Productos porque no existe en su DTO
+    // cantidadLlegando no es parte del modelo de Producto en la DB
     if (key !== 'cantidadLlegando') {
       const val = nuevoProd.value[key];
       formData.append(key, val !== null && val !== undefined && val !== '' ? val : 0);
     }
   });
-  
+
+  // ENVIAMOS EL ARCHIVO REAL SI EXISTE
   if (archivoProd.value) {
-    formData.append('imagen', archivoProd.value)
+    formData.append('imagen', archivoProd.value);
   }
 
   try {
