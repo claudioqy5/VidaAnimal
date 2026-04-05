@@ -252,18 +252,7 @@
 
             <div class="form-group" style="grid-column: span 2;">
               <label>Fotografía (Opcional)</label>
-              <div class="file-upload-wrapper">
-                <div class="mini-preview" v-if="filePreviewProd">
-                  <img :src="filePreviewProd" alt="Vista previa" />
-                  <button type="button" class="remove-photo" @click="eliminarImagenProducto">✕</button>
-                </div>
-                <div class="upload-placeholder" v-else>
-                  <span>📷</span>
-                  <p>Sin foto seleccionada</p>
-                </div>
-                <input type="file" @change="manejarImagenProducto" accept="image/*" id="fotoNuevaProd" style="display: none;" />
-                <label for="fotoNuevaProd" class="custom-file-label">Seleccionar Imagen (JPG, PNG, WebP)</label>
-              </div>
+              <input type="file" @change="onFileChangeProd" accept="image/*" style="padding: 0.6rem; cursor: pointer;" />
             </div>
           </div>
 
@@ -535,20 +524,14 @@ const mostrarModalProducto = ref(false)
 const guardandoProd = ref(false)
 const errorModalProd = ref('')
 const archivoProd = ref(null)
-const filePreviewProd = ref(null)
+const nuevoProd = ref({
+  codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
+  precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
+  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
+})
 
-// Lógica de imagen (igual que en Gestión de Productos)
-const manejarImagenProducto = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    archivoProd.value = file
-    filePreviewProd.value = URL.createObjectURL(file)
-  }
-}
-
-const eliminarImagenProducto = () => {
-  filePreviewProd.value = null
-  archivoProd.value = null
+const onFileChangeProd = (e) => {
+  archivoProd.value = e.target.files[0]
 }
 
 const abrirModalProducto = () => {
@@ -558,7 +541,6 @@ const abrirModalProducto = () => {
   }
   errorModalProd.value = ''
   archivoProd.value = null
-  filePreviewProd.value = null // <-- Aseguramos de limpiar la vista previa anterior
   nuevoProd.value = {
     codigo: '', nombre: '', descripcion: '', proveedorID: compraHeader.value.proveedorID,
     unidadMedida: 'UND', precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
@@ -585,7 +567,7 @@ const guardarProductoRapido = async () => {
     }
   });
   
-  // Imagen - DEBE llamarse 'ImagenFoto' para que ProductoCreateDTO en C# lo reconozca
+  // Imagen - DEBE llamarse 'ImagenFoto' para cumplir con el DTO de C#
   if (archivoProd.value) {
     formData.append('ImagenFoto', archivoProd.value)
   }
@@ -817,18 +799,6 @@ const registrarCompra = async () => {
 .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .cancel-btn { background-color: transparent; color: #4A5568; border: 1px solid #CBD5E0; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
 .cancel-btn:hover { background-color: #F7FAFC; }
-
-/* ESTILOS DE CARGA DE IMAGEN (VERSION COMPRAS) */
-.file-upload-wrapper { display: flex; align-items: center; gap: 1.5rem; background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px dashed #CBD5E0; margin-top: 5px; }
-.mini-preview { position: relative; width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 2px solid #F6AD55; box-shadow: 0 4px 10px rgba(246, 173, 85, 0.2); }
-.mini-preview img { width: 100%; height: 100%; object-fit: cover; }
-.remove-photo { position: absolute; top: 2px; right: 2px; background: #E53E3E; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-.remove-photo:hover { background: #C53030; transform: scale(1.1); }
-.upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #A0AEC0; font-size: 0.75rem; border: 2px dashed #E2E8F0; width: 80px; height: 80px; border-radius: 12px; justify-content: center; background: white; }
-.upload-placeholder span { font-size: 1.8rem; margin-bottom: 2px; }
-.custom-file-label { background: #F6AD55; color: white; padding: 0.7rem 1.4rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 3px 8px rgba(246, 173, 85, 0.3); }
-.custom-file-label:hover { background: #DD6B20; transform: translateY(-2px); box-shadow: 0 5px 12px rgba(246, 173, 85, 0.4); }
-
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
 
