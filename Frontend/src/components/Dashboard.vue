@@ -251,7 +251,7 @@ onMounted(cargar);
 .dot-g { width: 9px; height: 9px; background: #68D391; border-radius: 50%; }
 
 .chart-wrapper { display: flex; gap: 1.5rem; height: 380px; position: relative; }
-.axis-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.65rem; font-weight: 900; color: #A0AEC0; text-align: right; width: 80px; padding-bottom: 85px; }
+.axis-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.65rem; color: #A0AEC0; text-align: right;}
 
 .chart-area { flex: 1; position: relative; }
 .chart-grid { position: absolute; top: 0; left: 0; width: 100%; height: 320px; display: flex; flex-direction: column; justify-content: space-between; z-index: 1; }
