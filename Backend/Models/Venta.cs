@@ -71,6 +71,12 @@ namespace VidaAnimal.API.Models
         public decimal PrecioVentaUnitario { get; set; }
 
         [Column(TypeName = "decimal(12,2)")]
+        public decimal? PrecioCostoUnitario { get; set; } // Nuevo: Para el margen
+
+        [Column(TypeName = "decimal(12,2)")]
+        public decimal? Ganancia { get; set; } // Nuevo: Para el Dashboard
+
+        [Column(TypeName = "decimal(12,2)")]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal SubTotal { get; set; }
 

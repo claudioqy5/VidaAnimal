@@ -113,13 +113,16 @@ namespace VidaAnimal.API.Controllers
 
                     // Lógica especial de stock para Sacos vendidos por Kilo y Baldes por Unidad
                     decimal decrementoStockActual = det.Cantidad;
+                    decimal costoUnitarioAjustado = p.PrecioCosto; // Costo por bulto por defecto
+
                     if ((p.UnidadMedida == "SACO" && det.UnidadVenta == "KG") || 
                         (p.UnidadMedida == "BALDE" && det.UnidadVenta == "UND")) 
                     {
-                        // Si se vende fracción, restamos (cantidad / capacidad_bulto) del stock actual de bultos
                         if (p.CantidadMayorista.HasValue && p.CantidadMayorista > 0)
                         {
                             decrementoStockActual = det.Cantidad / p.CantidadMayorista.Value;
+                            // El costo de 1 KG es el (Costo del Saco / Peso del Saco)
+                            costoUnitarioAjustado = p.PrecioCosto / p.CantidadMayorista.Value;
                         }
                     }
 
@@ -128,16 +131,21 @@ namespace VidaAnimal.API.Controllers
 
                     itemsVenta.Add((p, decrementoStockActual, det.PrecioVentaUnitario, p.StockActual));
 
-                    // Descontar stock (decrementoStockActual ya está en unidades del stock)
+                    // Calcular la ganancia de esta línea de producto
+                    decimal gananciaLinea = (det.PrecioVentaUnitario - costoUnitarioAjustado) * det.Cantidad;
+
+                    // Descontar stock
                     p.StockActual -= decrementoStockActual;
 
-                    // Agregar detalle a la venta
+                    // Agregar detalle a la venta con el margen capturado
                     nuevaVenta.VentaDetalles.Add(new VentaDetalle
                     {
                         ProductoID = det.ProductoID,
-                        Cantidad = det.Cantidad, // Se guarda la cantidad nominal vendida (ej: 2)
+                        Cantidad = det.Cantidad, 
                         PrecioVentaUnitario = det.PrecioVentaUnitario,
-                        UnidadVenta = det.UnidadVenta ?? p.UnidadMedida // Guardamos si fue KG o SACO
+                        PrecioCostoUnitario = costoUnitarioAjustado, // CAPTURAMOS EL COSTO
+                        Ganancia = gananciaLinea, // CAPTURAMOS EL MARGEN REAL
+                        UnidadVenta = det.UnidadVenta ?? p.UnidadMedida 
                     });
 
                     totalCalculado += (det.Cantidad * det.PrecioVentaUnitario);
