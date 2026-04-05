@@ -84,10 +84,10 @@ namespace VidaAnimal.API.Controllers
                     .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
                     .OrderByDescending(x => x.totalMonto).Take(5).ToList();
 
-                // NUEVO: Top Proveedores (Basado en Compras)
+                // TOP Proveedores (Corregido con FechaCompra)
                 var topProveedores = await _context.Compras
                     .Include(c => c.Proveedor)
-                    .Where(c => c.Fecha.Month == mesActual && c.Proveedor != null)
+                    .Where(c => c.FechaCompra.Month == mesActual && c.Proveedor != null)
                     .GroupBy(c => c.Proveedor.Nombre)
                     .Select(g => new { nombre = g.Key, totalInvertido = g.Sum(c => c.Total) })
                     .OrderByDescending(x => x.totalInvertido)
