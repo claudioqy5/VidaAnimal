@@ -108,8 +108,7 @@
           <!-- ATENCIÓN DE INVENTARIO (VERTICAL ELEGANTE) -->
           <div class="card inventory-alert">
             <div class="card-header-v2">
-              <h3 class="card-title-v2">🛑 Atención de Inventario</h3>
-              <router-link to="/productos" class="view-more">Ver Todo →</router-link>
+              <h3 class="card-title-v2">🛑 Atención de Inventario</h3>              
             </div>
             <div class="inventory-list-v">
               <div v-for="p in stockBajo" :key="p.nombre" class="inv-item-v">
@@ -234,7 +233,7 @@ onMounted(cargarResumen);
 .header-status { display: flex; align-items: center; gap: 0.8rem; background: white; padding: 0.5rem 1.2rem; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 .status-indicator { width: 10px; height: 10px; border-radius: 50%; }
 .status-indicator.active { background: #48BB78; box-shadow: 0 0 10px rgba(72,187,120,0.5); }
-.status-text { font-size: 0.85rem; font-weight: 800; color: #4A5568; }
+.status-text { font-size: 0.85rem; color: #4A5568; }
 .refresh-btn { border: none; background: #EDF2F7; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 800; color: #553C9A; cursor: pointer; }
 
 /* KPIs */
@@ -262,27 +261,27 @@ onMounted(cargarResumen);
 .top-item-h { display: flex; align-items: center; gap: 1.2rem; background: #F8FAFC; padding: 1rem; border-radius: 20px; border: 1px solid #EDF2F7; }
 .top-rank { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 900; color: #553C9A; background: #E9D8FD; font-size: 0.8rem; }
 .top-rank.prov { background: #B2F5EA; color: #319795; }
-.p-name { font-weight: 800; font-size: 0.95rem; margin: 0; color: #1A202C; }
+.p-name { font-size: 0.95rem; margin: 0; color: #1A202C; }
 .p-meta { font-size: 0.75rem; font-weight: 700; color: #718096; margin: 0; }
 
 /* INVENTORY ALERT (VERTICAL ELEGANTE) */
 .inventory-alert { border-left: 8px solid #F6AD55; }
 .card-header-v2 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .card-title-v2 { font-size: 1.3rem; font-weight: 900; margin: 0; color: #2D3748; }
-.view-more { font-size: 0.85rem; font-weight: 800; color: #553C9A; text-decoration: none; }
+
 
 .inventory-list-v { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
 .inv-item-v { background: #FFF9F2; padding: 1.2rem; border-radius: 22px; border: 1px solid #FED7D7; }
 .inv-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.p-prod { font-weight: 900; font-size: 0.9rem; color: #2D3748; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
-.p-status { font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+.p-prod { font-size: 0.9rem; color: #2D3748; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
+.p-status { font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border-radius: 20px; }
 .critico { background: #E53E3E; color: white; }
 .bajo { background: #F6AD55; color: white; }
 
 .inv-bar-container { background: #EDF2F7; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem; }
 .inv-bar { height: 100%; border-radius: 4px; transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-.inv-footer { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #718096; }
+.inv-footer { display: flex; justify-content: space-between; font-size: 0.75rem; color: #718096; }
 
 /* FLOW CHART HOURLY */
 .chart-hourly-v2 { display: flex; align-items: flex-end; justify-content: space-between; height: 180px; padding-top: 30px; gap: 5px; }

@@ -224,7 +224,7 @@ onMounted(cargar);
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .page-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin: 0; }
 .period-switcher { background: #EDF2F7; padding: 4px; border-radius: 12px; display: flex; }
-.period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; font-weight: 800; color: #718096; }
+.period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; color: #718096; }
 .period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 .refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; }
 
@@ -263,8 +263,8 @@ onMounted(cargar);
 .grid-mode { align-items: flex-end; justify-content: space-around; padding-top: 40px; }
 .bar-unit { flex: 1; display: flex; flex-direction: column; align-items: center; height: 320px; position: relative; border-radius: 12px; }
 .bar-labels { position: absolute; top: -50px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.v-val { font-size: 0.6rem; font-weight: 900; color: #4A5568; background: #EDF2F7; padding: 2px 5px; border-radius: 4px; }
-.g-val { font-size: 0.6rem; font-weight: 900; color: #38A169; }
+.v-val { font-size: 0.8rem; color: #4A5568; background: #EDF2F7; padding: 2px 5px; border-radius: 4px; }
+.g-val { font-size: 0.8rem; font-weight: 600; color: #38A169; }
 .bar-pair { display: flex; align-items: flex-end; gap: 6px; height: 100%; }
 .bar-v { width: 22px; background: #CBD5E0; border-radius: 8px 8px 0 0; transition: height 1s; opacity: 0.4; }
 .bar-g { width: 14px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
@@ -287,7 +287,7 @@ onMounted(cargar);
 
 /* FOOTERS UNIFICADOS (BARRAS Y LÍNEAS) */
 .bar-footer, .node-footer-v2 { position: absolute; bottom: -85px; display: flex; flex-direction: column; align-items: center; text-align: center; width: 120px; z-index: 5; }
-.f-main { font-size: 0.75rem; font-weight: 900; color: #1A202C; text-transform: capitalize; margin-bottom: 2px; }
+.f-main { font-size: 0.75rem; color: #1A202C; text-transform: capitalize; margin-bottom: 2px; }
 .f-sub { font-size: 0.65rem; font-weight: 800; color: #A0AEC0; white-space: nowrap; }
 
 /* SECCIÓN RANKING */
@@ -297,7 +297,7 @@ onMounted(cargar);
 .top-row { display: flex; gap: 1rem; background: white; padding: 1.25rem; border-radius: 22px; border: 1px solid #EDF2F7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); align-items: center; }
 .top-number { width: 30px; height: 30px; min-width: 30px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; border-radius: 12px; background: #CBD5E0; font-size: 0.75rem; }
 .nr-0 { background: #FFD700; box-shadow: 0 4px 10px rgba(255,215,0,0.3); }
-.p-name-full { font-weight: 900; font-size: 0.9rem; color: #1A202C; margin: 0 0 4px 0; }
+.p-name-full { font-size: 0.9rem; color: #1A202C; margin: 0 0 4px 0; }
 .p-stats { display: flex; gap: 0.8rem; font-size: 0.7rem; color: #718096; font-weight: 800; }
 
 .loading-full { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10rem 0; }
