@@ -73,7 +73,7 @@
               <span v-for="val in yAxisLevels" :key="val">S/ {{ formatMoney(val) }}</span>
             </div>
 
-            <div class="chart-area">
+            <div class="chart-area focus-mode">
               <!-- Lineas de Fondo (Grid) -->
               <div class="chart-grid">
                 <div v-for="n in 5" :key="n" class="grid-line"></div>
@@ -91,13 +91,13 @@
                     <div class="bar-g" :style="{ height: getBarHeight(item.totalGanancia, maxChartVal) + '%' }"></div>
                   </div>
                   <div class="bar-footer">
-                    <strong>{{ item.dia }}</strong>
-                    <small>{{ item.fecha }}</small>
+                    <strong class="f-main">{{ item.dia }}</strong>
+                    <small class="f-sub">{{ item.fecha }}</small>
                   </div>
                 </div>
               </div>
 
-              <!-- VISTA MENSUAL (LÍNEAS) -->
+              <!-- VISTA MENSUAL (LÍNEAS) - REORDENADO ETIQUETAS DEBAJO -->
               <div v-else class="chart-canvas line-mode animate-fade-in">
                  <div class="line-container">
                    <svg class="line-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
@@ -105,15 +105,19 @@
                      <path :d="createLinePath(graficoMensual, 'totalGanancia')" class="l-g" />
                    </svg>
                    <div v-for="(item, idx) in graficoMensual" :key="item.semana" class="line-node-unit" :style="{ left: (idx * (100 / (graficoMensual.length - 1))) + '%' }">
-                     <div class="node-labels">
-                       <span class="v-t">S/ {{ formatMoney(item.totalVentas) }}</span>
-                       <span class="g-t">S/ {{ formatMoney(item.totalGanancia) }}</span>
+                     <!-- ETIQUETAS SOBRE NODOS (DINÁMICAS) -->
+                     <div class="node-data-top">
+                       <span class="v-tag-v2">S/ {{ formatMoney(item.totalVentas) }}</span>
+                       <span class="g-tag-v2">S/ {{ formatMoney(item.totalGanancia) }}</span>
                      </div>
-                     <div class="point-v"></div>
-                     <div class="point-g"></div>
-                     <div class="line-footer">
-                       <strong>{{ item.semana }}</strong>
-                       <small>{{ item.rango }}</small>
+                     
+                     <div class="point-v" :style="{ bottom: getBarHeight(item.totalVentas, maxChartVal) + '%' }"></div>
+                     <div class="point-g" :style="{ bottom: getBarHeight(item.totalGanancia, maxChartVal) + '%' }"></div>
+
+                     <!-- ETIQUETAS DEBAJO (ORDENADITO) -->
+                     <div class="node-footer-v2">
+                       <strong class="f-main">{{ item.semana }}</strong>
+                       <small class="f-sub">{{ item.rango }}</small>
                      </div>
                    </div>
                  </div>
@@ -127,7 +131,7 @@
           <div class="card ranking-full">
             <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
             <div class="top-list">
-              <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-row animate-pop-in">
+              <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-row animate-pop-in" :style="{ animationDelay: (i*0.1)+'s' }">
                 <div class="top-number" :class="'nr-'+i">{{ i + 1 }}</div>
                 <div class="top-info">
                   <p class="p-name-full">{{ p.nombre }}</p>
@@ -196,7 +200,7 @@ const yAxisLevels = computed(() => {
   return [max, max * 0.75, max * 0.5, max * 0.25, 0];
 });
 
-const getBarHeight = (val, max) => Math.max((val / max) * 100, 3);
+const getBarHeight = (val, max) => Math.min((val / max) * 100, 100);
 const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 
 const createLinePath = (data, key) => {
@@ -214,6 +218,7 @@ onMounted(cargar);
 </script>
 
 <style scoped>
+/* REUSO DE ESTILOS CORPORATIVOS */
 .dash-container { padding: 1.5rem; max-width: 1550px; margin: 0 auto; color: #2D3748; }
 
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
@@ -221,7 +226,7 @@ onMounted(cargar);
 .period-switcher { background: #EDF2F7; padding: 4px; border-radius: 12px; display: flex; }
 .period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; font-weight: 800; color: #718096; }
 .period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-.refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; margin-left: 1rem; }
+.refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; }
 
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
 .kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); }
@@ -230,10 +235,10 @@ onMounted(cargar);
 .k3 { background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%); }
 .k4 { background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%); }
 .kpi-icon-wrap { font-size: 1.6rem; background: rgba(255,255,255,0.15); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-.kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; border: none; }
+.kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; }
 .kpi-value { font-size: 1.35rem; font-weight: 900; margin: 0; }
 
-.main-layout { display: grid; grid-template-columns: 1fr 420px; gap: 1.5rem; align-items: start; }
+.main-layout { display: grid; grid-template-columns: 1fr 420px; gap: 1.5rem; align-items: stretch; }
 .card { background: white; border-radius: 28px; border: 1px solid #EDF2F7; box-shadow: 0 4px 25px rgba(0,0,0,0.03); }
 
 /* SECCIÓN GRÁFICO AVANZADO */
@@ -242,11 +247,11 @@ onMounted(cargar);
 .card-title-v2 { font-size: 1.15rem; font-weight: 900; }
 .chart-legend { display: flex; gap: 1rem; }
 .leg-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 800; color: #A0AEC0; }
-.dot-v { width: 9px; height: 9px; background: #E2E8F0; border-radius: 50%; }
+.dot-v { width: 9px; height: 9px; background: #CBD5E0; border-radius: 50%; opacity: 0.6; }
 .dot-g { width: 9px; height: 9px; background: #68D391; border-radius: 50%; }
 
 .chart-wrapper { display: flex; gap: 1.5rem; height: 380px; position: relative; }
-.axis-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.6rem; font-weight: 800; color: #CBD5E0; text-align: right; width: 70px; padding-bottom: 60px; }
+.axis-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.65rem; font-weight: 900; color: #A0AEC0; text-align: right; width: 80px; padding-bottom: 85px; }
 
 .chart-area { flex: 1; position: relative; }
 .chart-grid { position: absolute; top: 0; left: 0; width: 100%; height: 320px; display: flex; flex-direction: column; justify-content: space-between; z-index: 1; }
@@ -256,51 +261,48 @@ onMounted(cargar);
 
 /* BARRAS */
 .grid-mode { align-items: flex-end; justify-content: space-around; padding-top: 40px; }
-.bar-unit { flex: 1; display: flex; flex-direction: column; align-items: center; height: 320px; position: relative; }
-.bar-labels { position: absolute; top: -45px; display: flex; flex-direction: column; align-items: center; }
-.v-val { font-size: 0.65rem; font-weight: 900; color: #718096; background: #EDF2F7; padding: 2px 6px; border-radius: 4px; }
-.g-val { font-size: 0.65rem; font-weight: 900; color: #38A169; }
+.bar-unit { flex: 1; display: flex; flex-direction: column; align-items: center; height: 320px; position: relative; border-radius: 12px; }
+.bar-labels { position: absolute; top: -50px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.v-val { font-size: 0.6rem; font-weight: 900; color: #4A5568; background: #EDF2F7; padding: 2px 5px; border-radius: 4px; }
+.g-val { font-size: 0.6rem; font-weight: 900; color: #38A169; }
 .bar-pair { display: flex; align-items: flex-end; gap: 6px; height: 100%; }
-.bar-v { width: 24px; background: #E2E8F0; border-radius: 8px 8px 0 0; transition: height 1s; }
-.bar-g { width: 15px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
-.bar-footer { margin-top: 1.2rem; display: flex; flex-direction: column; align-items: center; }
-.bar-footer strong { font-size: 0.75rem; text-transform: capitalize; color: #4A5568; }
-.bar-footer small { font-size: 0.6rem; color: #CBD5E0; font-weight: 800; }
+.bar-v { width: 22px; background: #CBD5E0; border-radius: 8px 8px 0 0; transition: height 1s; opacity: 0.4; }
+.bar-g { width: 14px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
 
-/* LÍNEAS */
+/* LÍNEAS - REDISEÑO TOTAL (ETIQUETAS ABAJO) */
 .line-mode { padding: 40px 10px; }
 .line-container { width: 100%; height: 100%; position: relative; }
-.line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 260px; overflow: visible; z-index: 1; }
-.l-v { fill: none; stroke: #CBD5E0; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
-.l-g { fill: none; stroke: #68D391; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 260px; overflow: visible; z-index: 1; pointer-events: none; }
+.l-v { fill: none; stroke: #CBD5E0; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; }
+.l-g { fill: none; stroke: #68D391; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+
 .line-node-unit { position: absolute; top: 0; height: 320px; display: flex; flex-direction: column; align-items: center; z-index: 2; pointer-events: none; }
-.point-v { width: 12px; height: 12px; border-radius: 50%; background: white; border: 4px solid #CBD5E0; position: absolute; bottom: 120px; }
-.point-g { width: 12px; height: 12px; border-radius: 50%; background: white; border: 4px solid #68D391; position: absolute; bottom: 80px; }
-.node-labels { position: absolute; top: -35px; display: flex; flex-direction: column; align-items: center; }
-.v-t { font-size: 0.6rem; font-weight: 900; color: #718096; background: #F7FAFC; padding: 2px 6px; border-radius: 4px; }
-.g-t { font-size: 0.6rem; font-weight: 900; color: #38A169; }
+.node-data-top { position: absolute; top: -50px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.v-tag-v2 { font-size: 0.6rem; font-weight: 900; color: #718096; background: #F7FAFC; padding: 1px 5px; border-radius: 4px; border: 1px solid #EDF2F7; }
+.g-tag-v2 { font-size: 0.6rem; font-weight: 900; color: #38A169; }
 
-/* SECCIÓN RANKING (NOMBRES COMPLETOS) */
-.sidebar { display: flex; flex-direction: column; height: 100%; }
-.ranking-full { padding: 1.5rem; background: #F8FAFC; flex: 1; }
-.top-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
-.top-row { display: flex; gap: 1rem; background: white; padding: 1.25rem; border-radius: 20px; border: 1px solid #EDF2F7; box-shadow: 0 4px 15px rgba(0,0,0,0.02); align-items: center; }
-.top-number { width: 30px; height: 30px; min-width: 30px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; border-radius: 10px; background: #CBD5E0; font-size: 0.8rem; }
+.point-v { width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #CBD5E0; position: absolute; pointer-events: auto; }
+.point-v:hover { transform: scale(1.5); box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.point-g { width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #68D391; position: absolute; }
+
+/* FOOTERS UNIFICADOS (BARRAS Y LÍNEAS) */
+.bar-footer, .node-footer-v2 { position: absolute; bottom: -85px; display: flex; flex-direction: column; align-items: center; text-align: center; width: 120px; z-index: 5; }
+.f-main { font-size: 0.75rem; font-weight: 900; color: #1A202C; text-transform: capitalize; margin-bottom: 2px; }
+.f-sub { font-size: 0.65rem; font-weight: 800; color: #A0AEC0; white-space: nowrap; }
+
+/* SECCIÓN RANKING */
+.sidebar { display: flex; flex-direction: column; }
+.ranking-full { padding: 1.5rem; background: #F8FAFC; border-radius: 28px; }
+.top-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
+.top-row { display: flex; gap: 1rem; background: white; padding: 1.25rem; border-radius: 22px; border: 1px solid #EDF2F7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); align-items: center; }
+.top-number { width: 30px; height: 30px; min-width: 30px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; border-radius: 12px; background: #CBD5E0; font-size: 0.75rem; }
 .nr-0 { background: #FFD700; box-shadow: 0 4px 10px rgba(255,215,0,0.3); }
-.nr-1 { background: #C0C0C0; }
-.nr-2 { background: #CD7F32; }
-
-.top-info { flex: 1; }
-.p-name-full { font-weight: 800; font-size: 0.95rem; color: #1A202C; margin: 0 0 6px 0; line-height: 1.2; }
-.p-stats { display: flex; gap: 1rem; font-size: 0.7rem; color: #718096; font-weight: 700; }
-
-/* ANIMACIONES */
-.animate-fade-in { animation: fadeIn 0.5s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.animate-pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.p-name-full { font-weight: 900; font-size: 0.9rem; color: #1A202C; margin: 0 0 4px 0; }
+.p-stats { display: flex; gap: 0.8rem; font-size: 0.7rem; color: #718096; font-weight: 800; }
 
 .loading-full { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10rem 0; }
-.spinner-big { width: 50px; height: 50px; border: 5px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; }
+.spinner-big { width: 50px; height: 50px; border: 4px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.animate-fade-in { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
