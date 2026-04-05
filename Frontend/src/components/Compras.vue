@@ -252,7 +252,12 @@
 
             <div class="form-group" style="grid-column: span 2;">
               <label>Fotografía (Opcional)</label>
-              <input type="file" @change="onFileChangeProd" accept="image/*" style="padding: 0.6rem; cursor: pointer;" />
+              <!-- Contenedor de Vista Previa -->
+              <div v-if="previewUrl" class="image-preview-container">
+                <img :src="previewUrl" alt="Vista previa del producto" />
+                <button type="button" class="remove-btn-preview" @click="limpiarFoto">✕</button>
+              </div>
+              <input type="file" @change="onFileChangeProd" accept="image/*" style="padding: 0.6rem; cursor: pointer; width: 100%; border: 1.5px dashed #CBD5E0;" />
             </div>
           </div>
 
@@ -524,14 +529,24 @@ const mostrarModalProducto = ref(false)
 const guardandoProd = ref(false)
 const errorModalProd = ref('')
 const archivoProd = ref(null)
-const nuevoProd = ref({
-  codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
-  precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
-  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
-})
+const previewUrl = ref(null) // <-- Variable para la vista previa en Base64
 
 const onFileChangeProd = (e) => {
-  archivoProd.value = e.target.files[0]
+  const file = e.target.files[0]
+  if (!file) return
+  archivoProd.value = file
+
+  // Generar vista previa con FileReader (Base64)
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    previewUrl.value = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const limpiarFoto = () => {
+  archivoProd.value = null
+  previewUrl.value = null
 }
 
 const abrirModalProducto = () => {
@@ -541,6 +556,7 @@ const abrirModalProducto = () => {
   }
   errorModalProd.value = ''
   archivoProd.value = null
+  previewUrl.value = null // Reiniciar vista previa al abrir el modal
   nuevoProd.value = {
     codigo: '', nombre: '', descripcion: '', proveedorID: compraHeader.value.proveedorID,
     unidadMedida: 'UND', precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
@@ -799,6 +815,28 @@ const registrarCompra = async () => {
 .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .cancel-btn { background-color: transparent; color: #4A5568; border: 1px solid #CBD5E0; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
 .cancel-btn:hover { background-color: #F7FAFC; }
+
+/* NUEVOS ESTILOS PARA VISTA PREVIA */
+.image-preview-container { 
+  width: 100%; 
+  max-width: 300px; 
+  height: 200px; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  border: 2px solid #F6AD55; 
+  position: relative; 
+  margin-bottom: 10px; 
+  background-color: #F7FAFC; 
+}
+.image-preview-container img { width: 100%; height: 100%; object-fit: cover; }
+.remove-btn-preview { 
+  position: absolute; top: 5px; right: 5px; 
+  background: rgba(229, 62, 62, 0.9); color: white; 
+  border: none; border-radius: 50%; width: 25px; height: 25px; 
+  cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;
+}
+.remove-btn-preview:hover { background: #E53E3E; transform: scale(1.1); }
+
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
 
