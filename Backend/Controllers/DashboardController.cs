@@ -26,30 +26,22 @@ namespace VidaAnimal.API.Controllers
                 var mesActual = hoy.Month;
                 var anioActual = hoy.Year;
 
-                // 1. Estadísticas COHERENTES (Usando directamente la cabecera Ventas para el Total)
-                var ventasFiltradas = await _context.Ventas
-                    .Where(v => v.Estado == "Completada")
-                    .ToListAsync();
-
-                // Ventas de Hoy
-                var ventasHoyTotal = ventasFiltradas.Where(v => v.Fecha.Date == hoy.Date).Sum(v => v.Total);
-
-                // Ventas del Mes
-                var ventasMesTotal = ventasFiltradas.Where(v => v.Fecha.Month == mesActual && v.Fecha.Year == anioActual).Sum(v => v.Total);
-
-                // Ventas Históricas
-                var ventasHistoricas = ventasFiltradas.Sum(v => v.Total);
-
-                // 2. Ganancias (Necesitamos los detalles para esto)
-                var detallesFiltrados = await _context.VentaDetalles
+                // 1. Estadísticas BASADAS EN DETALLES (Subtotales aislados para margen exacto)
+                var todosLosDetalles = await _context.VentaDetalles
                     .Include(d => d.Venta)
                     .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
                     .ToListAsync();
 
-                var gananciaHoy = detallesFiltrados.Where(d => d.Venta.Fecha.Date == hoy.Date).Sum(d => (decimal?)d.Ganancia) ?? 0;
-                var gananciaTotal = detallesFiltrados.Sum(d => (decimal?)d.Ganancia) ?? 0;
+                // Totales de Hoy
+                var detallesHoy = todosLosDetalles.Where(d => d.Venta.Fecha.Date == hoy.Date).ToList();
+                var ventasHoy = detallesHoy.Sum(d => d.SubTotal);
+                var gananciaHoy = detallesHoy.Sum(d => (decimal?)d.Ganancia) ?? 0;
 
-                // 3. Gráfico Semanal (L-D)
+                // Totales Históricos
+                var ventasHistoricas = todosLosDetalles.Sum(d => d.SubTotal);
+                var gananciaHistorica = todosLosDetalles.Sum(d => (decimal?)d.Ganancia) ?? 0;
+
+                // 2. Gráfico Semanal (L-D)
                 var graficoVentas = new List<object>();
                 var inicioSemana = hoy.AddDays(-(int)hoy.DayOfWeek + (int)DayOfWeek.Monday);
                 if (hoy.DayOfWeek == DayOfWeek.Sunday) inicioSemana = hoy.AddDays(-6);
@@ -57,28 +49,48 @@ namespace VidaAnimal.API.Controllers
                 for (int i = 0; i < 7; i++)
                 {
                     var fecha = inicioSemana.AddDays(i);
-                    var vDia = ventasFiltradas.Where(v => v.Fecha.Date == fecha.Date).Sum(v => v.Total);
-                    var gDia = detallesFiltrados.Where(d => d.Venta.Fecha.Date == fecha.Date).Sum(d => (decimal?)d.Ganancia) ?? 0;
-
+                    var dataDia = todosLosDetalles.Where(v => v.Venta.Fecha.Date == fecha.Date).ToList();
                     graficoVentas.Add(new {
                         dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
                         fecha = fecha.ToString("dd/MM"),
-                        totalVentas = vDia,
-                        totalGanancia = gDia
+                        totalVentas = dataDia.Sum(v => v.SubTotal),
+                        totalGanancia = dataDia.Sum(v => (decimal?)v.Ganancia) ?? 0
+                    });
+                }
+
+                // 3. Gráfico Mensual
+                var graficoMensual = new List<object>();
+                var inicioMes = new DateTime(anioActual, mesActual, 1);
+                var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    var sInicio = inicioMes.AddDays(i * 7);
+                    if (sInicio > finMes) break;
+                    var sFin = sInicio.AddDays(6);
+                    if (sFin > finMes) sFin = finMes;
+
+                    var dataSemana = todosLosDetalles.Where(v => v.Venta.Fecha.Date >= sInicio.Date && v.Venta.Fecha.Date <= sFin.Date).ToList();
+                    graficoMensual.Add(new {
+                        semana = $"S{i + 1}",
+                        rango = $"{sInicio:dd/MM}-{sFin:dd/MM}",
+                        totalVentas = dataSemana.Sum(v => v.SubTotal),
+                        totalGanancia = dataSemana.Sum(v => (decimal?)v.Ganancia) ?? 0
                     });
                 }
 
                 return Ok(new {
                     success = true,
                     stats = new {
-                        ventasHoy = ventasHoyTotal,
+                        ventasHoy,
                         gananciaHoy,
-                        ventasSemana = ventasFiltradas.Where(v => v.Fecha >= inicioSemana && v.Fecha <= inicioSemana.AddDays(6)).Sum(v => v.Total),
-                        gananciaSemana = detallesFiltrados.Where(d => d.Venta.Fecha >= inicioSemana && d.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(d => (decimal?)d.Ganancia) ?? 0,
+                        ventasSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => v.SubTotal),
+                        gananciaSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => (decimal?)v.Ganancia) ?? 0,
                         ventasMes = ventasHistoricas,
-                        gananciaMes = gananciaTotal
+                        gananciaMes = gananciaHistorica
                     },
                     graficoSemanal = graficoVentas,
+                    graficoMensual,
                     stockBajo = await _context.Productos.Where(p => p.Activo && p.StockActual <= p.StockMinimo).OrderBy(p => p.StockActual).Take(5)
                         .Select(p => new { p.Nombre, p.StockActual, p.UnidadMedida }).ToListAsync()
                 });
