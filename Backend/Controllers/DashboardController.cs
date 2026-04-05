@@ -37,7 +37,7 @@ namespace VidaAnimal.API.Controllers
                 var ventasHoy = detallesHoy.Sum(d => d.SubTotal);
                 var gananciaHoy = detallesHoy.Sum(d => (decimal?)d.Ganancia) ?? 0;
 
-                // Ventas y Ganancias de TODO EL TIEMPO (Históricas no anuladas)
+                // Ventas y Ganancias de TODO EL TIEMPO
                 var ventasHistoricas = todosLosDetalles.Sum(d => d.SubTotal);
                 var gananciaHistorica = todosLosDetalles.Sum(d => (decimal?)d.Ganancia) ?? 0;
 
@@ -58,7 +58,7 @@ namespace VidaAnimal.API.Controllers
                     });
                 }
 
-                // 3. Gráfico Mensual (Semanas del mes actual)
+                // 3. Gráfico Mensual
                 var graficoMensual = new List<object>();
                 var inicioMes = new DateTime(anioActual, mesActual, 1);
                 var finMes = inicioMes.AddMonths(1).AddDays(-1);
@@ -75,7 +75,7 @@ namespace VidaAnimal.API.Controllers
                         semana = $"S{i + 1}",
                         rango = $"{sInicio:dd/MM}-{sFin:dd/MM}",
                         totalVentas = dataSemana.Sum(v => v.SubTotal),
-                        totalGanancia = dataSemana.Sum(v => (decimal?)d.Ganancia) ?? 0
+                        totalGanancia = dataSemana.Sum(v => (decimal?)v.Ganancia) ?? 0
                     });
                 }
 
@@ -86,7 +86,7 @@ namespace VidaAnimal.API.Controllers
                         gananciaHoy,
                         ventasSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => v.SubTotal),
                         gananciaSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => (decimal?)v.Ganancia) ?? 0,
-                        ventasMes = ventasHistoricas, // Mostramos el historial completo
+                        ventasMes = ventasHistoricas,
                         gananciaMes = gananciaHistorica
                     },
                     graficoSemanal = graficoVentas,
