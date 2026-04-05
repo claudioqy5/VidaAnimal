@@ -73,7 +73,35 @@ namespace VidaAnimal.API.Controllers
                 });
             }
 
-            // 3. Stock Bajo
+            // 3. Gráfico Mensual (Agrupado por Semanas)
+            var graficoMensual = new List<object>();
+            var inicioMes = new DateTime(anioActual, mesActual, 1);
+            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
+            var ventasMensualesRaw = await _context.VentaDetalles
+                .Where(d => d.Venta != null && d.Venta.Fecha >= inicioMes && d.Venta.Fecha <= finMes && d.Venta.Estado != "Anulada")
+                .Select(d => new { d.Venta.Fecha, d.SubTotal, d.Ganancia })
+                .ToListAsync();
+
+            // Agrupamos por semana (aprox 4-5 semanas)
+            for (int i = 0; i < 5; i++)
+            {
+                var sInicio = inicioMes.AddDays(i * 7);
+                if (sInicio > finMes) break;
+                var sFin = sInicio.AddDays(6);
+                if (sFin > finMes) sFin = finMes;
+
+                var dataSemana = ventasMensualesRaw.Where(v => v.Fecha.Date >= sInicio.Date && v.Fecha.Date <= sFin.Date).ToList();
+                graficoMensual.Add(new
+                {
+                    semana = $"S{i + 1}",
+                    rango = $"{sInicio:dd/MM}-{sFin:dd/MM}",
+                    totalVentas = dataSemana.Sum(v => v.SubTotal),
+                    totalGanancia = dataSemana.Sum(v => (decimal?)v.Ganancia) ?? 0
+                });
+            }
+
+            // 4. Stock Bajo
             var stockBajo = await _context.Productos
                 .Where(p => p.Activo && p.StockActual <= p.StockMinimo)
                 .OrderBy(p => p.StockActual)
@@ -92,6 +120,7 @@ namespace VidaAnimal.API.Controllers
                     gananciaMes
                 },
                 graficoSemanal = graficoVentas,
+                graficoMensual,
                 stockBajo
             });
         }

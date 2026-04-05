@@ -54,26 +54,30 @@
       </div>
 
       <div class="main-grid">
-        <!-- GRÁFICO SEMANAL (LUNES A DOMINGO) -->
+        <!-- GRÁFICO (SEMANAL / MENSUAL) -->
         <div class="card chart-card">
           <div class="card-header">
-            <h2 class="card-title">📅 Rendimiento Semanal (L-D)</h2>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <h2 class="card-title">📅 Rendimiento {{ periodo === 'semana' ? 'Semanal (L-D)' : 'Mensual (Por Semanas)' }}</h2>
+              <div class="period-switcher">
+                <button :class="{ active: periodo === 'semana' }" @click="periodo = 'semana'">Semanal</button>
+                <button :class="{ active: periodo === 'mes' }" @click="periodo = 'mes'">Mensual</button>
+              </div>
+            </div>
             <div class="chart-legend">
               <span class="leg-item"><i class="dot-v"></i> Ventas</span>
               <span class="leg-item"><i class="dot-g"></i> Utilidad</span>
             </div>
           </div>
           <div class="weekly-bars-container">
-            <div v-for="dia in graficoSemanal" :key="dia.dia" class="bar-column">
+            <div v-for="item in currentChartData" :key="item.dia || item.semana" class="bar-column">
               <div class="bar-stack">
-                <!-- Barra de Ventas -->
-                <div class="bar-v" :style="{ height: getBarHeight(dia.totalVentas, maxVenta) + '%' }" :title="'Ventas: S/ ' + dia.totalVentas"></div>
-                <!-- Barra de Ganancia -->
-                <div class="bar-g" :style="{ height: getBarHeight(dia.totalGanancia, maxVenta) + '%' }" :title="'Ganancia: S/ ' + dia.totalGanancia"></div>
+                <div class="bar-v" :style="{ height: getBarHeight(item.totalVentas, maxChartVal) + '%' }" :title="'Ventas: S/ ' + item.totalVentas"></div>
+                <div class="bar-g" :style="{ height: getBarHeight(item.totalGanancia, maxChartVal) + '%' }" :title="'Ganancia: S/ ' + item.totalGanancia"></div>
               </div>
               <div class="bar-info">
-                <span class="dia-name">{{ dia.dia }}</span>
-                <span class="dia-date">{{ dia.fecha }}</span>
+                <span class="dia-name">{{ item.dia || item.semana }}</span>
+                <span class="dia-date text-truncate">{{ item.fecha || item.rango }}</span>
               </div>
             </div>
           </div>
@@ -108,8 +112,10 @@ import { ref, onMounted, computed } from 'vue';
 
 const stats = ref({ ventasHoy: 0, gananciaHoy: 0, ventasMes: 0, gananciaMes: 0 });
 const graficoSemanal = ref([]);
+const graficoMensual = ref([]);
 const stockBajo = ref([]);
 const loading = ref(true);
+const periodo = ref('semana'); // 'semana' o 'mes'
 
 const getToken = () => localStorage.getItem('jwt_token');
 
@@ -123,6 +129,7 @@ const cargar = async () => {
     if (data.success) {
       stats.value = data.stats;
       graficoSemanal.value = data.graficoSemanal;
+      graficoMensual.value = data.graficoMensual;
       stockBajo.value = data.stockBajo;
     }
   } catch (e) {
@@ -132,8 +139,12 @@ const cargar = async () => {
   }
 };
 
-const maxVenta = computed(() => {
-  const vals = graficoSemanal.value.map(d => d.totalVentas);
+const currentChartData = computed(() => {
+  return periodo.value === 'semana' ? graficoSemanal.value : graficoMensual.value;
+});
+
+const maxChartVal = computed(() => {
+  const vals = currentChartData.value.map(d => d.totalVentas);
   return Math.max(...vals, 1);
 });
 
@@ -157,6 +168,11 @@ onMounted(cargar);
 
 .refresh-btn { background: #EDF2F7; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: #4A5568; }
 .refresh-btn:hover { background: #E2E8F0; }
+
+/* Period Switcher */
+.period-switcher { display: flex; background: #F7FAFC; padding: 4px; border-radius: 14px; border: 1px solid #E2E8F0; width: fit-content; }
+.period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 10px; font-size: 0.85rem; font-weight: 800; color: #718096; cursor: pointer; transition: all 0.2s; }
+.period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
 /* KPI Cards Premium */
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; }
@@ -192,7 +208,8 @@ onMounted(cargar);
 .bar-g { width: 20px; background: #68D391; border-radius: 12px 12px 0 0; transition: height 1s 0.2s cubic-bezier(0.16, 1, 0.3, 1); border: 1.5px solid #48BB78; }
 .bar-info { text-align: center; }
 .dia-name { display: block; font-size: 0.85rem; font-weight: 800; }
-.dia-date { font-size: 0.75rem; color: #A0AEC0; font-weight: 600; }
+.dia-date { font-size: 0.7rem; color: #A0AEC0; font-weight: 600; display: block; }
+.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60px; }
 
 /* Stock List */
 .stock-list { display: flex; flex-direction: column; gap: 1.25rem; }
