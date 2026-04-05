@@ -90,6 +90,20 @@
 
         <!-- COLUMNA DERECHA: FLUJO & INVENTARIO -->
         <div class="right-col">
+
+          <!-- FLUJO DE VENTAS -->
+          <div class="card flow-card">
+             <h3 class="card-title">🕒 Flujo de Ventas (Hoy)</h3>
+             <div v-if="!hasHourlyData" class="empty-state">Esperando primera venta para trazar curva...</div>
+             <div v-else class="chart-hourly-v2">
+                <div v-for="h in hourlyChart" :key="h.hora" class="hour-unit">
+                   <div class="hour-bar" :style="{ height: (h.total / maxHourlyTotal * 100) + '%' }">
+                      <span class="hour-pop">S/ {{ h.total }}</span>
+                   </div>
+                   <span class="hour-label">{{ h.hora }}h</span>
+                </div>
+             </div>
+          </div>
           
           <!-- ATENCIÓN DE INVENTARIO (VERTICAL ELEGANTE) -->
           <div class="card inventory-alert">
@@ -115,21 +129,7 @@
               </div>
               <div v-if="stockBajo.length === 0" class="empty-state">✅ Todo en orden</div>
             </div>
-          </div>
-
-          <!-- FLUJO DE VENTAS -->
-          <div class="card flow-card">
-             <h3 class="card-title">🕒 Flujo de Ventas (Hoy)</h3>
-             <div v-if="!hasHourlyData" class="empty-state">Esperando primera venta para trazar curva...</div>
-             <div v-else class="chart-hourly-v2">
-                <div v-for="h in hourlyChart" :key="h.hora" class="hour-unit">
-                   <div class="hour-bar" :style="{ height: (h.total / maxHourlyTotal * 100) + '%' }">
-                      <span class="hour-pop">S/ {{ h.total }}</span>
-                   </div>
-                   <span class="hour-label">{{ h.hora }}h</span>
-                </div>
-             </div>
-          </div>
+          </div>         
 
         </div>
 
