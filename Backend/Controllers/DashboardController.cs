@@ -26,10 +26,10 @@ namespace VidaAnimal.API.Controllers
                 var mesActual = hoy.Month;
                 var anioActual = hoy.Year;
 
-                // 1. Estadísticas HISTÓRICAS (Todas las que no estén ANULADAS)
+                // 1. Estadísticas ESTRICTAS (Solo ventas COMPLETADA)
                 var todosLosDetalles = await _context.VentaDetalles
                     .Include(d => d.Venta)
-                    .Where(d => d.Venta != null && d.Venta.Estado != "Anulada")
+                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
                     .ToListAsync();
 
                 // Ventas y Ganancias de Hoy
@@ -37,9 +37,9 @@ namespace VidaAnimal.API.Controllers
                 var ventasHoy = detallesHoy.Sum(d => d.SubTotal);
                 var gananciaHoy = detallesHoy.Sum(d => (decimal?)d.Ganancia) ?? 0;
 
-                // Ventas y Ganancias de TODO EL TIEMPO
-                var ventasHistoricas = todosLosDetalles.Sum(d => d.SubTotal);
-                var gananciaHistorica = todosLosDetalles.Sum(d => (decimal?)d.Ganancia) ?? 0;
+                // Ventas y Ganancias Totales (Sincronizado con base de datos real)
+                var ventasTotales = todosLosDetalles.Sum(d => d.SubTotal);
+                var gananciaTotal = todosLosDetalles.Sum(d => (decimal?)d.Ganancia) ?? 0;
 
                 // 2. Gráfico Semanal (L-D)
                 var graficoVentas = new List<object>();
@@ -58,7 +58,7 @@ namespace VidaAnimal.API.Controllers
                     });
                 }
 
-                // 3. Gráfico Mensual
+                // 3. Gráfico Mensual (Semanas del mes actual)
                 var graficoMensual = new List<object>();
                 var inicioMes = new DateTime(anioActual, mesActual, 1);
                 var finMes = inicioMes.AddMonths(1).AddDays(-1);
@@ -86,8 +86,8 @@ namespace VidaAnimal.API.Controllers
                         gananciaHoy,
                         ventasSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => v.SubTotal),
                         gananciaSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => (decimal?)v.Ganancia) ?? 0,
-                        ventasMes = ventasHistoricas,
-                        gananciaMes = gananciaHistorica
+                        ventasMes = ventasTotales, 
+                        gananciaMes = gananciaTotal
                     },
                     graficoSemanal = graficoVentas,
                     graficoMensual,
