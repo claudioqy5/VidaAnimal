@@ -1,32 +1,28 @@
 <template>
   <div class="dash-container animate-fade-in">
 
-    <!-- HEADER SECCIÓN -->
+    <!-- HEADER -->
     <div class="page-header">
       <div>
         <h1 class="page-title">📊 Inteligencia de Negocio</h1>
-        <p class="page-subtitle">Rendimiento estratégico del punto de venta</p>
+        <p class="page-subtitle">Analítica avanzada de rendimiento y rentabilidad</p>
       </div>
       <div class="header-actions">
         <div class="period-switcher">
-          <button :class="{ active: periodo === 'semana' }" @click="periodo = 'semana'">Semana</button>
+          <button :class="{ active: periodo === 'semana' }" @click="periodo = 'semana'">Semanal</button>
           <button :class="{ active: periodo === 'mes' }" @click="periodo = 'mes'">Mensual</button>
         </div>
-        <button class="refresh-btn" @click="cargar" :disabled="loading">
-          <span v-if="loading" class="spinner-small"></span>
-          <span v-else>🔄</span>
-        </button>
+        <button class="refresh-btn" @click="cargar" :disabled="loading">🔄</button>
       </div>
     </div>
 
-    <!-- PANELES DE CARGA -->
     <div v-if="loading" class="loading-full">
       <div class="spinner-big"></div>
       <p>Procesando métricas...</p>
     </div>
 
     <template v-else>
-      <!-- KPIs DINÁMICOS -->
+      <!-- KPIs SUPERIORES -->
       <div class="kpi-grid">
         <div class="kpi-card glass k1">
           <div class="kpi-icon-wrap">💵</div>
@@ -45,23 +41,23 @@
         <div class="kpi-card glass k3">
           <div class="kpi-icon-wrap">ATM</div>
           <div class="kpi-body">
-            <p class="kpi-label">Utilidad de Hoy</p>
+            <p class="kpi-label">Utilidad Real Hoy</p>
             <p class="kpi-value">S/ {{ formatMoney(stats.gananciaHoy) }}</p>
           </div>
         </div>
         <div class="kpi-card glass k4">
           <div class="kpi-icon-wrap">💎</div>
           <div class="kpi-body">
-            <p class="kpi-label">Ventas Totales (Historial No Anulado)</p>
+            <p class="kpi-label">Total Histórico</p>
             <p class="kpi-value">S/ {{ formatMoney(stats.ventasMes) }}</p>
           </div>
         </div>
       </div>
 
-      <!-- MAIN CONTENT -->
+      <!-- GRID PRINCIPAL -->
       <div class="main-layout">
         
-        <!-- COLUMNA IZQUIERDA: GRÁFICO PERSONALIZADO -->
+        <!-- SECCIÓN GRÁFICO (Eje Y + Grid Lineas) -->
         <div class="card chart-section">
           <div class="card-header-v2">
             <h2 class="card-title-v2">📈 Fluctuación del Rendimiento</h2>
@@ -71,64 +67,77 @@
             </div>
           </div>
           
-          <!-- VISTA SEMANAL (BARRAS) -->
-          <div v-if="periodo === 'semana'" class="chart-canvas-v2 bars-mode animate-fade-in">
-            <div v-for="item in graficoSemanal" :key="item.dia" class="bar-unit">
-              <div class="bar-labels-top">
-                <span class="v-val">S/ {{ formatMoney(item.totalVentas) }}</span>
-                <span class="g-val">S/ {{ formatMoney(item.totalGanancia) }}</span>
+          <div class="chart-wrapper">
+            <!-- Eje Y Referencial -->
+            <div class="axis-y">
+              <span v-for="val in yAxisLevels" :key="val">S/ {{ formatMoney(val) }}</span>
+            </div>
+
+            <div class="chart-area">
+              <!-- Lineas de Fondo (Grid) -->
+              <div class="chart-grid">
+                <div v-for="n in 5" :key="n" class="grid-line"></div>
               </div>
-              <div class="bar-pair">
-                <div class="bar-v-v2" :style="{ height: getBarHeight(item.totalVentas, maxChartVal) + '%' }"></div>
-                <div class="bar-g-v2" :style="{ height: getBarHeight(item.totalGanancia, maxChartVal) + '%' }"></div>
+
+              <!-- VISTA SEMANAL (BARRAS) -->
+              <div v-if="periodo === 'semana'" class="chart-canvas grid-mode animate-fade-in">
+                <div v-for="item in graficoSemanal" :key="item.dia" class="bar-unit">
+                  <div class="bar-labels">
+                    <span class="v-val">S/ {{ formatMoney(item.totalVentas) }}</span>
+                    <span class="g-val">S/ {{ formatMoney(item.totalGanancia) }}</span>
+                  </div>
+                  <div class="bar-pair">
+                    <div class="bar-v" :style="{ height: getBarHeight(item.totalVentas, maxChartVal) + '%' }"></div>
+                    <div class="bar-g" :style="{ height: getBarHeight(item.totalGanancia, maxChartVal) + '%' }"></div>
+                  </div>
+                  <div class="bar-footer">
+                    <strong>{{ item.dia }}</strong>
+                    <small>{{ item.fecha }}</small>
+                  </div>
+                </div>
               </div>
-              <div class="bar-bottom-info">
-                <strong class="b-main-label">{{ item.dia }}</strong>
-                <span class="b-sub-label">{{ item.fecha }}</span>
+
+              <!-- VISTA MENSUAL (LÍNEAS) -->
+              <div v-else class="chart-canvas line-mode animate-fade-in">
+                 <div class="line-container">
+                   <svg class="line-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
+                     <path :d="createLinePath(graficoMensual, 'totalVentas')" class="l-v" />
+                     <path :d="createLinePath(graficoMensual, 'totalGanancia')" class="l-g" />
+                   </svg>
+                   <div v-for="(item, idx) in graficoMensual" :key="item.semana" class="line-node-unit" :style="{ left: (idx * (100 / (graficoMensual.length - 1))) + '%' }">
+                     <div class="node-labels">
+                       <span class="v-t">S/ {{ formatMoney(item.totalVentas) }}</span>
+                       <span class="g-t">S/ {{ formatMoney(item.totalGanancia) }}</span>
+                     </div>
+                     <div class="point-v"></div>
+                     <div class="point-g"></div>
+                     <div class="line-footer">
+                       <strong>{{ item.semana }}</strong>
+                       <small>{{ item.rango }}</small>
+                     </div>
+                   </div>
+                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- VISTA MENSUAL (LÍNEAS) -->
-          <div v-else class="chart-canvas-v2 line-mode animate-fade-in">
-             <div class="line-container">
-               <svg class="line-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
-                 <!-- Línea de Venta -->
-                 <path :d="createLinePath(graficoMensual, 'totalVentas')" class="line-v" />
-                 <!-- Línea de Ganancia -->
-                 <path :d="createLinePath(graficoMensual, 'totalGanancia')" class="line-g" />
-               </svg>
-               <div v-for="(item, idx) in graficoMensual" :key="item.semana" class="line-point-unit" :style="{ left: (idx * (100 / (graficoMensual.length - 1))) + '%' }">
-                 <div class="point-labels">
-                   <span class="v-tag">S/ {{ formatMoney(item.totalVentas) }}</span>
-                   <span class="g-tag">S/ {{ formatMoney(item.totalGanancia) }}</span>
-                 </div>
-                 <div class="node-v"></div>
-                 <div class="node-g"></div>
-                 <div class="line-footer">
-                   <strong>{{ item.semana }}</strong>
-                   <small>{{ item.rango }}</small>
-                 </div>
-               </div>
-             </div>
           </div>
         </div>
 
-        <!-- COLUMNA DERECHA: RANKING -->
-        <div class="sidebar-info">
-          <div class="card ranking-card full-height">
-            <div class="card-header-v2">
-              <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
-            </div>
+        <!-- SECCIÓN RANKING (Nombres Completos) -->
+        <div class="sidebar">
+          <div class="card ranking-full">
+            <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
             <div class="top-list">
-              <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-item animate-pop-in" :style="{ animationDelay: (i * 0.1) + 's' }">
-                <div class="top-rank" :class="'rank-'+i">{{ i + 1 }}</div>
-                <div class="top-body">
-                  <p class="top-name">{{ p.nombre }}</p>
-                  <p class="top-meta">Monto: S/ {{ formatMoney(p.totalMonto) }} | Cant: {{ p.totalUnidades }}</p>
+              <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-row animate-pop-in">
+                <div class="top-number" :class="'nr-'+i">{{ i + 1 }}</div>
+                <div class="top-info">
+                  <p class="p-name-full">{{ p.nombre }}</p>
+                  <div class="p-stats">
+                    <span><strong>Monto:</strong> S/ {{ formatMoney(p.totalMonto) }}</span>
+                    <span><strong>Cant:</strong> {{ p.totalUnidades }}</span>
+                  </div>
                 </div>
               </div>
-              <div v-if="currentTop.length === 0" class="empty-state">No se registran ventas para este periodo.</div>
+              <div v-if="currentTop.length === 0" class="empty">Sin ventas registradas.</div>
             </div>
           </div>
         </div>
@@ -146,7 +155,6 @@ const graficoSemanal = ref([]);
 const graficoMensual = ref([]);
 const topSemanal = ref([]);
 const topMensual = ref([]);
-const stockBajo = ref([]);
 const loading = ref(true);
 const periodo = ref('semana');
 
@@ -175,13 +183,17 @@ const periodoLabel = computed(() => periodo.value === 'semana' ? 'Semanal' : 'Me
 const currentStats = computed(() => periodo.value === 'semana' ? 
   { ventas: stats.value.ventasSemana, ganancia: stats.value.gananciaSemana } : 
   { ventas: stats.value.ventasMes, ganancia: stats.value.gananciaMes });
-
 const currentTop = computed(() => periodo.value === 'semana' ? topSemanal.value : topMensual.value);
 
 const maxChartVal = computed(() => {
   const data = periodo.value === 'semana' ? graficoSemanal.value : graficoMensual.value;
-  const vals = data.map(d => d.totalVentas);
+  const vals = data.map(d => Math.max(d.totalVentas, d.totalGanancia));
   return Math.max(...vals, 1);
+});
+
+const yAxisLevels = computed(() => {
+  const max = maxChartVal.value;
+  return [max, max * 0.75, max * 0.5, max * 0.25, 0];
 });
 
 const getBarHeight = (val, max) => Math.max((val / max) * 100, 3);
@@ -202,95 +214,93 @@ onMounted(cargar);
 </script>
 
 <style scoped>
-.dash-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; color: #2D3748; }
+.dash-container { padding: 1.5rem; max-width: 1550px; margin: 0 auto; color: #2D3748; }
 
-/* Header & Switcher */
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .page-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin: 0; }
-.header-actions { display: flex; align-items: center; gap: 1rem; }
 .period-switcher { background: #EDF2F7; padding: 4px; border-radius: 12px; display: flex; }
-.period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; font-weight: 800; color: #718096; transition: 0.2s; }
-.period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-.refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; }
+.period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; font-weight: 800; color: #718096; }
+.period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; margin-left: 1rem; }
 
-/* KPI CARDS */
-.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
-.kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+.kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); }
 .k1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 .k2 { background: linear-gradient(135deg, #48BB78 0%, #38A169 100%); }
 .k3 { background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%); }
 .k4 { background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%); }
-.kpi-icon-wrap { font-size: 1.6rem; background: rgba(255,255,255,0.2); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-.kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; opacity: 0.8; }
-.kpi-value { font-size: 1.3rem; font-weight: 900; margin: 0; }
+.kpi-icon-wrap { font-size: 1.6rem; background: rgba(255,255,255,0.15); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+.kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; border: none; }
+.kpi-value { font-size: 1.35rem; font-weight: 900; margin: 0; }
 
-/* MAIN CONTENT LAYOUT */
-.main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; min-height: 450px; }
-.card { background: white; border-radius: 24px; border: 1px solid #EDF2F7; box-shadow: 0 4px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
-.chart-section { padding: 1.5rem; }
-.card-title-v2 { font-size: 1.1rem; font-weight: 900; margin: 0; color: #2D3748; }
+.main-layout { display: grid; grid-template-columns: 1fr 420px; gap: 1.5rem; align-items: start; }
+.card { background: white; border-radius: 28px; border: 1px solid #EDF2F7; box-shadow: 0 4px 25px rgba(0,0,0,0.03); }
 
-/* Legend */
-.chart-legend { display: flex; gap: 1.2rem; }
-.leg-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 800; color: #A0AEC0; }
-.dot-v { width: 8px; height: 8px; background: #E2E8F0; border-radius: 50%; }
-.dot-g { width: 8px; height: 8px; background: #68D391; border-radius: 50%; }
+/* SECCIÓN GRÁFICO AVANZADO */
+.chart-section { padding: 2rem; }
+.card-header-v2 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+.card-title-v2 { font-size: 1.15rem; font-weight: 900; }
+.chart-legend { display: flex; gap: 1rem; }
+.leg-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 800; color: #A0AEC0; }
+.dot-v { width: 9px; height: 9px; background: #E2E8F0; border-radius: 50%; }
+.dot-g { width: 9px; height: 9px; background: #68D391; border-radius: 50%; }
 
-/* VISTA DE BARRAS (SEMANA) */
-.chart-canvas-v2 { flex: 1; display: flex; position: relative; margin-top: 1rem; }
-.bars-mode { align-items: flex-end; justify-content: space-around; padding-top: 40px; }
-.bar-unit { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; position: relative; }
-.bar-labels-top { position: absolute; top: -45px; display: flex; flex-direction: column; align-items: center; width: 100%; }
-.v-val { font-size: 0.65rem; font-weight: 900; color: #718096; background: #F7FAFC; padding: 2px 6px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.chart-wrapper { display: flex; gap: 1.5rem; height: 380px; position: relative; }
+.axis-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.6rem; font-weight: 800; color: #CBD5E0; text-align: right; width: 70px; padding-bottom: 60px; }
+
+.chart-area { flex: 1; position: relative; }
+.chart-grid { position: absolute; top: 0; left: 0; width: 100%; height: 320px; display: flex; flex-direction: column; justify-content: space-between; z-index: 1; }
+.grid-line { width: 100%; height: 1px; background: #F7FAFC; }
+
+.chart-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; display: flex; }
+
+/* BARRAS */
+.grid-mode { align-items: flex-end; justify-content: space-around; padding-top: 40px; }
+.bar-unit { flex: 1; display: flex; flex-direction: column; align-items: center; height: 320px; position: relative; }
+.bar-labels { position: absolute; top: -45px; display: flex; flex-direction: column; align-items: center; }
+.v-val { font-size: 0.65rem; font-weight: 900; color: #718096; background: #EDF2F7; padding: 2px 6px; border-radius: 4px; }
 .g-val { font-size: 0.65rem; font-weight: 900; color: #38A169; }
-.bar-pair { flex: 1; display: flex; align-items: flex-end; gap: 6px; }
-.bar-v-v2 { width: 22px; background: #E2E8F0; border-radius: 8px 8px 0 0; transition: height 1s; }
-.bar-g-v2 { width: 14px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
-.bar-bottom-info { display: flex; flex-direction: column; align-items: center; margin-top: 1rem; padding-bottom: 0.5rem; }
-.b-main-label { font-size: 0.75rem; text-transform: capitalize; color: #4A5568; }
-.b-sub-label { font-size: 0.6rem; color: #A0AEC0; font-weight: 700; }
+.bar-pair { display: flex; align-items: flex-end; gap: 6px; height: 100%; }
+.bar-v { width: 24px; background: #E2E8F0; border-radius: 8px 8px 0 0; transition: height 1s; }
+.bar-g { width: 15px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
+.bar-footer { margin-top: 1.2rem; display: flex; flex-direction: column; align-items: center; }
+.bar-footer strong { font-size: 0.75rem; text-transform: capitalize; color: #4A5568; }
+.bar-footer small { font-size: 0.6rem; color: #CBD5E0; font-weight: 800; }
 
-/* VISTA DE LÍNEAS (MES) */
-.line-mode { padding: 40px 30px; }
+/* LÍNEAS */
+.line-mode { padding: 40px 10px; }
 .line-container { width: 100%; height: 100%; position: relative; }
 .line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 260px; overflow: visible; z-index: 1; }
-.line-v { fill: none; stroke: #CBD5E0; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); }
-.line-g { fill: none; stroke: #68D391; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-.line-point-unit { position: absolute; top: 0; height: 100%; display: flex; flex-direction: column; align-items: center; z-index: 2; pointer-events: none; }
-.node-v { width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #CBD5E0; margin-top: auto; margin-bottom: 120px; }
-.node-g { width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #68D391; position: absolute; bottom: 80px; }
-.point-labels { position: absolute; top: -30px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.v-tag { background: #EDF2F7; font-size: 0.6rem; font-weight: 900; color: #4A5568; padding: 2px 6px; border-radius: 4px; }
-.g-tag { color: #38A169; font-size: 0.6rem; font-weight: 900; }
-.line-footer { position: absolute; bottom: 0; display: flex; flex-direction: column; align-items: center; width: 100px; }
-.line-footer strong { font-size: 0.8rem; }
-.line-footer small { font-size: 0.6rem; color: #A0AEC0; }
+.l-v { fill: none; stroke: #CBD5E0; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.l-g { fill: none; stroke: #68D391; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.line-node-unit { position: absolute; top: 0; height: 320px; display: flex; flex-direction: column; align-items: center; z-index: 2; pointer-events: none; }
+.point-v { width: 12px; height: 12px; border-radius: 50%; background: white; border: 4px solid #CBD5E0; position: absolute; bottom: 120px; }
+.point-g { width: 12px; height: 12px; border-radius: 50%; background: white; border: 4px solid #68D391; position: absolute; bottom: 80px; }
+.node-labels { position: absolute; top: -35px; display: flex; flex-direction: column; align-items: center; }
+.v-t { font-size: 0.6rem; font-weight: 900; color: #718096; background: #F7FAFC; padding: 2px 6px; border-radius: 4px; }
+.g-t { font-size: 0.6rem; font-weight: 900; color: #38A169; }
 
-/* RANKING SIDEBAR */
-.sidebar-info { display: flex; flex-direction: column; }
-.ranking-card { padding: 1.5rem; background: #F7FAFC; }
-.top-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
-.top-item { display: flex; align-items: center; gap: 1rem; background: white; padding: 0.8rem; border-radius: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #EDF2F7; }
-.top-rank { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; font-size: 0.75rem; color: white; background: #CBD5E0; }
-.rank-0 { background: #F6AD55; transform: scale(1.1); box-shadow: 0 4px 10px rgba(237,137,54,0.3); }
-.rank-1 { background: #B2F5EA; color: #319795; }
-.rank-2 { background: #FED7D7; color: #C53030; }
-.top-name { font-weight: 800; font-size: 0.85rem; margin: 0; color: #2D3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-.top-meta { font-size: 0.7rem; font-weight: 700; color: #718096; margin: 0; }
+/* SECCIÓN RANKING (NOMBRES COMPLETOS) */
+.sidebar { display: flex; flex-direction: column; height: 100%; }
+.ranking-full { padding: 1.5rem; background: #F8FAFC; flex: 1; }
+.top-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+.top-row { display: flex; gap: 1rem; background: white; padding: 1.25rem; border-radius: 20px; border: 1px solid #EDF2F7; box-shadow: 0 4px 15px rgba(0,0,0,0.02); align-items: center; }
+.top-number { width: 30px; height: 30px; min-width: 30px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; border-radius: 10px; background: #CBD5E0; font-size: 0.8rem; }
+.nr-0 { background: #FFD700; box-shadow: 0 4px 10px rgba(255,215,0,0.3); }
+.nr-1 { background: #C0C0C0; }
+.nr-2 { background: #CD7F32; }
 
-/* UTILS */
-.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.top-info { flex: 1; }
+.p-name-full { font-weight: 800; font-size: 0.95rem; color: #1A202C; margin: 0 0 6px 0; line-height: 1.2; }
+.p-stats { display: flex; gap: 1rem; font-size: 0.7rem; color: #718096; font-weight: 700; }
 
-.animate-pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* ANIMACIONES */
+.animate-fade-in { animation: fadeIn 0.5s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.animate-pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-.loading-full { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8rem 0; }
-.spinner-big { width: 45px; height: 45px; border: 4px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; }
+.loading-full { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10rem 0; }
+.spinner-big { width: 50px; height: 50px; border: 5px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 1100px) {
-  .main-layout { grid-template-columns: 1fr; }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-}
 </style>
