@@ -26,7 +26,7 @@ namespace VidaAnimal.API.Controllers
                 var mesActual = hoy.Month;
                 var anioActual = hoy.Year;
 
-                // 1. Estadísticas BASADAS EN DETALLES (Subtotales aislados para margen exacto)
+                // 1. Estadísticas BASADAS EN DETALLES (Subtotales aislados)
                 var todosLosDetalles = await _context.VentaDetalles
                     .Include(d => d.Venta)
                     .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
@@ -58,7 +58,7 @@ namespace VidaAnimal.API.Controllers
                     });
                 }
 
-                // 3. Gráfico Mensual
+                // 3. Gráfico Mensual (Por Semanas)
                 var graficoMensual = new List<object>();
                 var inicioMes = new DateTime(anioActual, mesActual, 1);
                 var finMes = inicioMes.AddMonths(1).AddDays(-1);
@@ -70,14 +70,27 @@ namespace VidaAnimal.API.Controllers
                     var sFin = sInicio.AddDays(6);
                     if (sFin > finMes) sFin = finMes;
 
-                    var dataSemana = todosLosDetalles.Where(v => v.Venta.Fecha.Date >= sInicio.Date && v.Venta.Fecha.Date <= sFin.Date).ToList();
+                    var vSem = todosLosDetalles.Where(d => d.Venta.Fecha.Date >= sInicio.Date && d.Venta.Fecha.Date <= sFin.Date).ToList();
                     graficoMensual.Add(new {
                         semana = $"S{i + 1}",
                         rango = $"{sInicio:dd/MM}-{sFin:dd/MM}",
-                        totalVentas = dataSemana.Sum(v => v.SubTotal),
-                        totalGanancia = dataSemana.Sum(v => (decimal?)v.Ganancia) ?? 0
+                        totalVentas = vSem.Sum(v => v.SubTotal),
+                        totalGanancia = vSem.Sum(v => (decimal?)v.Ganancia) ?? 0
                     });
                 }
+
+                // 4. TOPS - DINÁMICOS
+                var topSemanal = todosLosDetalles
+                    .Where(d => d.Venta.Fecha >= inicioSemana && d.Venta.Fecha <= inicioSemana.AddDays(6))
+                    .GroupBy(d => d.NombreProducto)
+                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
+                    .OrderByDescending(x => x.totalMonto).Take(5).ToList();
+
+                var topMensual = todosLosDetalles
+                    .Where(d => d.Venta.Fecha >= inicioMes && d.Venta.Fecha <= finMes)
+                    .GroupBy(d => d.NombreProducto)
+                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
+                    .OrderByDescending(x => x.totalMonto).Take(5).ToList();
 
                 return Ok(new {
                     success = true,
@@ -91,6 +104,8 @@ namespace VidaAnimal.API.Controllers
                     },
                     graficoSemanal = graficoVentas,
                     graficoMensual,
+                    topSemanal,
+                    topMensual,
                     stockBajo = await _context.Productos.Where(p => p.Activo && p.StockActual <= p.StockMinimo).OrderBy(p => p.StockActual).Take(5)
                         .Select(p => new { p.Nombre, p.StockActual, p.UnidadMedida }).ToListAsync()
                 });
