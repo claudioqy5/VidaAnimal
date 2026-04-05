@@ -524,6 +524,11 @@ const mostrarModalProducto = ref(false)
 const guardandoProd = ref(false)
 const errorModalProd = ref('')
 const archivoProd = ref(null)
+const nuevoProd = ref({
+  codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
+  precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
+  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
+})
 
 const onFileChangeProd = (e) => {
   archivoProd.value = e.target.files[0]
@@ -796,7 +801,6 @@ const registrarCompra = async () => {
 .cancel-btn:hover { background-color: #F7FAFC; }
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
-
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
