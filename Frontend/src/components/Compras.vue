@@ -558,6 +558,7 @@ const abrirModalProducto = () => {
   }
   errorModalProd.value = ''
   archivoProd.value = null
+  filePreviewProd.value = null // <-- Aseguramos de limpiar la vista previa anterior
   nuevoProd.value = {
     codigo: '', nombre: '', descripcion: '', proveedorID: compraHeader.value.proveedorID,
     unidadMedida: 'UND', precioCosto: 0, precioVenta: '', stockActual: 0, stockMinimo: 5, cantidadLlegando: 1,
