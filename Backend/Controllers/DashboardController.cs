@@ -26,9 +26,10 @@ namespace VidaAnimal.API.Controllers
                 var mesActual = hoy.Month;
                 var anioActual = hoy.Year;
 
-                // 1. Estadísticas BASADAS EN DETALLES (Subtotales aislados)
+                // 1. Estadísticas ESTRICTAS (Solo ventas COMPLETADA con Productos incluidos)
                 var todosLosDetalles = await _context.VentaDetalles
                     .Include(d => d.Venta)
+                    .Include(d => d.Producto)
                     .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
                     .ToListAsync();
 
@@ -58,7 +59,7 @@ namespace VidaAnimal.API.Controllers
                     });
                 }
 
-                // 3. Gráfico Mensual (Por Semanas)
+                // 3. Gráfico Mensual
                 var graficoMensual = new List<object>();
                 var inicioMes = new DateTime(anioActual, mesActual, 1);
                 var finMes = inicioMes.AddMonths(1).AddDays(-1);
@@ -79,16 +80,16 @@ namespace VidaAnimal.API.Controllers
                     });
                 }
 
-                // 4. TOPS - DINÁMICOS
+                // 4. TOPS - DINÁMICOS (Corregido con Producto.Nombre)
                 var topSemanal = todosLosDetalles
-                    .Where(d => d.Venta.Fecha >= inicioSemana && d.Venta.Fecha <= inicioSemana.AddDays(6))
-                    .GroupBy(d => d.NombreProducto)
+                    .Where(d => d.Venta.Fecha >= inicioSemana && d.Venta.Fecha <= inicioSemana.AddDays(6) && d.Producto != null)
+                    .GroupBy(d => d.Producto.Nombre)
                     .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
                     .OrderByDescending(x => x.totalMonto).Take(5).ToList();
 
                 var topMensual = todosLosDetalles
-                    .Where(d => d.Venta.Fecha >= inicioMes && d.Venta.Fecha <= finMes)
-                    .GroupBy(d => d.NombreProducto)
+                    .Where(d => d.Venta.Fecha >= inicioMes && d.Venta.Fecha <= finMes && d.Producto != null)
+                    .GroupBy(d => d.Producto.Nombre)
                     .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
                     .OrderByDescending(x => x.totalMonto).Take(5).ToList();
 
