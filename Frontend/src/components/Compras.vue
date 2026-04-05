@@ -252,7 +252,18 @@
 
             <div class="form-group" style="grid-column: span 2;">
               <label>Fotografía (Opcional)</label>
-              <input type="file" @change="onFileChangeProd" accept="image/png, image/jpeg, image/jpg" style="padding: 0.6rem; cursor: pointer;" />
+              <div class="file-upload-wrapper">
+                <div class="mini-preview" v-if="previewUrl">
+                  <img :src="previewUrl" alt="Vista previa" />
+                  <button type="button" class="remove-photo" @click="limpiarFoto">✕</button>
+                </div>
+                <div class="upload-placeholder" v-else>
+                  <span>📷</span>
+                  <p>Sin foto seleccionada</p>
+                </div>
+                <input type="file" @change="onFileChangeProd" accept="image/png, image/jpeg, image/jpg" id="fotoNuevaProd" style="display: none;" />
+                <label for="fotoNuevaProd" class="custom-file-label">Seleccionar Imagen</label>
+              </div>
             </div>
           </div>
 
@@ -530,8 +541,24 @@ const nuevoProd = ref({
   precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
 })
 
+const previewUrl = ref(null)
+
 const onFileChangeProd = (e) => {
-  archivoProd.value = e.target.files[0]
+  const file = e.target.files[0]
+  if (!file) return
+  archivoProd.value = file
+  
+  // Generar vista previa
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    previewUrl.value = event.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const limpiarFoto = () => {
+  archivoProd.value = null
+  previewUrl.value = null
 }
 
 const abrirModalProducto = () => {
@@ -551,6 +578,8 @@ const abrirModalProducto = () => {
 
 const cerrarModalProducto = () => {
   mostrarModalProducto.value = false
+  previewUrl.value = null
+  archivoProd.value = null
 }
 
 const guardarProductoRapido = async () => {
@@ -798,6 +827,17 @@ const registrarCompra = async () => {
 .primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .cancel-btn { background-color: transparent; color: #4A5568; border: 1px solid #CBD5E0; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
 .cancel-btn:hover { background-color: #F7FAFC; }
+
+/* FILE UPLOAD STYLES EN COMPRAS */
+.file-upload-wrapper { display: flex; align-items: center; gap: 1.5rem; background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px dashed #CBD5E0; }
+.mini-preview { position: relative; width: 80px; height: 80px; border-radius: 10px; overflow: hidden; border: 2px solid #F6AD55; }
+.mini-preview img { width: 100%; height: 100%; object-fit: cover; }
+.remove-photo { position: absolute; top: -5px; right: -5px; background: #E53E3E; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #A0AEC0; font-size: 0.8rem; border: 2px solid #E2E8F0; width: 80px; height: 80px; border-radius: 10px; justify-content: center; }
+.upload-placeholder span { font-size: 1.5rem; }
+.custom-file-label { background: #F6AD55; color: white; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.custom-file-label:hover { background: #DD6B20; transform: translateY(-1px); }
+
 
 .modal-footer { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E2E8F0; }
 
