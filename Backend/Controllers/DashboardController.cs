@@ -132,11 +132,11 @@ namespace VidaAnimal.API.Controllers
             }
         }
 
-        private List<object> GenerarGraficoSemanal(List<dynamic> data, DateTime inicio) {
+        private List<object> GenerarGraficoSemanal(IEnumerable<dynamic> data, DateTime inicio) {
             var lista = new List<object>();
             for (int i = 0; i < 7; i++) {
                 var fecha = inicio.AddDays(i);
-                var dDia = data.Where(d => d.FechaPeru.Date == fecha.Date).ToList();
+                var dDia = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date == fecha.Date).ToList();
                 lista.Add(new {
                     dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
                     fecha = fecha.ToString("dd/MM"),
@@ -147,14 +147,14 @@ namespace VidaAnimal.API.Controllers
             return lista;
         }
 
-        private List<object> GenerarGraficoMensual(List<dynamic> data, DateTime ahora) {
+        private List<object> GenerarGraficoMensual(IEnumerable<dynamic> data, DateTime ahora) {
             var lista = new List<object>();
             var inicioMes = new DateTime(ahora.Year, ahora.Month, 1);
             for (int i = 0; i < 5; i++) {
                 var sInicio = inicioMes.AddDays(i * 7);
                 if (sInicio.Month != ahora.Month) break;
                 var sFin = sInicio.AddDays(6);
-                var dSem = data.Where(d => d.FechaPeru.Date >= sInicio.Date && d.FechaPeru.Date <= sFin.Date).ToList();
+                var dSem = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date >= sInicio.Date && ((DateTime)d.FechaPeru).Date <= sFin.Date).ToList();
                 lista.Add(new {
                     semana = $"Semana {i + 1}",
                     rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
