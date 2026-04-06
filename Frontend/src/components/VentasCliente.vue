@@ -51,7 +51,7 @@
       <div v-if="usuarioRol === 'ADMINISTRADOR'" class="stats-mini">
         <div class="stat-item">
           <span class="label">Monto Total:</span>
-          <span class="value highlight">S/ {{ formatMoney(totalGeneral) }}</span>
+          <span class="value highlight">S/ {{ totalGeneral.toFixed(2) }}</span>
         </div>
         <button class="btn-reporte" @click="descargarReporteVentas" :disabled="ventasOrdenadas.length === 0">
           📄 Generar Reporte
@@ -214,7 +214,6 @@ const selectedClienteID = ref('');
 const selectedFecha = ref(getTodayInFormat());
 const orderBy = ref('fecha_desc');
 const expandedVentas = ref(new Set());
-const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 
 const verTodoElHistorial = () => {
   selectedFecha.value = '';
@@ -451,7 +450,7 @@ const descargarReporteVentas = () => {
   const finalY = doc.lastAutoTable.finalY || 60;
   doc.setFontSize(13);
   doc.setFont(undefined, 'bold');
-  doc.text(`MONTO TOTAL: S/ ${formatMoney(totalGeneral.value)}`, 120, finalY + 15);
+  doc.text(`MONTO TOTAL: S/ ${totalGeneral.value.toFixed(2)}`, 120, finalY + 15);
   
   doc.setFontSize(9);
   doc.setFont(undefined, 'normal');
