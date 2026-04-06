@@ -184,7 +184,7 @@ onMounted(cargarResumen);
 .page-title { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; margin: 0; }
 .header-status { display: flex; align-items: center; gap: 0.8rem; background: white; padding: 0.5rem 1.2rem; border-radius: 12px; }
 .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #48BB78; }
-.refresh-btn { border: none; background: #EDF2F7; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 800; cursor: pointer; }
+.refresh-btn { border: none; background: #EDF2F7; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
 
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
 .kpi-card { padding: 1.25rem; border-radius: 22px; display: flex; align-items: center; gap: 1.2rem; color: white; }
@@ -202,7 +202,7 @@ onMounted(cargarResumen);
 .top-item-h { display: flex; align-items: center; gap: 1rem; background: #F8FAFC; padding: 0.8rem; border-radius: 18px; border: 1px solid #EDF2F7; margin-bottom: 0.8rem; }
 .top-rank { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 900; font-size: 0.75rem; background: #E9D8FD; color: #553C9A; }
 .top-rank.prov { background: #B2F5EA; color: #319795; }
-.p-name { font-weight: 800; font-size: 0.9rem; margin: 0; }
+.p-name {font-size: 0.9rem; margin: 0; }
 
 .inventory-list-v { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .inv-item-v { background: #FFF9F2; padding: 1rem; border-radius: 18px; border: 1px solid #FED7D7; }
