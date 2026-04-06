@@ -81,7 +81,8 @@ namespace VidaAnimal.API.Controllers
 
                 var flujoHoras = new List<object>();
                 for (int i = 6; i <= 22; i++) {
-                    var totalHora = detallesHoy.Where(d => d.FechaPeru.Hour == i).Sum(d => d.Detalle.SubTotal);
+                    // Usamos la hora ya convertida a Perú (FechaPeru) para que no haya desfase
+                    var totalHora = detallesHoy.Where(d => ((DateTime)d.FechaPeru).Hour == i).Sum(d => (decimal)d.Detalle.SubTotal);
                     flujoHoras.Add(new { hora = i, total = totalHora });
                 }
 
