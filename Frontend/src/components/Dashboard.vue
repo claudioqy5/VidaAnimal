@@ -201,7 +201,7 @@ const yAxisLevels = computed(() => {
 });
 
 const getBarHeight = (val, max) => Math.min((val / max) * 100, 100);
-const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
+const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const createLinePath = (data, key) => {
   if (!data || data.length < 2) return "";

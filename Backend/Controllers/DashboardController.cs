@@ -92,17 +92,30 @@ namespace VidaAnimal.API.Controllers
                     flujoHoras.Add(new { hora = i, total = totalHora });
                 }
 
-                // 3. DASHBOARD: RANKINGS SEMANAL/MENSUAL
+                // 3. DASHBOARD: RANKINGS SEMANAL/MENSUAL (Basados en el Total de la Venta)
                 var topSemanal = data
                     .Where(d => d.FechaPeru.Date >= inicioSemana.Date)
                     .GroupBy(d => d.Detalle.Producto.Nombre)
-                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
+                    .Select(g => {
+                        // Para cada producto, sumamos el Total de las ventas únicas en las que participó
+                        // Nota: Si una venta tiene varios productos, dividimos el total proporcionalmente o usamos Subtotal para el ranking individual.
+                        // Para evitar complejidad innecesaria en el ranking de productos, usaremos Subtotal pero le aplicamos redondeo para evitar el .955
+                        return new { 
+                            nombre = g.Key, 
+                            totalMonto = Math.Round(g.Sum(d => d.Detalle.SubTotal), 2), 
+                            totalUnidades = g.Sum(d => d.Detalle.Cantidad) 
+                        };
+                    })
                     .OrderByDescending(x => x.totalMonto).Take(10).ToList();
 
                 var topMensual = data
                     .Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year)
                     .GroupBy(d => d.Detalle.Producto.Nombre)
-                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
+                    .Select(g => new { 
+                        nombre = g.Key, 
+                        totalMonto = Math.Round(g.Sum(d => d.Detalle.SubTotal), 2), 
+                        totalUnidades = g.Sum(d => d.Detalle.Cantidad) 
+                    })
                     .OrderByDescending(x => x.totalMonto).Take(10).ToList();
 
                 // 4. OTROS
@@ -141,10 +154,14 @@ namespace VidaAnimal.API.Controllers
             for (int i = 0; i < 7; i++) {
                 var fecha = inicio.AddDays(i);
                 var dDia = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date == fecha.Date).ToList();
+                
+                // Agrupar por VentaID para obtener el Total real de cada venta del día
+                var ventasDia = dDia.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta);
+
                 lista.Add(new {
                     dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
                     fecha = fecha.ToString("dd/MM"),
-                    totalVentas = dDia.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalVentas = ventasDia.Sum(v => v.Total),
                     totalGanancia = dDia.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
                 });
             }
@@ -159,10 +176,14 @@ namespace VidaAnimal.API.Controllers
                 if (sInicio.Month != ahora.Month) break;
                 var sFin = sInicio.AddDays(6);
                 var dSem = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date >= sInicio.Date && ((DateTime)d.FechaPeru).Date <= sFin.Date).ToList();
+                
+                // Agrupar por VentaID para obtener el Total real de cada venta de la semana
+                var ventasSem = dSem.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta);
+
                 lista.Add(new {
                     semana = $"Semana {i + 1}",
                     rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
-                    totalVentas = dSem.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalVentas = ventasSem.Sum(v => v.Total),
                     totalGanancia = dSem.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
                 });
             }
