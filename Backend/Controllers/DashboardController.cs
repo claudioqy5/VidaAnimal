@@ -23,97 +23,146 @@ namespace VidaAnimal.API.Controllers
         public async Task<IActionResult> GetResumen()
         {
             try {
-                var hoy = DateTime.Today;
-                var mesActual = hoy.Month;
-                var anioActual = hoy.Year;
+                // Cross-platform TimeZone handling (Windows vs Linux)
+                TimeZoneInfo peruTimeZone;
+                try {
+                    peruTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SA Pacific Standard Time");
+                } catch {
+                    try {
+                        peruTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Lima");
+                    } catch {
+                        // Fallback fallback
+                        peruTimeZone = TimeZoneInfo.Local; 
+                    }
+                }
 
-                // 1. Datos Base
-                var todosLosDetalles = await _context.VentaDetalles
+                var ahoraPeru = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, peruTimeZone);
+                var hoy = ahoraPeru.Date;
+                var inicioSemana = hoy.AddDays(-(int)ahoraPeru.DayOfWeek + (int)DayOfWeek.Monday);
+                if (ahoraPeru.DayOfWeek == DayOfWeek.Sunday) inicioSemana = hoy.AddDays(-6);
+                
+                var inicioMes = new DateTime(ahoraPeru.Year, ahoraPeru.Month, 1);
+                
+                // Prefilter from DB (since start of month or 7 days ago) to avoid loading everything
+                var fechaLimitePeru = inicioMes < hoy.AddDays(-7) ? inicioMes : hoy.AddDays(-7);
+                var fechaLimiteUTC = fechaLimitePeru.AddHours(1); // Small buffer
+
+                var detallesQuery = await _context.VentaDetalles
                     .Include(d => d.Venta)
                     .Include(d => d.Producto)
-                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
+                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada" && d.Venta.Fecha >= fechaLimiteUTC)
                     .ToListAsync();
 
-                // 2. Gráficos
-                var graficoSemanal = new List<object>();
-                var inicioSemana = hoy.AddDays(-(int)hoy.DayOfWeek + (int)DayOfWeek.Monday);
-                if (hoy.DayOfWeek == DayOfWeek.Sunday) inicioSemana = hoy.AddDays(-6);
+                // Group in memory with Peru conversion
+                var data = detallesQuery.Select(d => new {
+                    Detalle = d,
+                    FechaPeru = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(d.Venta.Fecha, DateTimeKind.Utc), peruTimeZone)
+                }).ToList();
 
-                for (int i = 0; i < 7; i++)
-                {
-                    var fecha = inicioSemana.AddDays(i);
-                    var dataDia = todosLosDetalles.Where(v => v.Venta.Fecha.Date == fecha.Date).ToList();
-                    graficoSemanal.Add(new {
-                        dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
-                        fecha = fecha.ToString("dd/MM"),
-                        totalVentas = dataDia.Sum(v => v.SubTotal),
-                        totalGanancia = dataDia.Sum(v => (decimal?)v.Ganancia) ?? 0
-                    });
+                var detallesHoy = data.Where(d => d.FechaPeru.Date == hoy).ToList();
+                var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).ToList();
+
+                // 1. STATS CORE
+                var stats = new {
+                    ventasHoy = detallesHoy.Sum(d => d.Detalle.SubTotal),
+                    gananciaHoy = detallesHoy.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0,
+                    transaccionesHoy = ventasHoyGroups.Count,
+                    clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),
+                    
+                    ventasSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => d.Detalle.SubTotal),
+                    gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0,
+                    
+                    ventasMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.SubTotal),
+                    gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
+                };
+
+                // 2. INICIO: TOP PRODUCTOS HOY Y FLUJO
+                var topProductosHoy = detallesHoy
+                    .GroupBy(d => d.Detalle.Producto.Nombre)
+                    .Select(g => new { producto = g.Key, total = g.Sum(d => d.Detalle.SubTotal), cantidad = g.Sum(d => d.Detalle.Cantidad) })
+                    .OrderByDescending(x => x.total).Take(5).ToList();
+
+                var flujoHoras = new List<object>();
+                for (int i = 6; i <= 22; i++) {
+                    var totalHora = detallesHoy.Where(d => d.FechaPeru.Hour == i).Sum(d => d.Detalle.SubTotal);
+                    flujoHoras.Add(new { hora = i, total = totalHora });
                 }
 
-                var graficoMensual = new List<object>();
-                var inicioMes = new DateTime(anioActual, mesActual, 1);
-                var finMes = inicioMes.AddMonths(1).AddDays(-1);
+                // 3. DASHBOARD: RANKINGS SEMANAL/MENSUAL
+                var topSemanal = data
+                    .Where(d => d.FechaPeru.Date >= inicioSemana.Date)
+                    .GroupBy(d => d.Detalle.Producto.Nombre)
+                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
+                    .OrderByDescending(x => x.totalMonto).Take(10).ToList();
 
-                for (int i = 0; i < 5; i++)
-                {
-                    var sInicio = inicioMes.AddDays(i * 7);
-                    if (sInicio > finMes) break;
-                    var sFin = sInicio.AddDays(6);
-                    if (sFin > finMes) sFin = finMes;
+                var topMensual = data
+                    .Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year)
+                    .GroupBy(d => d.Detalle.Producto.Nombre)
+                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
+                    .OrderByDescending(x => x.totalMonto).Take(10).ToList();
 
-                    var vSem = todosLosDetalles.Where(d => d.Venta.Fecha.Date >= sInicio.Date && d.Venta.Fecha.Date <= sFin.Date).ToList();
-                    graficoMensual.Add(new {
-                        semana = $"Semana {i + 1}",
-                        rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
-                        totalVentas = vSem.Sum(v => v.SubTotal),
-                        totalGanancia = vSem.Sum(v => (decimal?)v.Ganancia) ?? 0
-                    });
-                }
-
-                // 3. Tops & Inventario
-                var topSemanal = todosLosDetalles
-                    .Where(d => d.Venta.Fecha >= inicioSemana && d.Producto != null)
-                    .GroupBy(d => d.Producto.Nombre)
-                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
-                    .OrderByDescending(x => x.totalMonto).Take(5).ToList();
-
-                var topMensual = todosLosDetalles
-                    .Where(d => d.Venta.Fecha >= inicioMes && d.Producto != null)
-                    .GroupBy(d => d.Producto.Nombre)
-                    .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.SubTotal), totalUnidades = g.Sum(d => d.Cantidad) })
-                    .OrderByDescending(x => x.totalMonto).Take(5).ToList();
-
-                // TOP Proveedores (Corregido con FechaCompra)
+                // 4. OTROS
                 var topProveedores = await _context.Compras
                     .Include(c => c.Proveedor)
-                    .Where(c => c.FechaCompra.Month == mesActual && c.Proveedor != null)
+                    .Where(c => c.FechaCompra.Month == ahoraPeru.Month && c.FechaCompra.Year == ahoraPeru.Year && c.Proveedor != null)
                     .GroupBy(c => c.Proveedor.Nombre)
                     .Select(g => new { nombre = g.Key, totalInvertido = g.Sum(c => c.Total) })
-                    .OrderByDescending(x => x.totalInvertido)
-                    .Take(5).ToListAsync();
+                    .OrderByDescending(x => x.totalInvertido).Take(5).ToListAsync();
+
+                var stockBajo = await _context.Productos
+                    .Where(p => p.Activo && p.StockActual <= p.StockMinimo)
+                    .OrderBy(p => p.StockActual)
+                    .Select(p => new { p.Nombre, p.StockActual, p.UnidadMedida, p.StockMinimo })
+                    .Take(10).ToListAsync();
 
                 return Ok(new {
                     success = true,
-                    stats = new {
-                        ventasHoy = todosLosDetalles.Where(d => d.Venta.Fecha.Date == hoy.Date).Sum(d => d.SubTotal),
-                        gananciaHoy = todosLosDetalles.Where(d => d.Venta.Fecha.Date == hoy.Date).Sum(d => (decimal?)d.Ganancia) ?? 0,
-                        ventasSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => v.SubTotal),
-                        gananciaSemana = todosLosDetalles.Where(v => v.Venta.Fecha >= inicioSemana && v.Venta.Fecha <= inicioSemana.AddDays(6)).Sum(v => (decimal?)v.Ganancia) ?? 0,
-                        ventasMes = todosLosDetalles.Sum(d => d.SubTotal),
-                        gananciaMes = todosLosDetalles.Sum(d => (decimal?)d.Ganancia) ?? 0
-                    },
-                    graficoSemanal,
-                    graficoMensual,
+                    stats,
+                    topProductosHoy,
+                    flujoHoras,
                     topSemanal,
                     topMensual,
                     topProveedores,
-                    stockBajo = await _context.Productos.Where(p => p.Activo && p.StockActual <= p.StockMinimo).OrderBy(p => p.StockActual).Take(10)
-                        .Select(p => new { p.Nombre, p.StockActual, p.UnidadMedida, p.StockMinimo }).ToListAsync()
+                    stockBajo,
+                    graficoSemanal = GenerarGraficoSemanal(data, inicioSemana),
+                    graficoMensual = GenerarGraficoMensual(data, ahoraPeru)
                 });
             } catch (Exception ex) {
-                return BadRequest(new { success = false, message = ex.Message });
+                return BadRequest(new { success = false, message = ex.Message, inner = ex.InnerException?.Message });
             }
+        }
+
+        private List<object> GenerarGraficoSemanal(List<dynamic> data, DateTime inicio) {
+            var lista = new List<object>();
+            for (int i = 0; i < 7; i++) {
+                var fecha = inicio.AddDays(i);
+                var dDia = data.Where(d => d.FechaPeru.Date == fecha.Date).ToList();
+                lista.Add(new {
+                    dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
+                    fecha = fecha.ToString("dd/MM"),
+                    totalVentas = dDia.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalGanancia = dDia.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
+                });
+            }
+            return lista;
+        }
+
+        private List<object> GenerarGraficoMensual(List<dynamic> data, DateTime ahora) {
+            var lista = new List<object>();
+            var inicioMes = new DateTime(ahora.Year, ahora.Month, 1);
+            for (int i = 0; i < 5; i++) {
+                var sInicio = inicioMes.AddDays(i * 7);
+                if (sInicio.Month != ahora.Month) break;
+                var sFin = sInicio.AddDays(6);
+                var dSem = data.Where(d => d.FechaPeru.Date >= sInicio.Date && d.FechaPeru.Date <= sFin.Date).ToList();
+                lista.Add(new {
+                    semana = $"Semana {i + 1}",
+                    rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
+                    totalVentas = dSem.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalGanancia = dSem.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
+                });
+            }
+            return lista;
         }
     }
 }
