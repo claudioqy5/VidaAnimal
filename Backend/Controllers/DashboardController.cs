@@ -141,10 +141,14 @@ namespace VidaAnimal.API.Controllers
             for (int i = 0; i < 7; i++) {
                 var fecha = inicio.AddDays(i);
                 var dDia = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date == fecha.Date).ToList();
+                
+                // Agrupamos por VentaID para sumar el Total real de cada venta del día
+                var ventasUnicasDia = dDia.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta);
+
                 lista.Add(new {
                     dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
                     fecha = fecha.ToString("dd/MM"),
-                    totalVentas = dDia.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalVentas = ventasUnicasDia.Sum(v => v.Total),
                     totalGanancia = dDia.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
                 });
             }
@@ -159,10 +163,14 @@ namespace VidaAnimal.API.Controllers
                 if (sInicio.Month != ahora.Month) break;
                 var sFin = sInicio.AddDays(6);
                 var dSem = Enumerable.Where(data, d => ((DateTime)d.FechaPeru).Date >= sInicio.Date && ((DateTime)d.FechaPeru).Date <= sFin.Date).ToList();
+                
+                // Agrupamos por VentaID para sumar el Total real de cada venta de la semana
+                var ventasUnicasSem = dSem.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta);
+
                 lista.Add(new {
                     semana = $"Semana {i + 1}",
                     rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
-                    totalVentas = dSem.Sum(d => (decimal)d.Detalle.SubTotal),
+                    totalVentas = ventasUnicasSem.Sum(v => v.Total),
                     totalGanancia = dSem.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
                 });
             }
