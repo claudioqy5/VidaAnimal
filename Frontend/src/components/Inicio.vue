@@ -209,7 +209,7 @@ onMounted(cargarResumen);
 .inv-bar-container { background: #EDF2F7; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 0.5rem; margin-bottom: 0.5rem; }
 .inv-bar { height: 100%; transition: 1s; }
 
-.chart-hourly-v2 { display: flex; align-items: flex-end; justify-content: space-between; height: 150px; gap: 4px; }
+.chart-hourly-v2 { display: flex; align-items: baseline; justify-content: space-between; height: 150px; gap: 4px; }
 .hour-unit { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; }
 .hour-bar { width: 100%; background: #E2E8F0; border-radius: 4px 4px 0 0; position: relative; transition: 0.3s; }
 .hour-bar:hover { background: #553C9A; }
