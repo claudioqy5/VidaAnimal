@@ -172,7 +172,7 @@ const cargarResumen = async () => {
 const hasHourlyData = computed(() => flujos.value.some(h => h.total > 0));
 const maxHourlyTotal = computed(() => Math.max(...flujos.value.map(h => h.total), 1));
 const getStockPercent = (p) => Math.min((p.stockActual / p.stockMinimo) * 100, 100);
-const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatMoney = (n) => Number(n || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 });
 
 onMounted(cargarResumen);
 </script>
