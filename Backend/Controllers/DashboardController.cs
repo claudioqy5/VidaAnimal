@@ -60,19 +60,23 @@ namespace VidaAnimal.API.Controllers
                 }).ToList();
 
                 var detallesHoy = data.Where(d => d.FechaPeru.Date == hoy).ToList();
-                var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).ToList();
+                var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
-                // 1. STATS CORE
+                // 1. STATS CORE (Calculados sobre la Venta para incluir descuentos)
                 var stats = new {
-                    ventasHoy = detallesHoy.Sum(d => d.Detalle.SubTotal),
+                    ventasHoy = ventasHoyGroups.Sum(v => v.Total),
                     gananciaHoy = detallesHoy.Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0,
                     transaccionesHoy = ventasHoyGroups.Count,
                     clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),
                     
-                    ventasSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => d.Detalle.SubTotal),
+                    ventasSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date)
+                                       .GroupBy(d => d.Detalle.VentaID)
+                                       .Select(g => g.First().Detalle.Venta.Total).Sum(),
                     gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0,
                     
-                    ventasMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.SubTotal),
+                    ventasMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year)
+                                    .GroupBy(d => d.Detalle.VentaID)
+                                    .Select(g => g.First().Detalle.Venta.Total).Sum(),
                     gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => (decimal?)d.Detalle.Ganancia) ?? 0
                 };
 

@@ -39,7 +39,29 @@ namespace VidaAnimal.API.Controllers
             {
                 if (DateTime.TryParse(fecha, out DateTime fechaFiltro))
                 {
-                    query = query.Where(v => v.Fecha.Date == fechaFiltro.Date);
+                    // Manejo de zona horaria Perú multiplataforma
+                    TimeZoneInfo peruTimeZone;
+                    try {
+                        peruTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SA Pacific Standard Time");
+                    } catch {
+                        try {
+                            peruTimeZone = TimeZoneInfo.FindSystemTimeZoneById("America/Lima");
+                        } catch {
+                            peruTimeZone = TimeZoneInfo.Local;
+                        }
+                    }
+
+                    // Calculamos el inicio y fin del día en Perú, pero convertido a UTC para comparar en la DB
+                    // Si el usuario filtra por "2024-04-05", queremos todo lo que sea >= 00:00 (Perú) y < 00:00 del día siguiente (Perú)
+                    var inicioDiaPeru = fechaFiltro.Date;
+                    var finDiaPeru = inicioDiaPeru.AddDays(1);
+
+                    // Offset de Perú es -5h relative to UTC (UTC = PeruTime + 5h)
+                    // Así que el rango UTC es:
+                    var inicioUTC = inicioDiaPeru.AddHours(5);
+                    var finUTC = finDiaPeru.AddHours(5);
+
+                    query = query.Where(v => v.Fecha >= inicioUTC && v.Fecha < finUTC);
                 }
             }
 

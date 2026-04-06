@@ -20,7 +20,7 @@
         <div class="icon-wrap">💰</div>
         <div class="kpi-content">
           <p class="kpi-label">Ventas Hoy</p>
-          <p class="kpi-value">S/ {{ stats.ventasHoy.toFixed(2) }}</p>
+          <p class="kpi-value">S/ {{ formatMoney(stats.ventasHoy) }}</p>
         </div>
       </div>
       <div class="kpi-card k2">
