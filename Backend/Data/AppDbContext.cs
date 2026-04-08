@@ -54,10 +54,8 @@ namespace VidaAnimal.API.Data
 
             // Relaciones de Clasificación
             modelBuilder.Entity<Producto>()
-                .HasOne(p => p.Especie)
-                .WithMany()
-                .HasForeignKey(p => p.EspecieID)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasMany(p => p.Especies)
+                .WithMany(); // EF Core crea la tabla intermedia automáticamente
 
             modelBuilder.Entity<Producto>()
                 .HasOne(p => p.Categoria)

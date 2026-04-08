@@ -21,7 +21,7 @@ namespace VidaAnimal.API.DTOs
         public IFormFile? ImagenFoto { get; set; }
         public bool EliminarImagen { get; set; }
 
-        public int? EspecieID { get; set; }
+        public string? EspecieIdsJson { get; set; } // Ejemplo: "[1, 2, 5]"
         public int? CategoriaID { get; set; }
     }
 }

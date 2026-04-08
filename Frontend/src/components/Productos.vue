@@ -61,8 +61,8 @@
             <td class="font-medium">
               <div class="prod-name">
                 {{ prod.nombre }}
-                <div class="prod-classification" v-if="prod.especie || prod.categoria">
-                    <span v-if="prod.especie" class="class-badge especie-bg">🐾 {{ prod.especie.nombre }}</span>
+                <div class="prod-classification" v-if="(prod.especies && prod.especies.length > 0) || prod.categoria">
+                    <span v-for="esp in prod.especies" :key="esp.especieID" class="class-badge especie-bg">🐾 {{ esp.nombre }}</span>
                     <span v-if="prod.categoria" class="class-badge categoria-bg">🏷️ {{ prod.categoria.nombre }}</span>
                 </div>
                 <span v-if="prod.stockActual <= prod.stockMinimo" class="alert-badge stock-badge" title="Stock Bajo">⚠️ Bajo Stock</span>
@@ -129,14 +129,14 @@
                     <option v-for="p in proveedores" :key="p.proveedorID" :value="p.proveedorID">{{ p.nombre }}</option>
                   </select>
                 </div>
-                <div class="form-group">
-                  <label>¿Para qué mascota? (Especie)</label>
-                  <div style="display: flex; gap: 5px;">
-                      <select v-model="formProd.especieID" style="flex: 1;">
-                        <option :value="null">Sin asignar</option>
-                        <option v-for="e in especies" :key="e.especieID" :value="e.especieID">{{ e.nombre }}</option>
-                      </select>
-                      <button type="button" @click="agregarEspecieRapido" class="action-btn" title="Nueva Especie">+</button>
+                <div class="form-group lg">
+                  <label>¿Para qué mascota(s)? (Selección Múltiple)</label>
+                  <div class="multi-select-container">
+                      <div v-for="e in especies" :key="e.especieID" class="checkbox-item">
+                        <input type="checkbox" :id="'esp-'+e.especieID" :value="e.especieID" v-model="formProd.especieIds" />
+                        <label :for="'esp-'+e.especieID">{{ e.nombre }}</label>
+                      </div>
+                      <button type="button" @click="agregarEspecieRapido" class="add-mini-btn" title="Nueva Mascota">+ Nueva</button>
                   </div>
                 </div>
                 <div class="form-group">
@@ -398,7 +398,7 @@ const formProd = ref({
   codigo: '', nombre: '', descripcion: '', proveedorID: 0, 
   unidadMedida: 'UND', precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
   precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: '',
-  especieID: null, categoriaID: null
+  especieIds: [], categoriaID: null
 })
 
 const archivoSeleccionado = ref(null)
@@ -535,7 +535,7 @@ const abrirModalNuevo = () => {
     codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
     precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
     precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: '',
-    eliminarImagen: false, especieID: null, categoriaID: null
+    eliminarImagen: false, especieIds: [], categoriaID: null
   }
   mostrarModal.value = true
 }
@@ -547,13 +547,15 @@ const abrirModalEditar = (prod) => {
   archivoSeleccionado.value = null
   filePreview.value = prod.imagenURL ? IMAGE_BASE + prod.imagenURL : null
   
-  // Mapeo manual para asegurar que los campos nuevos no sean null
+  // Mapeo manual incluyendo colección de especies
   formProd.value = {
     ...prod,
     precioMayorista: prod.precioMayorista ?? 0,
     cantidadMayorista: prod.cantidadMayorista ?? 0,
     nombreUnidadMayorista: prod.nombreUnidadMayorista ?? '',
-    eliminarImagen: false
+    eliminarImagen: false,
+    especieIds: (prod.especies || []).map(e => e.especieID),
+    categoriaID: prod.categoriaID
   }
   
   mostrarModal.value = true
@@ -572,9 +574,16 @@ const guardarProducto = async () => {
   errorFormulario.value = ''
 
   const formData = new FormData()
-  // Agregar todos los campos al FormData respetando valores numéricos como 0
-  Object.keys(formProd.value).forEach(key => {
-    const val = formProd.value[key];
+  
+  // Preparar envío de especies como JSON string
+  const dataToSave = { ...formProd.value };
+  dataToSave.especieIdsJson = JSON.stringify(formProd.value.especieIds);
+  
+  // Agregar campos al FormData
+  Object.keys(dataToSave).forEach(key => {
+    // No enviamos el array crudo, enviamos el JSON string
+    if (key === 'especieIds') return; 
+    const val = dataToSave[key];
     formData.append(key, val !== null && val !== undefined && val !== '' ? val : 0);
   });
   
@@ -716,7 +725,7 @@ const agregarEspecieRapido = async () => {
         const data = await res.json();
         if (data.success) {
             especies.value.push(data.data);
-            formProd.value.especieID = data.data.especieID;
+            formProd.value.especieIds.push(data.data.especieID);
         }
     } catch (e) { alert("Error al crear especie"); }
 }
@@ -762,6 +771,15 @@ const agregarCategoriaRapida = async () => {
 .class-badge { font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
 .especie-bg { background-color: #EBF8FF; color: #2B6CB0; border: 1px solid #BEE3F8; }
 .categoria-bg { background-color: #FAF5FF; color: #6B46C1; border: 1px solid #E9D8FD; }
+
+/* MULTI-SELECT STYLES */
+.multi-select-container { display: flex; flex-wrap: wrap; gap: 0.75rem; background: #F7FAFC; padding: 1rem; border-radius: 10px; border: 1px solid #E2E8F0; margin-top: 0.5rem;}
+.checkbox-item { display: flex; align-items: center; gap: 0.5rem; background: white; padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid #EDF2F7; cursor: pointer; transition: all 0.2s;}
+.checkbox-item:hover { border-color: #A3E4D7; background: #f0fff4; }
+.checkbox-item input { cursor: pointer; width: 16px; height: 16px; }
+.checkbox-item label { cursor: pointer; font-size: 0.9rem; color: #4A5568; font-weight: 500; margin: 0; }
+.add-mini-btn { background: #E6FFFA; color: #319795; border: 1px dashed #81E6D9; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.8rem;}
+.add-mini-btn:hover { background: #B2F5EA; }
 
 /* Aprovechamos la UI común */
 .productos-module { animation: fadeIn 0.4s ease; }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VidaAnimal.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9285d985bc02313f22258581917e43bac48d451")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb10b83060c6cfb7f72ccc1c76b38f67eaa46cd8")]
 [assembly: System.Reflection.AssemblyProductAttribute("VidaAnimal.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VidaAnimal.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

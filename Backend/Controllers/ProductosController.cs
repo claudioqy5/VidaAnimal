@@ -37,7 +37,7 @@ namespace VidaAnimal.API.Controllers
                 .ToListAsync();
 
             var todosLosProductos = await _context.Productos
-                .Include(p => p.Especie)
+                .Include(p => p.Especies)
                 .Include(p => p.Categoria)
                 .Where(p => p.Activo)
                 .ToListAsync();
@@ -100,9 +100,18 @@ namespace VidaAnimal.API.Controllers
                     Activo = true,
                     FechaCreacion = DateTime.Now,
                     ImagenURL = rutaImagenBD,
-                    EspecieID = modelo.EspecieID,
                     CategoriaID = modelo.CategoriaID
                 };
+
+                // Procesar Especies Múltiples
+                if (!string.IsNullOrEmpty(modelo.EspecieIdsJson))
+                {
+                    var ids = System.Text.Json.JsonSerializer.Deserialize<List<int>>(modelo.EspecieIdsJson);
+                    if (ids != null)
+                    {
+                        nuevoProducto.Especies = await _context.Especies.Where(e => ids.Contains(e.EspecieID)).ToListAsync();
+                    }
+                }
 
                 _context.Productos.Add(nuevoProducto);
                 await _context.SaveChangesAsync();
@@ -196,8 +205,26 @@ namespace VidaAnimal.API.Controllers
             p.PrecioMayorista = modelo.PrecioMayorista;
             p.CantidadMayorista = modelo.CantidadMayorista;
             p.NombreUnidadMayorista = modelo.NombreUnidadMayorista;
-            p.EspecieID = modelo.EspecieID;
             p.CategoriaID = modelo.CategoriaID;
+
+            // Procesar actualización de Especies (Muchos a Muchos)
+            if (!string.IsNullOrEmpty(modelo.EspecieIdsJson))
+            {
+                var ids = System.Text.Json.JsonSerializer.Deserialize<List<int>>(modelo.EspecieIdsJson);
+                if (ids != null)
+                {
+                    // Cargamos explícitamente para borrar y re-asignar
+                    await _context.Entry(p).Collection(prod => prod.Especies).LoadAsync();
+                    p.Especies.Clear();
+                    p.Especies = await _context.Especies.Where(e => ids.Contains(e.EspecieID)).ToListAsync();
+                }
+            }
+            else 
+            {
+                // Si viene vacío o nulo, quitamos todas las especies
+                await _context.Entry(p).Collection(prod => prod.Especies).LoadAsync();
+                p.Especies.Clear();
+            }
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, mensaje = "Actualizado" });
