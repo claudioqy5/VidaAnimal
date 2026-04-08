@@ -61,6 +61,10 @@
             <td class="font-medium">
               <div class="prod-name">
                 {{ prod.nombre }}
+                <div class="prod-classification" v-if="prod.especie || prod.categoria">
+                    <span v-if="prod.especie" class="class-badge especie-bg">🐾 {{ prod.especie.nombre }}</span>
+                    <span v-if="prod.categoria" class="class-badge categoria-bg">🏷️ {{ prod.categoria.nombre }}</span>
+                </div>
                 <span v-if="prod.stockActual <= prod.stockMinimo" class="alert-badge stock-badge" title="Stock Bajo">⚠️ Bajo Stock</span>
                 <span v-if="evaluarPerdida(prod)" class="alert-badge loss-badge" title="Venta por debajo del costo de compra">🚨 Pérdida</span>
               </div>
@@ -124,6 +128,26 @@
                     <option value="0" disabled>Selecciona uno...</option>
                     <option v-for="p in proveedores" :key="p.proveedorID" :value="p.proveedorID">{{ p.nombre }}</option>
                   </select>
+                </div>
+                <div class="form-group">
+                  <label>¿Para qué mascota? (Especie)</label>
+                  <div style="display: flex; gap: 5px;">
+                      <select v-model="formProd.especieID" style="flex: 1;">
+                        <option :value="null">Sin asignar</option>
+                        <option v-for="e in especies" :key="e.especieID" :value="e.especieID">{{ e.nombre }}</option>
+                      </select>
+                      <button type="button" @click="agregarEspecieRapido" class="action-btn" title="Nueva Especie">+</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Categoría de Producto</label>
+                  <div style="display: flex; gap: 5px;">
+                      <select v-model="formProd.categoriaID" style="flex: 1;">
+                        <option :value="null">Sin asignar</option>
+                        <option v-for="c in categorias" :key="c.categoriaID" :value="c.categoriaID">{{ c.nombre }}</option>
+                      </select>
+                      <button type="button" @click="agregarCategoriaRapida" class="action-btn" title="Nueva Categoría">+</button>
+                  </div>
                 </div>
                 <div class="form-group lg">
                   <label>Descripción</label>
@@ -346,6 +370,7 @@ const obtenerRol = () => {
 }
 
 const categorias = ref([])
+const especies = ref([])
 const proveedores = ref([])
 
 const cargando = ref(true)
@@ -372,7 +397,8 @@ const productToEditId = ref(0) // ID original de edicion para el PUT
 const formProd = ref({
   codigo: '', nombre: '', descripcion: '', proveedorID: 0, 
   unidadMedida: 'UND', precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
-  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: ''
+  precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: '',
+  especieID: null, categoriaID: null
 })
 
 const archivoSeleccionado = ref(null)
@@ -442,6 +468,16 @@ const cargarDatos = async () => {
       const dProv = await resProv.json();
       if (dProv.success) proveedores.value = dProv.data.filter(p => p.activo);
     }
+
+    // 3. Cargar Clasificaciones (Especies y Categorías)
+    const resEsp = await fetch(`${API_URL}/Clasificacion/especies`, { headers });
+    const dEsp = await resEsp.json();
+    if (dEsp.success) especies.value = dEsp.data;
+
+    const resCat = await fetch(`${API_URL}/Clasificacion/categorias`, { headers });
+    const dCat = await resCat.json();
+    if (dCat.success) categorias.value = dCat.data;
+
   } catch (err) {
     console.error(err);
     errorGlobal.value = 'Error cargando datos del Catálogo.';
@@ -499,7 +535,7 @@ const abrirModalNuevo = () => {
     codigo: '', nombre: '', descripcion: '', proveedorID: 0, unidadMedida: 'UND', 
     precioCosto: 0, precioVenta: 0, stockActual: 0, stockMinimo: 5,
     precioMayorista: 0, cantidadMayorista: 0, nombreUnidadMayorista: '',
-    eliminarImagen: false
+    eliminarImagen: false, especieID: null, categoriaID: null
   }
   mostrarModal.value = true
 }
@@ -666,6 +702,41 @@ const confirmarToggle = async () => {
     togglando.value = false
   }
 }
+
+// Funciones rápidas para agregar Especies/Categorías
+const agregarEspecieRapido = async () => {
+    const nombre = prompt("Ingrese el nombre de la nueva especie (ej: Perro, Gato, Ave):");
+    if (!nombre) return;
+    try {
+        const res = await fetch(`${API_URL}/Clasificacion/especies`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify({ nombre })
+        });
+        const data = await res.json();
+        if (data.success) {
+            especies.value.push(data.data);
+            formProd.value.especieID = data.data.especieID;
+        }
+    } catch (e) { alert("Error al crear especie"); }
+}
+
+const agregarCategoriaRapida = async () => {
+    const nombre = prompt("Ingrese el nombre de la nueva categoría (ej: Alimentos, Juguetes):");
+    if (!nombre) return;
+    try {
+        const res = await fetch(`${API_URL}/Clasificacion/categorias`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: JSON.stringify({ nombre })
+        });
+        const data = await res.json();
+        if (data.success) {
+            categorias.value.push(data.data);
+            formProd.value.categoriaID = data.data.categoriaID;
+        }
+    } catch (e) { alert("Error al crear categoría"); }
+}
 </script>
 
 <style scoped>
@@ -685,6 +756,12 @@ const confirmarToggle = async () => {
 .results-badge { background: rgba(241, 245, 249, 0.8); padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.85rem; color: #64748b; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; }
 .count-now { color: #fb923c; font-weight: 700; }
 .count-total { color: #334155; font-weight: 700; }
+
+/* NUEVOS ESTILOS CLASIFICACION */
+.prod-classification { display: flex; gap: 0.4rem; margin-top: 0.3rem; flex-wrap: wrap; }
+.class-badge { font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
+.especie-bg { background-color: #EBF8FF; color: #2B6CB0; border: 1px solid #BEE3F8; }
+.categoria-bg { background-color: #FAF5FF; color: #6B46C1; border: 1px solid #E9D8FD; }
 
 /* Aprovechamos la UI común */
 .productos-module { animation: fadeIn 0.4s ease; }

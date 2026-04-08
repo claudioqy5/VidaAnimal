@@ -19,6 +19,9 @@ namespace VidaAnimal.API.Data
         public DbSet<VentaDetalle> VentaDetalles { get; set; }
         public DbSet<MovimientoInventario> MovimientosInventario { get; set; }
 
+        public DbSet<Especie> Especies { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -48,6 +51,19 @@ namespace VidaAnimal.API.Data
                 .HasColumnType("decimal(12,3)");
 
             // Trigger TR_ReducirStock fue eliminado. El backend gestiona el stock directamente.
+
+            // Relaciones de Clasificación
+            modelBuilder.Entity<Producto>()
+                .HasOne(p => p.Especie)
+                .WithMany()
+                .HasForeignKey(p => p.EspecieID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Producto>()
+                .HasOne(p => p.Categoria)
+                .WithMany()
+                .HasForeignKey(p => p.CategoriaID)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

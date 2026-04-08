@@ -36,7 +36,11 @@ namespace VidaAnimal.API.Controllers
                 .Select(g => new { ProductoID = g.Key, CantidadVendida = g.Sum(vd => vd.Cantidad) })
                 .ToListAsync();
 
-            var todosLosProductos = await _context.Productos.Where(p => p.Activo).ToListAsync();
+            var todosLosProductos = await _context.Productos
+                .Include(p => p.Especie)
+                .Include(p => p.Categoria)
+                .Where(p => p.Activo)
+                .ToListAsync();
 
             // Unimos los productos con su conteo de ventas y ordenamos
             var resultado = todosLosProductos
@@ -95,7 +99,9 @@ namespace VidaAnimal.API.Controllers
                     NombreUnidadMayorista = modelo.NombreUnidadMayorista,
                     Activo = true,
                     FechaCreacion = DateTime.Now,
-                    ImagenURL = rutaImagenBD
+                    ImagenURL = rutaImagenBD,
+                    EspecieID = modelo.EspecieID,
+                    CategoriaID = modelo.CategoriaID
                 };
 
                 _context.Productos.Add(nuevoProducto);
@@ -190,6 +196,8 @@ namespace VidaAnimal.API.Controllers
             p.PrecioMayorista = modelo.PrecioMayorista;
             p.CantidadMayorista = modelo.CantidadMayorista;
             p.NombreUnidadMayorista = modelo.NombreUnidadMayorista;
+            p.EspecieID = modelo.EspecieID;
+            p.CategoriaID = modelo.CategoriaID;
 
             await _context.SaveChangesAsync();
             return Ok(new { success = true, mensaje = "Actualizado" });

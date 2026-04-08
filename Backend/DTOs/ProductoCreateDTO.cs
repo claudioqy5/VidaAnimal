@@ -20,5 +20,8 @@ namespace VidaAnimal.API.DTOs
 
         public IFormFile? ImagenFoto { get; set; }
         public bool EliminarImagen { get; set; }
+
+        public int? EspecieID { get; set; }
+        public int? CategoriaID { get; set; }
     }
 }

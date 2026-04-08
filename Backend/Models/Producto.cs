@@ -32,5 +32,12 @@ namespace VidaAnimal.API.Models
         public bool Activo { get; set; }
         public DateTime FechaCreacion { get; set; }
         public string? ImagenURL { get; set; }
+
+        // Nuevos campos para Clasificación (E-commerce)
+        public int? EspecieID { get; set; }
+        public virtual Especie? Especie { get; set; }
+
+        public int? CategoriaID { get; set; }
+        public virtual Categoria? Categoria { get; set; }
     }
 }
