@@ -21,9 +21,9 @@ const getWhatsAppUrl = () => {
 
 const getImageUrl = (url) => {
   if (!url) return 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=500&auto=format&fit=crop'
-  // Si la URL es relativa, le pegamos el dominio del VPS
+  // Si la URL es relativa, le pegamos el dominio del VPS con todo y /api
   if (url.startsWith('/')) {
-     return `https://vidaanimal.helifyferdigital.cloud${url}`
+     return `https://vidaanimal.helifyferdigital.cloud/api${url}`
   }
   return url
 }

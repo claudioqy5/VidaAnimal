@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary: #2D5A27; /* Verde Bosque (Naturaleza/Salud) */
-  --secondary: #D19C1D; /* Dorado/Miel (Calidad/Premium) */
-  --bg-color: #F8F7F4; /* Blanco Crema (Limpieza/Suavidad) */
+  --primary: #2D5A27; /* Verde Bosque */
+  --secondary: #D19C1D; /* Dorado/Miel */
+  --bg-color: #F8F7F4; /* Blanco Crema */
   --text-dark: #1A1A1A;
   --text-light: #666666;
   --glass: rgba(255, 255, 255, 0.7);
@@ -17,7 +17,7 @@
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-dark);
   line-height: 1.6;
