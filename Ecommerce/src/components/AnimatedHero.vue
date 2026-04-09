@@ -2,11 +2,49 @@
 import { onMounted, ref } from 'vue'
 
 const isLoaded = ref(false)
+const displayText = ref('')
+const phrases = [
+  "en un solo lugar.",
+  "para vivir cómodos y felices.",
+  "al mejor precio.",
+  "con calidad y cariño."
+]
+
+const baseText = "Todo lo que ellos necesitan, "
+let phraseIndex = 0
+let charIndex = 0
+let isDeleting = false
+let typeSpeed = 100
+
+const typeEffect = () => {
+  const currentPhrase = phrases[phraseIndex]
+  
+  if (isDeleting) {
+    displayText.value = baseText + currentPhrase.substring(0, charIndex - 1)
+    charIndex--
+    typeSpeed = 50
+  } else {
+    displayText.value = baseText + currentPhrase.substring(0, charIndex + 1)
+    charIndex++
+    typeSpeed = 100
+  }
+
+  if (!isDeleting && charIndex === currentPhrase.length) {
+    isDeleting = true
+    typeSpeed = 2000 // Tiempo que se queda la frase completa
+  } else if (isDeleting && charIndex === 0) {
+    isDeleting = false
+    phraseIndex = (phraseIndex + 1) % phrases.length
+    typeSpeed = 500
+  }
+
+  setTimeout(typeEffect, typeSpeed)
+}
 
 onMounted(() => {
-  // Pequeño delay para asegurar que el navegador esté listo para animar
   setTimeout(() => {
     isLoaded.value = true
+    typeEffect()
   }, 100)
 })
 </script>
@@ -35,9 +73,8 @@ onMounted(() => {
 
     <div class="hero-overlay fade-in" v-if="isLoaded">
       <div class="container welcome-container">        
-        <div class="hero-actions-box">
-          <p>Nutrición y cuidado de alta gama.</p>
-          <button class="btn-primary" @click="$emit('explore')">Comenzar a Comprar</button>
+        <div class="hero-actions-box">          
+          <p class="typewriter-text">{{ displayText }}<span class="cursor">|</span></p>          
         </div>
         <div class="massive-text">
           <h1>VIDA<br>ANIMAL</h1>
@@ -72,7 +109,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.65); /* Oscurece el fondo para que resalten las letras */
+  filter: brightness(0.45); /* Más oscuro para máximo contraste */
 }
 
 /* Animación: Lado Izquierdo */
@@ -87,7 +124,7 @@ onMounted(() => {
 .layer-left img {
   height: 100%;
   width: auto;
-  filter: brightness(0.65); /* Oscurece la imagen izquierda */
+  filter: brightness(0.45); /* Oscurece la imagen izquierda */
 }
 
 .start-animation .layer-left {
@@ -105,7 +142,7 @@ onMounted(() => {
 .layer-right img {
   height: 100%;
   width: auto;
-  filter: brightness(0.65); /* Oscurece la imagen derecha */
+  filter: brightness(0.45); /* Oscurece la imagen derecha */
 }
 
 .start-animation .layer-right {
@@ -125,7 +162,7 @@ onMounted(() => {
   max-height: 110%; /* Más grande como en la referencia */
   width: auto;
   object-fit: contain;
-  filter: brightness(0.65); /* Oscurece también la imagen central */
+  filter: brightness(0.45); /* Oscurece también la imagen central */
 }
 
 .start-animation .layer-center {
@@ -149,9 +186,11 @@ onMounted(() => {
 .welcome-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  justify-content: flex-end; /* Lo manda al fondo */
+  align-items: flex-start;  /* Lo mantiene a la izquierda */
   height: 100%;
+  padding-bottom: 2rem;     /* Más cerca del suelo como en la captura */
+  margin-left: 5rem;
 }
 
 .massive-text {
@@ -173,13 +212,64 @@ onMounted(() => {
 .hero-actions-box {
   opacity: 0;
   animation: fadeInText 1s forwards 4s;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 4rem; /* Separación de las letras gigantes */
+}
+
+/* El botón con 'Vida' */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #3e7a36 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  width: fit-content;
+  box-shadow: 0 10px 25px rgba(45, 90, 39, 0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: pulse-glow 2s infinite 5s; /* Empieza a pulsar después de salir */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 30px rgba(45, 90, 39, 0.6);
+  filter: brightness(1.1);
 }
 
 .hero-actions-box p {
-  color: #f0f0f0;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
+  color: #fff;
+  font-size: 1.1rem;
   font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.9;
+  border-left: 3px solid var(--secondary);
+  padding-left: 1rem;
+  min-height: 1.5em; /* Evita que el layout salte */
+}
+
+.cursor {
+  color: var(--secondary);
+  animation: blink 0.8s infinite;
+  margin-left: 5px;
+  font-weight: 900;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(45, 90, 39, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(45, 90, 39, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(45, 90, 39, 0); }
 }
 
 @keyframes fadeInText {

@@ -31,9 +31,18 @@ const scrollToCatalog = () => {
         </div>
         
         <ul class="nav-links">
-          <li><a href="#" @click.prevent="scrollToCatalog" class="active">Tienda</a></li>
-          <li><a href="https://wa.me/51975418965" target="_blank" class="btn-cta">WhatsApp</a></li>
+          <li><a href="#" @click.prevent="scrollToCatalog">Tienda</a></li>
+          <li><a href="#">Marcas</a></li>
+          <li><a href="#">Nosotros</a></li>
         </ul>
+
+        <div class="nav-actions">
+          <div class="cart-trigger">
+            <span class="cart-icon">🛒</span>
+            <span class="cart-count">0</span>
+          </div>
+          <a href="https://wa.me/51975418965" target="_blank" class="btn-cta">WhatsApp</a>
+        </div>
       </div>
     </nav>
 
@@ -82,6 +91,43 @@ const scrollToCatalog = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cart-trigger {
+  position: relative;
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: transform 0.2s;
+}
+
+.cart-trigger:hover {
+  transform: scale(1.1);
+}
+
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: var(--secondary);
+  color: white;
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid white;
 }
 
 .logo {
