@@ -56,6 +56,18 @@ namespace VidaAnimal.API.Controllers
             return Ok(new { success = true, data = resultado });
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Producto>> GetProducto(int id)
+        {
+            var producto = await _context.Productos
+                .Include(p => p.Especies)
+                .Include(p => p.Categoria)
+                .FirstOrDefaultAsync(p => p.ProductoID == id);
+
+            if (producto == null) return NotFound();
+            return producto;
+        }
+
         [HttpPost]
         public async Task<IActionResult> CrearProducto([FromForm] ProductoCreateDTO modelo)
         {
