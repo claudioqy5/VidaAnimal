@@ -165,3 +165,9 @@ C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\obj\Release\net9.0\refi
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\obj\Release\net9.0\VidaAnimal.API.pdb
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\obj\Release\net9.0\VidaAnimal.API.genruntimeconfig.cache
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\obj\Release\net9.0\ref\VidaAnimal.API.dll
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\web.config
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\appsettings.Development.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\appsettings.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\VidaAnimal.API.deps.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\VidaAnimal.API.runtimeconfig.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\bin\Release\net9.0\vps_deploy\VidaAnimal.API.staticwebassets.endpoints.json

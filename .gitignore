@@ -1,0 +1,26 @@
+# .gitignore para Vida Animal
+
+# Carpetas de compilación de .NET
+[Bb]in/
+[Oo]bj/
+vps_deploy/
+
+# Archivos de publicación específicos
+*.exe
+*.dll
+*.pdb
+
+# Node modules (Frontend y Ecommerce)
+node_modules/
+dist/
+
+# Archivos temporales de VS Code
+.vscode/
+.DS_Store
+
+# Variables de entorno locales
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

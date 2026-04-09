@@ -1,6 +1,12 @@
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\VidaAnimal.API.exe
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\web.config
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\appsettings.Development.json
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\appsettings.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\appsettings.Development.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\appsettings.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\VidaAnimal.API.deps.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\VidaAnimal.API.runtimeconfig.json
+C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\vps_deploy\VidaAnimal.API.staticwebassets.endpoints.json
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\VidaAnimal.API.dll
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\VidaAnimal.API.runtimeconfig.json
 C:\Users\ADMIN\Desktop\MIS PROYECTOS\VIDA ANIMAL\backend\vps_deploy\VidaAnimal.API.pdb
