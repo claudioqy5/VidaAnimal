@@ -142,8 +142,8 @@
             <!-- SELECTOR -->
             <div v-else class="item-selector-row">
                <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini">
-                 <option value="KG">Vender por Kilo (Kg)</option>
-                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde' }}</option>
+                 <option :value="item.producto.unidadMedida === 'SACO' ? 'KG' : 'UND'">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Kilo (Kg)' : 'Unidad (Und)' }}</option>
+                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde/Bolsa' }}</option>
                </select>
                <div class="item-desc-line" style="margin-top: 0.25rem;">
                  <span>S/&nbsp;</span>
