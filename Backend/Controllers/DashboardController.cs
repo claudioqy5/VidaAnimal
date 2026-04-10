@@ -57,21 +57,20 @@ namespace VidaAnimal.API.Controllers
                 var detallesHoy = data.Where(d => d.FechaPeru.Date == hoy).ToList();
                 var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
+                var ventasSemanaGroups = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
+                var ventasMesGroups = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
+
                 var stats = new {
                     ventasHoy = ventasHoyGroups.Sum(v => v.Total),
-                    gananciaHoy = detallesHoy.Sum(d => d.Detalle.Ganancia ?? 0),
+                    gananciaHoy = detallesHoy.Sum(d => d.Detalle.Ganancia ?? 0) - ventasHoyGroups.Sum(v => v.Descuento),
                     transaccionesHoy = ventasHoyGroups.Count,
                     clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),
                     
-                    ventasSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date)
-                                       .GroupBy(d => d.Detalle.VentaID)
-                                       .Select(g => g.First().Detalle.Venta.Total).Sum(),
-                    gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0),
+                    ventasSemana = ventasSemanaGroups.Sum(v => v.Total),
+                    gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0) - ventasSemanaGroups.Sum(v => v.Descuento),
                     
-                    ventasMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year)
-                                    .GroupBy(d => d.Detalle.VentaID)
-                                    .Select(g => g.First().Detalle.Venta.Total).Sum(),
-                    gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.Ganancia ?? 0)
+                    ventasMes = ventasMesGroups.Sum(v => v.Total),
+                    gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.Ganancia ?? 0) - ventasMesGroups.Sum(v => v.Descuento)
                 };
 
                 var topProductosHoy = detallesHoy
@@ -141,7 +140,7 @@ namespace VidaAnimal.API.Controllers
                     dia = fecha.ToString("dddd", new CultureInfo("es-ES")),
                     fecha = fecha.ToString("dd/MM"),
                     totalVentas = ventasUnicas.Sum(v => (decimal)v.Total),
-                    totalGanancia = itemsDia.Sum(d => (decimal)d.Detalle.Ganancia)
+                    totalGanancia = itemsDia.Sum(d => (decimal)(d.Detalle.Ganancia ?? 0)) - ventasUnicas.Sum(v => (decimal)v.Descuento)
                 });
             }
             return lista;
@@ -162,7 +161,7 @@ namespace VidaAnimal.API.Controllers
                     semana = $"Semana {i + 1}",
                     rango = $"{sInicio:dd/MM} - {sFin:dd/MM}",
                     totalVentas = ventasUnicas.Sum(v => (decimal)v.Total),
-                    totalGanancia = itemsSem.Sum(d => (decimal)d.Detalle.Ganancia)
+                    totalGanancia = itemsSem.Sum(d => (decimal)(d.Detalle.Ganancia ?? 0)) - ventasUnicas.Sum(v => (decimal)v.Descuento)
                 });
             }
             return lista;
