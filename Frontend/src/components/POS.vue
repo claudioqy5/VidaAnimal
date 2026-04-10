@@ -620,11 +620,10 @@ const validarPrecioCosto = (idx) => {
   let costoMinimoPermitido = 0;
   
   if (item.tipoVenta === 'SACO' || item.tipoVenta === 'BALDE') {
-    // Si vende bulto entero, el costo es el precio de costo * la cantidad de unidades en el bulto
-    costoMinimoPermitido = costoBase * (item.producto.cantidadMayorista || 1);
-  } else {
-    // Si vende por kilo o unidad suelta, el costo es el precio de costo unitario
     costoMinimoPermitido = costoBase;
+  } else {
+    const divisor = (item.producto.cantidadMayorista && item.producto.cantidadMayorista > 0) ? item.producto.cantidadMayorista : 1;
+    costoMinimoPermitido = costoBase / divisor;
   }
 
   if (item.precioVentaUnitario < costoMinimoPermitido) {
