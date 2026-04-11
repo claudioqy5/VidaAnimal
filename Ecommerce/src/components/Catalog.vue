@@ -4,7 +4,7 @@ import api from '../utils/api'
 import ProductCard from './ProductCard.vue'
 
 // Importación de Logos Personalizados
-import iconHuella from '../assets/logohuella.png'
+import iconHuella from '../assets//logohuella.png'
 import iconGato from '../assets/logogato.jpg'
 import iconPollo from '../assets/logopollo.jpg'
 import iconCuy from '../assets/logocuy.jpg'
