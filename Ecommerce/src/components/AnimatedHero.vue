@@ -1,8 +1,36 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import publicidadPata from '../assets/publicidadpata.png'
+import publicidadRopita from '../assets/publicidadropita.png'
+import publicidadStitch from '../assets/publicidadstitch.jpg'
+import publicidadSchnauzer from '../assets/publicidadschnauzer.png'
+import publicidadZapatos from '../assets/publicidadzapatos.png'
+import publicidadBebedero from '../assets/publicidadbebedero.png'
+import publicidadSofaDog from '../assets/publicidadsofa.png'
+import publicidadalimentos from '../assets/publicidadalimentos.png'
+import publicidadalimentosotros from '../assets/publicidadalimentosotros.png'
+import publicidadjuguetes from '../assets/publicidadjuguetes.png' 
 
 const isLoaded = ref(false)
+const isDimmed = ref(false)
 const displayText = ref('')
+
+// Configuración Carousel
+const adImages = [
+  publicidadPata,
+  publicidadRopita,  
+  publicidadStitch,  
+  publicidadZapatos,
+  publicidadBebedero,
+  publicidadSofaDog,
+  publicidadalimentos,
+  publicidadjuguetes,
+  publicidadSchnauzer,
+  publicidadalimentosotros
+]
+const currentAdIndex = ref(0)
+const isPaused = ref(false)
+
 const phrases = [
   "en un solo lugar.",
   "para vivir cómodos y felices.",
@@ -31,7 +59,7 @@ const typeEffect = () => {
 
   if (!isDeleting && charIndex === currentPhrase.length) {
     isDeleting = true
-    typeSpeed = 2000 // Tiempo que se queda la frase completa
+    typeSpeed = 2000 
   } else if (isDeleting && charIndex === 0) {
     isDeleting = false
     phraseIndex = (phraseIndex + 1) % phrases.length
@@ -41,43 +69,76 @@ const typeEffect = () => {
   setTimeout(typeEffect, typeSpeed)
 }
 
+const nextAd = () => {
+  currentAdIndex.value = (currentAdIndex.value + 1) % adImages.length
+}
+
+const prevAd = () => {
+  currentAdIndex.value = (currentAdIndex.value - 1 + adImages.length) % adImages.length
+}
+
 onMounted(() => {
   setTimeout(() => {
     isLoaded.value = true
     typeEffect()
   }, 100)
+
+  // Rotación del Carousel cada 2 segundos (solo si no está pausado)
+  setInterval(() => {
+    if (!isPaused.value) {
+      currentAdIndex.value = (currentAdIndex.value + 1) % adImages.length
+    }
+  }, 2000)
+
+  // Oscurecemos el fondo a los 3 segundos
+  setTimeout(() => {
+    isDimmed.value = true
+  }, 3000)
 })
 </script>
 
 <template>
-  <section class="animated-hero" :class="{ 'start-animation': isLoaded }">
-    <!-- Fondo Total -->
+  <section class="animated-hero" :class="{ 'start-animation': isLoaded, 'is-dimmed': isDimmed }">
+    <!-- Capas de arte -->
     <div class="layer layer-bg">
       <img src="../assets/fondototal.png" alt="Fondo" class="full-img">
     </div>
-
-    <!-- Imagen Izquierda -->
     <div class="layer layer-left">
       <img src="../assets/ladoizquierdo.png" alt="Decoración Izquierda">
     </div>
-
-    <!-- Imagen Derecha -->
     <div class="layer layer-right">
       <img src="../assets/ladoderecho.png" alt="Decoración Derecha">
     </div>
-
-    <!-- Imagen Centro -->
     <div class="layer layer-center">
       <img src="../assets/centro.png" alt="Centro" class="lift-img">
     </div>
 
+    <!-- Minicarousel Publicitario (Derecha) - Solo aparece cuando se oscurece el fondo -->
+    <Transition name="fade-ad-entrance">
+      <div 
+        class="ad-carousel-container" 
+        v-if="isDimmed"
+        @mouseenter="isPaused = true"
+        @mouseleave="isPaused = false"
+      >
+        <!-- Botones de control -->
+        <button class="ad-nav-btn prev" @click="prevAd">‹</button>
+        <button class="ad-nav-btn next" @click="nextAd">›</button>
+
+        <Transition name="fade-ad" mode="out-in">
+          <img :key="currentAdIndex" :src="adImages[currentAdIndex]" class="ad-image" alt="Publicidad Destacada">
+        </Transition>
+      </div>
+    </Transition>
+
+    <!-- Overlay de textos -->
     <div class="hero-overlay fade-in" v-if="isLoaded">
-      <div class="container welcome-container">        
+      <div class="container welcome-container">
         <div class="hero-actions-box">          
           <p class="typewriter-text">{{ displayText }}<span class="cursor">|</span></p>          
         </div>
         <div class="massive-text">
-          <h1>VIDA<br>ANIMAL</h1>
+          <h1><span class="vida">Vida</span><br><span class="animal">ANIMAL</span></h1>
         </div>
       </div>
     </div>
@@ -90,9 +151,86 @@ onMounted(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: #000; /* Fondo de seguridad */
+  background-color: #000;
 }
 
+/* Carousel Estilos */
+.ad-carousel-container {
+  position: absolute;
+  right: 8%; /* Posicionado a la derecha */
+  top: 50%;
+  transform: translateY(-50%);
+  /*width: 30%;  Tamaño proporcional */
+  height:75%;
+  z-index: 40; /* Subido para estar por encima del overlay y recibir clics */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  border-radius: 100%; /* Esquinas redondeadas premium */
+  overflow: visible; /* Permitir que los botones sobresalgan un poco si se desea */
+  /* YA NO SE OSCURECE: Mantiene su color natural al 100% */
+  filter: brightness(1) !important;
+  pointer-events: auto; /* IMPORTANTE: Ahora sí recibe clics para los botones */
+}
+
+.ad-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 35;
+  transition: all 0.3s;
+  line-height: 0;
+  padding-bottom: 5px;
+}
+
+.ad-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.ad-nav-btn.prev { left: -20px; }
+.ad-nav-btn.next { right: -20px; }
+
+.ad-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 24px; /* Aplicar redondeado a la imagen también */
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.fade-ad-entrance-enter-active {
+  transition: opacity 2s ease, transform 2s ease;
+}
+.fade-ad-entrance-enter-from {
+  opacity: 0;
+  transform: translateY(-40%) scale(0.9);
+}
+
+/* Animación de fundido para el anuncio */
+.fade-ad-enter-active,
+.fade-ad-leave-active {
+  transition: opacity 0.7s ease;
+}
+.fade-ad-enter-from,
+.fade-ad-leave-to {
+  opacity: 0;
+}
+
+/* Capas y Filtros */
 .layer {
   position: absolute;
   top: 0;
@@ -102,36 +240,42 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none; /* Las imágenes no bloquean clicks */
+  pointer-events: none;
 }
 
 .full-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.45); /* Más oscuro para máximo contraste */
+  transition: filter 2s ease;
 }
 
-/* Animación: Lado Izquierdo */
+.is-dimmed .full-img {
+  filter: brightness(0.35);
+}
+
 .layer-left {
   transform: translateX(-100%);
   transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
   justify-content: flex-start;
   z-index: 10;
-  max-height: 100%; /* Más grande como en la referencia */
+  max-height: 100%;
 }
 
 .layer-left img {
   height: 100%;
   width: auto;
-  filter: brightness(0.45); /* Oscurece la imagen izquierda */
+  transition: filter 2s ease;
+}
+
+.is-dimmed .layer-left img {
+  filter: brightness(0.25);
 }
 
 .start-animation .layer-left {
   transform: translateX(0);
 }
 
-/* Animación: Lado Derecho */
 .layer-right {
   transform: translateX(100%);
   transition: transform 2.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -142,35 +286,42 @@ onMounted(() => {
 .layer-right img {
   height: 100%;
   width: auto;
-  filter: brightness(0.45); /* Oscurece la imagen derecha */
+  transition: filter 2s ease;
+}
+
+.is-dimmed .layer-right img {
+  filter: brightness(0.25);
 }
 
 .start-animation .layer-right {
   transform: translateX(0);
 }
 
-/* Animación: Centro (Levantamiento) */
 .layer-center {
-  transform: translateY(100vh); /* Empieza completamente abajo (suelo) */
+  transform: translateY(100vh);
   opacity: 0;
   transition: all 2.5s cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: 1s; /* Espera 2.5 segundos para aparecer */
+  transition-delay: 1s;
   z-index: 20;
 }
 
 .layer-center img {
-  max-height: 110%; /* Más grande como en la referencia */
+  max-height: 110%;
   width: auto;
   object-fit: contain;
-  filter: brightness(0.45); /* Oscurece también la imagen central */
+  transition: filter 2s ease;
+}
+
+.is-dimmed .layer-center img {
+  filter: brightness(0.25);
 }
 
 .start-animation .layer-center {
-  transform: translateY(0) scale(1.05); /* Ligeramente más grande al final */
+  transform: translateY(0) scale(1.05);
   opacity: 1;
 }
 
-/* Texto sobre el diseño */
+/* Overlay y Contenedores */
 .hero-overlay {
   position: absolute;
   top: 0;
@@ -180,16 +331,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   z-index: 30;
-  background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 70%);
+  background: linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 90%);
 }
 
 .welcome-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* Lo manda al fondo */
-  align-items: flex-start;  /* Lo mantiene a la izquierda */
+  justify-content: flex-end;
+  align-items: flex-start;
   height: 100%;
-  padding-bottom: 2rem;     /* Más cerca del suelo como en la captura */
+  padding-bottom: 2rem;
   margin-left: 5rem;
 }
 
@@ -198,9 +349,24 @@ onMounted(() => {
   animation: fadeInText 1.5s forwards 3s;
 }
 
-.massive-text h1 {
-  font-size: clamp(5rem, 15vw, 15rem); /* Gigante y responsivo */
+.vida {
+  color: rgb(228, 180, 107);
+  font-family: 'Pacifico', cursive; /* Fuente elegante y manuscrita */
+  letter-spacing: 5px;
+  text-transform: none; /* Las cursivas se ven mejor en minúsculas/mixtas */
+  text-shadow: 0 5px 15px rgba(228, 180, 107, 0.3);
+}
+
+.animal {
   color: white;
+  font-family: 'Bungee', sans-serif; /* Fuente sólida y bloque */
+  letter-spacing: -2px;
+  text-transform: uppercase;
+}
+
+.massive-text h1 {
+  font-size: clamp(5rem, 15vw, 15rem);
+  color: rgb(255, 255, 255);
   line-height: 0.85;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -215,10 +381,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-bottom: 4rem; /* Separación de las letras gigantes */
+  margin-bottom: 4rem;
 }
 
-/* El botón con 'Vida' */
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, #3e7a36 100%);
   color: white;
@@ -231,7 +396,7 @@ onMounted(() => {
   width: fit-content;
   box-shadow: 0 10px 25px rgba(45, 90, 39, 0.4);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: pulse-glow 2s infinite 5s; /* Empieza a pulsar después de salir */
+  animation: pulse-glow 2s infinite 5s;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -244,14 +409,14 @@ onMounted(() => {
 
 .hero-actions-box p {
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
   opacity: 0.9;
   border-left: 3px solid var(--secondary);
   padding-left: 1rem;
-  min-height: 1.5em; /* Evita que el layout salte */
+  min-height: 1.5em;
 }
 
 .cursor {
@@ -279,6 +444,7 @@ onMounted(() => {
 
 @media (max-width: 1024px) {
   .welcome-text h1 { font-size: 2.5rem; }
-  .layer-left, .layer-right { opacity: 0.5; } /* Menos distracción en móvil */
+  .layer-left, .layer-right { opacity: 0.5; }
+  .ad-carousel-container { display: none; } /* Ocultar en móvil para limpiar el diseño */
 }
 </style>

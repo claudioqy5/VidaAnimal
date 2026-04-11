@@ -1,13 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary: #2D5A27; /* Verde Bosque */
-  --secondary: #D19C1D; /* Dorado/Miel */
-  --bg-color: #F8F7F4; /* Blanco Crema */
-  --text-dark: #1A1A1A;
-  --text-light: #666666;
-  --glass: rgba(255, 255, 255, 0.7);
-  --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --primary: #3D1E1E; /* Carbono Elegante (Mismo que 'Vida') */
+  --secondary: #F4A261; /* Arena para detalles suaves */
+  --whatsapp: #2D5A27; /* Verde Original exclusivo */
+  --bg-color: #FEFAF9;
+  --text-dark: #3D1E1E;
+  --text-light: #8D7373;
+  --glass: rgba(255, 255, 255, 0.9);
+  --shadow: 0 4px 20px rgba(61, 30, 30, 0.1);
 }
 
 * {
@@ -17,7 +18,7 @@
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-dark);
   line-height: 1.6;
@@ -34,9 +35,9 @@ ul {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
 /* Glassmorphism utility */

@@ -70,7 +70,7 @@ const getImageUrl = (url) => {
 }
 
 .image-container {
-  height: 220px;
+  height: 180px;
   position: relative;
   overflow: hidden;
 }
@@ -96,7 +96,7 @@ const getImageUrl = (url) => {
 }
 
 .species-badge {
-  background: rgba(45, 90, 39, 0.85);
+  background: var(--primary);
   color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 50px;
@@ -106,7 +106,7 @@ const getImageUrl = (url) => {
 }
 
 .product-info {
-  padding: 1.5rem;
+  padding: 1.2rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -122,7 +122,7 @@ const getImageUrl = (url) => {
 }
 
 .product-info h3 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   margin-bottom: 0.5rem;
   color: var(--text-dark);
 }
@@ -130,7 +130,7 @@ const getImageUrl = (url) => {
 .description {
   font-size: 0.9rem;
   color: var(--text-light);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -147,7 +147,7 @@ const getImageUrl = (url) => {
 }
 
 .price {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--primary);
 }
@@ -155,14 +155,15 @@ const getImageUrl = (url) => {
 .buy-btn {
   background: var(--primary);
   color: white;
-  padding: 0.7rem 1.2rem;
-  border-radius: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 0.9rem;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
 .buy-btn:hover {
-  background: #1e3d1a;
+  background: #2a1515;
+  transform: translateY(-2px);
 }
 </style>
