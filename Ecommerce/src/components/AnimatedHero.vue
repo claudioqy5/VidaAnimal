@@ -478,7 +478,8 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .welcome-text h1 { font-size: 2.5rem; }
   .layer-left, .layer-right { opacity: 0.5; }
-  .ad-carousel-container { display: none; } /* Ocultar en móvil para limpiar el diseño */
+  .ad-carousel-container { display: none; }
+  .layer-left, .layer-right { display: none; }
 }
 
 @media (max-width: 768px) {
@@ -492,6 +493,7 @@ onMounted(() => {
   }
   .welcome-container {
     padding: 0 1.5rem;
+    padding-bottom: 4.5rem;
   }
 }
 

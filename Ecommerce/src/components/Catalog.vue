@@ -311,6 +311,22 @@ const addToCart = () => {
             <p v-if="filteredProducts.length">{{ filteredProducts.length }} productos</p>
           </header>
 
+          <!-- Filtro de categorías horizontal (solo mobile) -->
+          <div v-if="availableCategories.length" class="mobile-cat-bar">
+            <button
+              class="mobile-cat-chip"
+              :class="{ active: !selectedCategory }"
+              @click="selectedCategory = null"
+            >Todas</button>
+            <button
+              v-for="cat in availableCategories"
+              :key="cat.categoriaId"
+              class="mobile-cat-chip"
+              :class="{ active: selectedCategory === cat.categoriaId }"
+              @click="toggleCategory(cat.categoriaId)"
+            >{{ cat.nombre }}</button>
+          </div>
+
           <div v-if="loading" class="loading-state">
              <div class="spinner"></div>
              <p>Cargando lo mejor para tu mascota...</p>
@@ -636,16 +652,53 @@ const addToCart = () => {
 @media (max-width: 1024px) {
   .catalog-container {
     flex-direction: column;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
   }
-  
   .catalog-sidebar {
-    width: 100%;
-    position: static;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    display: none;
   }
+  .main-header h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Barra de categorías mobile */
+.mobile-cat-bar {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .mobile-cat-bar {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 0 0.8rem;
+    margin-bottom: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .mobile-cat-bar::-webkit-scrollbar { display: none; }
+}
+
+.mobile-cat-chip {
+  flex-shrink: 0;
+  background: white;
+  border: 1.5px solid #eee;
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.mobile-cat-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 3px 10px rgba(61,30,30,0.2);
 }
 
 @media (max-width: 640px) {

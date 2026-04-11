@@ -322,6 +322,10 @@ const mobileFilter = (species, category) => {
           <span class="logo-text">Vida<b>Animal</b></span>
           <button @click="closeMobileMenu" class="mobile-close">✕</button>
         </div>
+        <div class="mobile-nav-search">
+          <span>🔍</span>
+          <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?" @input="closeMobileMenu">
+        </div>
         <div class="mobile-nav-links">
           <button @click="mobileFilter('Perro', '')" class="mobile-link">🐶 PERROS</button>
           <button @click="mobileFilter('Gato', '')" class="mobile-link">🐱 GATOS</button>
@@ -329,14 +333,11 @@ const mobileFilter = (species, category) => {
           <button @click="mobileFilter('Cuy', '')" class="mobile-link">🐹 CUY</button>
           <button @click="mobileFilter('Chancho', '')" class="mobile-link">🐷 CHANCHO</button>
           <button @click="mobileFilter('Conejo', '')" class="mobile-link">🐇 CONEJO</button>
+          <button @click="mobileFilter('Peste', '')" class="mobile-link">🐀 PESTE</button>
           <button @click="() => { scrollToBrands(); closeMobileMenu() }" class="mobile-link">🏷️ MARCAS</button>
           <button @click="() => { openSoonModal(); closeMobileMenu() }" class="mobile-link">✂️ PELUQUERÍA</button>
           <button @click="() => { scrollToMap(); closeMobileMenu() }" class="mobile-link">📍 UBÍCANOS</button>
           <button @click="() => { scrollToAbout(); closeMobileMenu() }" class="mobile-link">🌿 NOSOTROS</button>
-        </div>
-        <div class="mobile-nav-search">
-          <span>🔍</span>
-          <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?" @input="closeMobileMenu">
         </div>
       </div>
     </Teleport>
