@@ -26,8 +26,10 @@ const loading = ref(true)
 
 // Estado de filtros internos
 const search = ref('')
+const debouncedSearch = ref('')
 const selectedCategory = ref(null)
 const selectedSpecies = ref(null)
+let searchTimeout = null
 
 // Mapeo automático de iconos
 const getSpeciesIcon = (nombre) => {
@@ -96,8 +98,8 @@ onMounted(async () => {
 
 const filteredProducts = computed(() => {
   return productos.value.filter(p => {
-    const matchesSearch = p.nombre.toLowerCase().includes(search.value.toLowerCase()) || 
-                          p.descripcion?.toLowerCase().includes(search.value.toLowerCase())
+    const matchesSearch = p.nombre.toLowerCase().includes(debouncedSearch.value.toLowerCase()) || 
+                          p.descripcion?.toLowerCase().includes(debouncedSearch.value.toLowerCase())
     
     const matchesCategory = !selectedCategory.value || p.categoriaId === selectedCategory.value
     
@@ -125,7 +127,12 @@ watch(search, (newVal, oldVal) => {
     selectedSpecies.value = null
     selectedCategory.value = null
   }
-})
+  
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = newVal
+  }, 350)
+}, { immediate: true })
 
 const toggleSpecies = (id) => {
   selectedSpecies.value = selectedSpecies.value === id ? null : id
@@ -156,7 +163,14 @@ const availableCategories = computed(() => {
 const selectedProduct = ref(null)
 const qty = ref(1)
 const purchaseMode = ref('frac') // 'frac' (por kilo/unidad) o 'bulk' (saco/balde completo)
-const emit = defineEmits(['add-to-cart'])
+const emit = defineEmits(['add-to-cart', 'clear-filters'])
+
+const clearAllFilters = () => {
+  search.value = ''
+  selectedSpecies.value = null
+  selectedCategory.value = null
+  emit('clear-filters')
+}
 
 // Resetear modo al seleccionar producto
 watch(selectedProduct, (newVal) => {
@@ -316,12 +330,26 @@ const addToCart = () => {
         <!-- VISTA DE GRILLA -->
         <div v-if="!selectedProduct" class="catalog-results-wrapper">
           <header class="main-header">
-            <h2>Resultados <span>{{ selectedSpecies ? 'para ' + especies.find(e => e.especieId === selectedSpecies)?.nombre : '' }}</span></h2>
-            <p v-if="filteredProducts.length">{{ filteredProducts.length }} productos</p>
+            <div class="header-titles">
+              <h2>
+                Resultados 
+                <span class="desktop-search-text">{{ selectedSpecies ? 'para ' + especies.find(e => e.especieId === selectedSpecies)?.nombre : '' }}</span>
+                <span class="mobile-search-text">
+                   <template v-if="debouncedSearch">para "{{ debouncedSearch }}"</template>
+                   <template v-else-if="selectedSpecies">para {{ especies.find(e => e.especieId === selectedSpecies)?.nombre }}</template>
+                </span>
+              </h2>
+              <p v-if="filteredProducts.length">{{ filteredProducts.length }} productos</p>
+            </div>
+            <button v-if="debouncedSearch || selectedSpecies || selectedCategory" @click="clearAllFilters" class="btn-clear-header">
+              Limpiar✕
+            </button>
           </header>
 
           <!-- Filtro de categorías horizontal (solo mobile) -->
-          <div v-if="availableCategories.length" class="mobile-cat-bar">
+          <div v-if="availableCategories.length" class="mobile-cat-container">
+            <p class="scroll-hint">Desliza para ver más →</p>
+            <div class="mobile-cat-bar">
             <button
               class="mobile-cat-chip"
               :class="{ active: !selectedCategory }"
@@ -334,6 +362,7 @@ const addToCart = () => {
               :class="{ active: selectedCategory === cat.categoriaId }"
               @click="toggleCategory(cat.categoriaId)"
             >{{ cat.nombre }}</button>
+          </div>
           </div>
 
           <div v-if="loading" class="loading-state">
@@ -354,6 +383,7 @@ const addToCart = () => {
              <span class="empty-icon">🏜️</span>
              <h3>Sin resultados</h3>
              <p>Prueba con otros filtros o nombres.</p>
+             <button @click="clearAllFilters" class="btn-clear-empty">Mostrar todos los productos</button>
           </div>
         </div>
 
@@ -658,6 +688,10 @@ const addToCart = () => {
 }
 
 /* Responsividad */
+.mobile-search-text {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .catalog-container {
     flex-direction: column;
@@ -669,6 +703,12 @@ const addToCart = () => {
   .main-header h2 {
     font-size: 1.5rem;
   }
+  .mobile-search-text {
+    display: inline;
+  }
+  .desktop-search-text {
+    display: none;
+  }
 }
 
 /* Barra de categorías mobile */
@@ -676,13 +716,33 @@ const addToCart = () => {
   display: none;
 }
 
+.mobile-cat-container {
+  display: none;
+}
+
 @media (max-width: 1024px) {
+  .mobile-cat-container {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  
+  .scroll-hint {
+    font-size: 0.65rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
   .mobile-cat-bar {
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
-    padding: 0.5rem 0 0.8rem;
-    margin-bottom: 1rem;
+    padding: 0.2rem 0 0.5rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -1160,5 +1220,61 @@ const addToCart = () => {
   .detail-price-big {
     font-size: 2rem;
   }
+  .btn-clear-header {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Botones de limpieza de filtros */
+.btn-clear-header {
+  display: none; /* Oculto en PC por defecto */
+}
+
+ @media (max-width: 1024px) {
+  .btn-clear-header {
+    display: block;
+    background: #ffeded;
+    color: #e53935;
+    border: 1.5px solid #ffcdd2;
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: fit-content;
+    align-self: center;
+    margin-left: 1rem;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.15);
+  }
+}
+
+.btn-clear-header:hover {
+  background: #d32f2f;
+  color: white;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-clear-empty {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-clear-empty:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
 }
 </style>

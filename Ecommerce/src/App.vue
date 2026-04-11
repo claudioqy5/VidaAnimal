@@ -363,6 +363,7 @@ const mobileFilter = (species, category) => {
           :category-filter="selectedCategory" 
           :search-query="globalSearch"
           @add-to-cart="addToCart"
+          @clear-filters="globalSearch = ''; selectedSpecies = ''; selectedCategory = ''"
        />
     </main>
 
