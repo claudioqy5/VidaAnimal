@@ -39,7 +39,7 @@
 <script setup>
 // Importación de Logos
 import logoChick from '../assets/marcas/chickmaster.jpg'
-import logoCorimix from '../assets/marcas/corimix.JPG'
+import logoCorimix from '../assets/marcas/corimix.jpg'
 import logoCorina from '../assets/marcas/corina.jpg'
 import logoCoripollo from '../assets/marcas/coripollo.png'
 import logoGuau from '../assets/marcas/guauguau.png'

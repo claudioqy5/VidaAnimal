@@ -5,10 +5,10 @@ import ProductCard from './ProductCard.vue'
 
 // Importación de Logos Personalizados
 import iconHuella from '../assets/logohuella.png'
-import iconGato from '../assets/logogato.JPG'
-import iconPollo from '../assets/logopollo.JPG'
-import iconCuy from '../assets/logocuy.JPG'
-import iconChancho from '../assets/logochancho.JPG'
+import iconGato from '../assets/logogato.jpg'
+import iconPollo from '../assets/logopollo.jpg'
+import iconCuy from '../assets/logocuy.jpg'
+import iconChancho from '../assets/logochancho.jpg'
 import iconConejo from '../assets/logoconejo.jpg'
 import iconPerro from '../assets/logoperro.jpg'
 
