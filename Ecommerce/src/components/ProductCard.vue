@@ -6,6 +6,8 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['select'])
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-PE', {
     style: 'currency',
@@ -13,9 +15,9 @@ const formatPrice = (price) => {
   }).format(price)
 }
 
-const getWhatsAppUrl = () => {
+const getWhatsAppUrl = (product) => {
   const phone = "+51975418965"
-  const message = `Hola Vida Animal! 👋 Me interesa el producto: *${props.producto.nombre}* que tiene un precio de *${formatPrice(props.producto.precioVenta)}*. Tienen stock disponible?`
+  const message = `Hola Vida Animal! 👋 Me interesa el producto: *${product.nombre}* que tiene un precio de *${formatPrice(product.precioVenta)}*. Tienen stock disponible?`
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
@@ -30,7 +32,7 @@ const getImageUrl = (url) => {
 </script>
 
 <template>
-  <div class="product-card glass fade-in">
+  <div class="product-card glass fade-in" @click="$emit('select', props.producto)" style="cursor: pointer;">
     <div class="image-container">
       <img 
         :src="getImageUrl(props.producto.imagenURL)" 
@@ -51,7 +53,7 @@ const getImageUrl = (url) => {
       
       <div class="card-footer">
         <span class="price">{{ formatPrice(props.producto.precioVenta) }}</span>
-        <a :href="getWhatsAppUrl()" target="_blank" class="buy-btn">
+        <a :href="getWhatsAppUrl(props.producto)" target="_blank" class="buy-btn" @click.stop>
           Comprar
         </a>
       </div>
