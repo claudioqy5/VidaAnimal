@@ -34,7 +34,7 @@ const getDisplayUnit = (um) => {
   if (!um) return ''
   const upper = um.toUpperCase().trim()
   if (upper === 'SACO' || upper === 'KILO' || upper === 'KG') return 'kg'
-  if (upper === 'BALDE' || upper === 'UNIDAD') return 'unid'
+  if (upper === 'BALDE' || upper === 'UNIDAD' || upper === 'UND') return 'unid'
   return upper.toLowerCase()
 }
 </script>

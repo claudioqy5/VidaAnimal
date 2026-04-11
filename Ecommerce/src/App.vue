@@ -18,6 +18,8 @@ watch(cart, (newCart) => {
   localStorage.setItem('vida_animal_cart', JSON.stringify(newCart))
 }, { deep: true })
 
+const isCartBouncing = ref(false)
+
 const addToCart = (product, quantity) => {
   const existing = cart.value.find(item => item.productoId === product.productoID || item.productoId === product.productoId)
   if (existing) {
@@ -26,11 +28,17 @@ const addToCart = (product, quantity) => {
     cart.value.push({
       productoId: product.productoID || product.productoId,
       nombre: product.nombre,
-      precio: product.precioVenta,
+      precio: product.precio ?? product.precioVenta,
       imagen: product.imagenURL,
       quantity: quantity
     })
   }
+  
+  // Feedback visual de agregado
+  isCartBouncing.value = true
+  setTimeout(() => {
+    isCartBouncing.value = false
+  }, 500)
 }
 
 const removeFromCart = (productId) => {
@@ -282,7 +290,7 @@ const handleBrandFilter = (brand) => {
             <span class="search-icon">🔍</span>
             <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?">
           </div>
-          <div class="cart-trigger" @click="isCartOpen = true">
+          <div class="cart-trigger" :class="{ bouncing: isCartBouncing }" @click="isCartOpen = true">
             <span class="cart-icon">🛒</span>
             <span class="cart-count">{{ cartCount }}</span>
           </div>
@@ -772,5 +780,25 @@ background: rgba(38, 19, 19, 0.6);
   padding: 1rem;
   cursor: pointer;
   border: none;
+}
+
+/* Animación de feedback para el carrito */
+.cart-trigger {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cart-trigger.bouncing {
+  animation: cartBounce 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  background-color: #fff8f0;
+  box-shadow: 0 0 15px rgba(255, 122, 0, 0.6);
+  border-radius: 50%;
+}
+
+@keyframes cartBounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.3) translateY(-3px); }
+  50% { transform: scale(0.9) translateY(2px); }
+  75% { transform: scale(1.1) translateY(-1px); }
+  100% { transform: scale(1) translateY(0); }
 }
 </style>

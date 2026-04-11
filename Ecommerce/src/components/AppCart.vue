@@ -7,68 +7,81 @@
         <button class="close-drawer" @click="$emit('close')">✕</button>
       </div>
 
-      <!-- Items List -->
-      <div class="cart-body">
-        <div v-if="items.length === 0" class="empty-cart">
-          <span class="empty-icon">🛒</span>
-          <p>Tu carrito está vacío.</p>
-          <button @click="$emit('close')" class="btn-start-shopping">Empezar a comprar</button>
-        </div>
+      <div v-if="items.length === 0" class="empty-cart">
+        <span class="empty-icon">🛒</span>
+        <p>Tu carrito está vacío.</p>
+        <button @click="$emit('close')" class="btn-start-shopping">Empezar a comprar</button>
+      </div>
 
-        <div v-else class="cart-items">
-          <div v-for="item in items" :key="item.productoId" class="cart-item glass">
-            <img :src="getImageUrl(item.imagen)" :alt="item.nombre" class="item-img">
-            <div class="item-details">
-              <h4>{{ item.nombre }}</h4>
-              <p class="item-price">{{ formatPrice(item.precio) }}</p>
-              
-              <div class="item-actions">
-                <div class="qty-control">
-                  <button @click="$emit('update-qty', item.productoId, item.quantity - 1)">-</button>
-                  <span>{{ item.quantity }}</span>
-                  <button @click="$emit('update-qty', item.productoId, item.quantity + 1)">+</button>
+      <div v-else class="cart-layout">
+        <!-- Columna Izquierda: Productos -->
+        <div class="cart-left">
+          <div class="cart-items">
+            <div v-for="item in items" :key="item.productoId" class="cart-item glass">
+              <img :src="getImageUrl(item.imagen)" :alt="item.nombre" class="item-img">
+              <div class="item-details">
+                <h4>{{ item.nombre }}</h4>
+                <p class="item-price">{{ formatPrice(item.precio) }}</p>
+                <div class="item-actions">
+                  <div class="qty-control">
+                    <button @click="$emit('update-qty', item.productoId, item.quantity - 1)">-</button>
+                    <span>{{ item.quantity }}</span>
+                    <button @click="$emit('update-qty', item.productoId, item.quantity + 1)">+</button>
+                  </div>
+                  <button class="remove-btn" @click="$emit('remove', item.productoId)">Eliminar</button>
                 </div>
-                <button class="remove-btn" @click="$emit('remove', item.productoId)">Eliminar</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Footer -->
-      <div v-if="items.length > 0" class="cart-footer">
-        <div class="checkout-details glass">
-          <div class="pickup-info">
-            <label>📅 ¿Cuándo pasarás por tu pedido?</label>
-            <input type="date" v-model="pickupDate" :min="minDate" class="date-input">
-            <p class="pickup-address">📍 Recojo en: <b>Local Aucayacu</b></p>
+        <!-- Columna Derecha: Checkout y Avisos -->
+        <div class="cart-right">
+          <!-- Info de Recojo -->
+          <div class="pickup-highlight glass">
+            <div class="pickup-h-icon">🛍️</div>
+            <div>
+              <h3>Recojo Flexible</h3>              
+              <p>Arma tu pedido hoy y recógelo cuando gustes.</p>    
+              <div>Lunes a Domingo</div>    
+              <p class="side-sub">📍 En nuestro local de Aucayacu</p>
+              <div>Jiron Atahualpa N° 291</div>    
+            </div>
           </div>
 
-          <div class="reservation-box">
-            <div class="res-header">
-              <span class="yape-icon">✨</span>
-              <span>Separa tu pedido con el 20%</span>
+          <div class="checkout-details glass">
+            <div class="pickup-info">
+              <label>📅 ¿Cuándo pasarás por tu pedido?</label>
+              <input type="date" v-model="pickupDate" :min="minDate" class="date-input">
+              <p class="pickup-address">📍 Recojo en: local <b>Aucayacu</b></p>
             </div>
-            <div class="res-row">
-              <span>Adelanto x Yape:</span>
-              <strong>{{ formatPrice(reservationAmount) }}</strong>
-            </div>
-            <div class="res-row">
-              <span>Saldo a pagar en local:</span>
-              <span style="font-size: 0.9rem; font-weight: 600;">{{ formatPrice(pendingAmount) }}</span>
-            </div>
-            <p class="yape-hint">Recuerda enviar el comprobante por este chat.</p>
-          </div>
-        </div>
 
-        <div class="total-row">
-          <span>Total del pedido</span>
-          <span class="total-price">{{ formatPrice(totalPrice) }}</span>
+            <div class="reservation-box">
+              <div class="res-header">
+                <span class="yape-icon">✨</span>
+                <span>Separa tu pedido con el 20%</span>
+              </div>
+              <div class="res-row">
+                <span>Adelanto x Yape:</span>
+                <strong>{{ formatPrice(reservationAmount) }}</strong>
+              </div>
+              <div class="res-row">
+                <span>Saldo a pagar en local:</span>
+                <span style="font-size: 0.9rem; font-weight: 600;">{{ formatPrice(pendingAmount) }}</span>
+              </div>
+              <p class="yape-hint">Recuerda enviar el comprobante por este chat.</p>
+            </div>
+          </div>
+
+          <div class="total-row">
+            <span>Total del pedido</span>
+            <span class="total-price">{{ formatPrice(totalPrice) }}</span>
+          </div>
+          <button @click="sendWhatsApp" class="btn-confirm-order">
+            Confirmar Pedido por WhatsApp
+          </button>
+          <p class="footer-hint">Te redirigiremos a WhatsApp para finalizar.</p>
         </div>
-        <button @click="sendWhatsApp" class="btn-confirm-order">
-          Confirmar Pedido por WhatsApp
-        </button>
-        <p class="footer-hint">Te redirigiremos a WhatsApp para finalizar.</p>
       </div>
     </div>
   </div>
@@ -159,8 +172,9 @@ const sendWhatsApp = () => {
 .cart-drawer {
   position: absolute;
   top: 0;
-  right: -400px;
-  width: 400px;
+  right: -900px;
+  width: 900px;
+  max-width: 90vw;
   height: 100%;
   background: white;
   box-shadow: -20px 0 60px rgba(0,0,0,0.2);
@@ -171,6 +185,49 @@ const sendWhatsApp = () => {
 
 .cart-drawer.active {
   right: 0;
+}
+
+.cart-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.cart-left {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.cart-right {
+  width: 380px;
+  background: #fdfdfd;
+  border-left: 1px solid #eee;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Colapsar a una columna en móviles */
+@media (max-width: 800px) {
+  .cart-layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .cart-left {
+    overflow-y: visible;
+    padding-bottom: 0;
+  }
+  .cart-right {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #eee;
+    overflow-y: visible;
+  }
+  .cart-drawer {
+    width: 100%;
+  }
 }
 
 .cart-header {
@@ -205,11 +262,6 @@ const sendWhatsApp = () => {
   color: var(--primary);
 }
 
-.cart-body {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-}
 
 .empty-cart {
   text-align: center;
@@ -294,11 +346,6 @@ const sendWhatsApp = () => {
   cursor: pointer;
 }
 
-.cart-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #eee;
-  background: #fdfdfd;
-}
 
 .checkout-details {
   background: #fff;
@@ -312,6 +359,38 @@ const sendWhatsApp = () => {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px dashed #eee;
+}
+
+.pickup-highlight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #fff2e6 0%, #fff 100%);
+  border: 1px solid rgba(255, 122, 0, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.pickup-h-icon {
+  font-size: 2rem;
+  background: white;
+  border-radius: 50%;
+  padding: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.pickup-highlight h3 {
+  font-size: 0.95rem;
+  color: var(--primary);
+  margin-bottom: 0.2rem;
+  font-weight: 800;
+}
+
+.pickup-highlight p {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
 }
 
 .pickup-info label {

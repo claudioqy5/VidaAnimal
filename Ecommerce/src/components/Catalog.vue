@@ -184,6 +184,9 @@ const selectProduct = (product) => {
 
 const clearSelection = () => {
   selectedProduct.value = null
+  selectedSpecies.value = null
+  selectedCategory.value = null
+  search.value = ''
 }
 
 // Cerrar detalle si se cambia cualquier filtro
@@ -223,7 +226,7 @@ const getUnitLabel = (isBulk) => {
     if (um === 'SACO') return 'kg'
     if (um === 'BALDE') return 'unid'
     if (um === 'KILO' || um === 'KG') return 'kg'
-    if (um === 'UNIDAD') return 'unid'
+    if (um === 'UNIDAD' || um === 'UND') return 'unid'
     return um.toLowerCase() || 'unid'
   }
 }
@@ -394,10 +397,10 @@ const addToCart = () => {
                   <button @click="qty++" class="qty-btn">+</button>
                 </div>
 
-                <button @click="addToCart(); clearSelection()" class="btn-add-cart-large">
+                <button @click="addToCart()" class="btn-add-cart-large">
                   Añadir {{ qty }} {{ getUnitLabel(purchaseMode === 'bulk') }} al Carrito
                 </button>
-                <p class="store-info">📦 Disponible en nuestro local de Aucayacu.</p>
+                <p class="store-info">📦 Disponible en local (Aucayacu). Recógelo de <b>Lunes a Domingo</b>.</p>
               </div>
             </div>
 

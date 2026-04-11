@@ -134,11 +134,16 @@ onMounted(() => {
     <!-- Overlay de textos -->
     <div class="hero-overlay fade-in" v-if="isLoaded">
       <div class="container welcome-container">
-        <div class="hero-actions-box">          
-          <p class="typewriter-text">{{ displayText }}<span class="cursor">|</span></p>          
-        </div>
         <div class="massive-text">
           <h1><span class="vida">Vida</span><br><span class="animal">ANIMAL</span></h1>
+        </div>
+        <div class="hero-actions-box">          
+          <p class="typewriter-text">{{ displayText }}<span class="cursor">|</span></p>          
+          
+          <div class="hero-pickup-badge fade-in-delayed">
+            <span class="icon">🛍️</span>
+            <span>Arma tu pedido online, recógelo en tienda (Lunes a Domingo) y reclama tu <b>regalo</b></span>
+          </div>
         </div>
       </div>
     </div>
@@ -440,6 +445,34 @@ onMounted(() => {
 @keyframes fadeInText {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-pickup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: fit-content;
+}
+
+.hero-pickup-badge b {
+  color: var(--secondary);
+  font-weight: 800;
+}
+
+.fade-in-delayed {
+  opacity: 0;
+  animation: fadeInText 1s forwards 4.5s;
 }
 
 @media (max-width: 1024px) {
