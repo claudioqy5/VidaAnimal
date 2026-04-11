@@ -601,26 +601,38 @@ background: rgba(38, 19, 19, 0.6);
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(18, 18, 18, 0.9);
+  transform: translateX(-50%) translateY(0);
+  background: rgba(18, 18, 18, 0.95);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   border-radius: 12px;
-  min-width: 200px;
+  min-width: 220px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
+  margin-top: 0; /* Sin espacio para que no se pierda el hover */
+}
+
+/* Puente invisible para mantener el hover entre el link y el menú */
+.nav-item-dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 15px;
+  background: transparent;
 }
 
 .nav-item-dropdown:hover > .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(10px);
+  transform: translateX(-50%) translateY(8px);
 }
 
 .dropdown-menu a {
