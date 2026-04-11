@@ -86,5 +86,17 @@
   .whatsapp-tooltip {
     display: none; /* Ocultar burbuja en móvil para no tapar contenido */
   }
+  .whatsapp-float {
+    bottom: 15px;
+    right: 15px;
+  }
+  .whatsapp-btn {
+    width: 50px;
+    height: 50px;
+  }
+  .whatsapp-btn svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 </style>

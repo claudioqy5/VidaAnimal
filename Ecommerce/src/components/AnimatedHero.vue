@@ -483,22 +483,31 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .massive-text h1 { font-size: 5rem; }
-  .hero-actions-box p { font-size: 1rem; letter-spacing: 1px; }
+  .massive-text h1 { font-size: 4.5rem; text-align: center; }
+  .hero-actions-box { align-items: center; text-align: center; margin-bottom: 0; }
+  .hero-actions-box p { font-size: 1rem; letter-spacing: 1px; border-left: none; border-bottom: 3px solid var(--secondary); padding-left: 0; padding-bottom: 0.5rem; margin-bottom: 1rem; }
   .hero-pickup-badge {
     font-size: 0.85rem;
     padding: 0.6rem 1rem;
     border-radius: 12px;
     white-space: normal;
+    margin-top: 1rem;
   }
   .welcome-container {
     padding: 0 1.5rem;
-    padding-bottom: 4.5rem;
+    padding-bottom: 0;
+    margin-left: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%);
   }
 }
 
 @media (max-width: 480px) {
-  .massive-text h1 { font-size: 3.5rem; }
+  .massive-text h1 { font-size: 3.5rem; margin-bottom: 1rem; }
   .hero-actions-box p { font-size: 0.85rem; }
+  .btn-primary { padding: 1rem 2rem; font-size: 1rem; }
 }
 </style>

@@ -8,7 +8,7 @@
           <span class="feature-icon">🕒</span>
         </div>
         <h3>Horario de Atención</h3>
-        <p>Te esperamos todos los días de <strong>7:00 AM a 9:30 PM</strong>en nuestro local y las <strong>24 horas del dia los 7 dias de la semana</strong> online para atender a tus engreídos con amor.</p>
+        <p>Te esperamos todos los días de <strong>7:00 AM a 9:30 PM</strong> en nuestro local y las <strong>24 horas del dia los 7 dias de la semana</strong> online para atender a tus engreídos con amor.</p>
       </div>
 
       <!-- CARD 2: PRODUCTOS -->

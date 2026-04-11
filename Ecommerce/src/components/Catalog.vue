@@ -51,6 +51,8 @@ watch(() => [props.speciesFilter, props.categoryFilter], ([newSpec, newCat]) => 
       const found = especies.value.find(e => e.nombre.toLowerCase().includes(newSpec.toLowerCase()))
       selectedSpecies.value = found ? found.especieId : null
     }
+  } else if (newSpec === '') {
+    selectedSpecies.value = null
   }
   
   if (newCat) {
@@ -117,6 +119,13 @@ const filteredProducts = computed(() => {
 watch(() => props.searchQuery, (newVal) => {
   search.value = newVal || ''
 }, { immediate: true })
+
+watch(search, (newVal, oldVal) => {
+  if (newVal && newVal !== oldVal) {
+    selectedSpecies.value = null
+    selectedCategory.value = null
+  }
+})
 
 const toggleSpecies = (id) => {
   selectedSpecies.value = selectedSpecies.value === id ? null : id

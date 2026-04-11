@@ -70,6 +70,11 @@
   }
   .map-container {
     border-radius: 20px;
+    padding: 5px;
+    box-shadow: 0 10px 30px rgba(61, 30, 30, 0.05);
+  }
+  .map-section {
+    padding: 3rem 0;
   }
 }
 </style>

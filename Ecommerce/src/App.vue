@@ -69,8 +69,13 @@ const showSoonModal = ref(false) // Control para la ventana de "Pronto"
 
 // Al buscar en el header, forzamos la vista de catálogo
 watch(globalSearch, (newVal) => {
-  if (newVal.length > 0 && activeView.value === 'home') {
-    activeView.value = 'catalog'
+  if (newVal.length > 0) {
+    if (activeView.value === 'home') {
+      activeView.value = 'catalog'
+    }
+    // Al empezar a buscar, quitamos filtros para buscar en toda la tienda
+    selectedSpecies.value = ''
+    selectedCategory.value = ''
   }
 })
 
@@ -324,7 +329,7 @@ const mobileFilter = (species, category) => {
         </div>
         <div class="mobile-nav-search">
           <span>🔍</span>
-          <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?" @input="closeMobileMenu">
+          <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?" @keyup.enter="closeMobileMenu">
         </div>
         <div class="mobile-nav-links">
           <button @click="mobileFilter('Perro', '')" class="mobile-link">🐶 PERROS</button>
@@ -333,7 +338,6 @@ const mobileFilter = (species, category) => {
           <button @click="mobileFilter('Cuy', '')" class="mobile-link">🐹 CUY</button>
           <button @click="mobileFilter('Chancho', '')" class="mobile-link">🐷 CHANCHO</button>
           <button @click="mobileFilter('Conejo', '')" class="mobile-link">🐇 CONEJO</button>
-          <button @click="mobileFilter('Peste', '')" class="mobile-link">🐀 PESTE</button>
           <button @click="() => { scrollToBrands(); closeMobileMenu() }" class="mobile-link">🏷️ MARCAS</button>
           <button @click="() => { openSoonModal(); closeMobileMenu() }" class="mobile-link">✂️ PELUQUERÍA</button>
           <button @click="() => { scrollToMap(); closeMobileMenu() }" class="mobile-link">📍 UBÍCANOS</button>
