@@ -232,6 +232,7 @@ const mobileFilter = (species, category) => {
               <a href="#" @click.prevent="handleFilter('Pollo', 'Comederos')">Comederos / Platos</a>
               <a href="#" @click.prevent="handleFilter('Pollo', 'Limpieza')">Limpieza</a>
               <a href="#" @click.prevent="handleFilter('Pollo', 'Accesorios')">Accesorios</a>
+              <a href="#" @click.prevent="handleFilter('Pollo', 'Animales vivos')">Animales vivos</a>
             </div>
           </div>
 

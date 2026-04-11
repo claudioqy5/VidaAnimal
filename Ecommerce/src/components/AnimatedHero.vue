@@ -1,28 +1,31 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+
+import pollosvivos from '../assets/pollosvivos.png'
 import publicidadPata from '../assets/publicidadpata.png'
 import publicidadRopita from '../assets/publicidadropita.png'
 import publicidadStitch from '../assets/publicidadstitch.jpg'
 import publicidadSchnauzer from '../assets/publicidadschnauzer.png'
 import publicidadZapatos from '../assets/publicidadzapatos.png'
 import publicidadBebedero from '../assets/publicidadbebedero.png'
-import publicidadSofaDog from '../assets/publicidadsofa.png'
 import publicidadalimentos from '../assets/publicidadalimentos.png'
 import publicidadalimentosotros from '../assets/publicidadalimentosotros.png'
-import publicidadjuguetes from '../assets/publicidadjuguetes.png' 
+import publicidadjuguetes from '../assets/publicidadjuguetes.png'
+
 
 const isLoaded = ref(false)
 const isDimmed = ref(false)
 const displayText = ref('')
 
 // Configuración Carousel
-const adImages = [
+const adImages = [  
   publicidadPata,
+  pollosvivos,
   publicidadRopita,  
+  pollosvivos,
   publicidadStitch,  
   publicidadZapatos,
-  publicidadBebedero,
-  publicidadSofaDog,
+  publicidadBebedero,  
   publicidadalimentos,
   publicidadjuguetes,
   publicidadSchnauzer,
