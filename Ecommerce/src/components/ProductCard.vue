@@ -32,7 +32,11 @@ const getImageUrl = (url) => {
 <template>
   <div class="product-card glass fade-in">
     <div class="image-container">
-      <img :src="getImageUrl(props.producto.imagenURL)" :alt="props.producto.nombre">
+      <img 
+        :src="getImageUrl(props.producto.imagenURL)" 
+        :alt="props.producto.nombre"
+        loading="lazy"
+      >
       <div v-if="props.producto.especies && props.producto.especies.length" class="species-badges">
         <span v-for="esp in props.producto.especies" :key="esp.especieID" class="species-badge">
            {{ esp.nombre }}
