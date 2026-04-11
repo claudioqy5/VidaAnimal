@@ -37,8 +37,32 @@
 
       <!-- Footer -->
       <div v-if="items.length > 0" class="cart-footer">
+        <div class="checkout-details glass">
+          <div class="pickup-info">
+            <label>📅 ¿Cuándo pasarás por tu pedido?</label>
+            <input type="date" v-model="pickupDate" :min="minDate" class="date-input">
+            <p class="pickup-address">📍 Recojo en: <b>Local Aucayacu</b></p>
+          </div>
+
+          <div class="reservation-box">
+            <div class="res-header">
+              <span class="yape-icon">✨</span>
+              <span>Separa tu pedido con el 20%</span>
+            </div>
+            <div class="res-row">
+              <span>Adelanto x Yape:</span>
+              <strong>{{ formatPrice(reservationAmount) }}</strong>
+            </div>
+            <div class="res-row">
+              <span>Saldo a pagar en local:</span>
+              <span style="font-size: 0.9rem; font-weight: 600;">{{ formatPrice(pendingAmount) }}</span>
+            </div>
+            <p class="yape-hint">Recuerda enviar el comprobante por este chat.</p>
+          </div>
+        </div>
+
         <div class="total-row">
-          <span>Total estimado</span>
+          <span>Total del pedido</span>
           <span class="total-price">{{ formatPrice(totalPrice) }}</span>
         </div>
         <button @click="sendWhatsApp" class="btn-confirm-order">
@@ -51,7 +75,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -62,6 +86,20 @@ const emit = defineEmits(['close', 'remove', 'update-qty'])
 
 const totalItems = computed(() => props.items.reduce((acc, item) => acc + item.quantity, 0))
 const totalPrice = computed(() => props.items.reduce((acc, item) => acc + (item.precio * item.quantity), 0))
+const reservationAmount = computed(() => totalPrice.value * 0.20)
+const pendingAmount = computed(() => totalPrice.value - reservationAmount.value)
+
+// Fecha mínima: mañana
+const tomorrow = new Date()
+tomorrow.setDate(tomorrow.getDate() + 1)
+const minDate = tomorrow.toISOString().split('T')[0]
+const pickupDate = ref(minDate)
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-')
+  return `${d}/${m}/${y}`
+}
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-PE', {
@@ -84,8 +122,14 @@ const sendWhatsApp = () => {
     message += `🔹 ${item.quantity}x ${item.nombre} - ${formatPrice(item.precio * item.quantity)}\n`
   })
   
-  message += `\n*Total estimado: ${formatPrice(totalPrice.value)}*\n`
-  message += "\n¿Tienen disponibilidad para enviarlo a mi domicilio?"
+  message += `\n💰 *DETALLES DEL PAGO:*`
+  message += `\n-----------------------`
+  message += `\n*TOTAL DEL PEDIDO:* ${formatPrice(totalPrice.value)}`
+  message += `\n*ADELANTO (20%) x Yape:* ${formatPrice(reservationAmount.value)}`
+  message += `\n*SALDO PENDIENTE:* ${formatPrice(pendingAmount.value)}`
+  message += `\n-----------------------`
+  message += `\n\n🗓️ *Fecha de recojo:* ${formatDate(pickupDate.value)}`
+  message += "\n\n¿Tienen todo en stock para enviarles la captura del Yape? 👋"
 
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
   window.open(url, '_blank')
@@ -251,9 +295,83 @@ const sendWhatsApp = () => {
 }
 
 .cart-footer {
-  padding: 2rem;
+  padding: 1.5rem;
   border-top: 1px solid #eee;
-  background: #fafafa;
+  background: #fdfdfd;
+}
+
+.checkout-details {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #f0f0f0;
+}
+
+.pickup-info {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #eee;
+}
+
+.pickup-info label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.date-input {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+  margin-bottom: 0.5rem;
+}
+
+.pickup-address {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.reservation-box {
+  background: #fdf8f0;
+  padding: 0.8rem;
+  border-radius: 12px;
+}
+
+.res-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #b37400;
+  margin-bottom: 0.5rem;
+}
+
+.res-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.res-row span {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.res-row strong {
+  color: #261313;
+  font-size: 1.1rem;
+}
+
+.yape-hint {
+  font-size: 0.7rem;
+  color: #999;
 }
 
 .total-row {

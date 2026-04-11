@@ -29,6 +29,14 @@ const getImageUrl = (url) => {
   }
   return url
 }
+
+const getDisplayUnit = (um) => {
+  if (!um) return ''
+  const upper = um.toUpperCase().trim()
+  if (upper === 'SACO' || upper === 'KILO' || upper === 'KG') return 'kg'
+  if (upper === 'BALDE' || upper === 'UNIDAD') return 'unid'
+  return upper.toLowerCase()
+}
 </script>
 
 <template>
@@ -52,7 +60,10 @@ const getImageUrl = (url) => {
       <p class="description">{{ props.producto.descripcion || 'Sin descripción disponible' }}</p>
       
       <div class="card-footer">
-        <span class="price">{{ formatPrice(props.producto.precioVenta) }}</span>
+        <span class="price">
+          {{ formatPrice(props.producto.precioVenta) }}
+          <small v-if="props.producto.unidadMedida" class="per-kg"> x {{ getDisplayUnit(props.producto.unidadMedida) }}</small>
+        </span>
         <a :href="getWhatsAppUrl(props.producto)" target="_blank" class="buy-btn" @click.stop>
           Comprar
         </a>
@@ -156,6 +167,15 @@ const getImageUrl = (url) => {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.per-kg {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 600;
 }
 
 .buy-btn {

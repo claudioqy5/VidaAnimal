@@ -11,6 +11,7 @@ import iconCuy from '../assets/logocuy.jpg'
 import iconChancho from '../assets/logochancho.jpg'
 import iconConejo from '../assets/logoconejo.jpg'
 import iconPerro from '../assets/logoperro.jpg'
+import iconRata from '../assets/logorata.jpg'
 
 const props = defineProps({
   speciesFilter: String,
@@ -37,6 +38,7 @@ const getSpeciesIcon = (nombre) => {
   if (n.includes('cuy')) return iconCuy
   if (n.includes('chancho')) return iconChancho
   if (n.includes('conejo')) return iconConejo
+  if (n.includes('peste')) return iconRata
   return iconHuella // Fallback si no hay icono específico
 }
 
@@ -144,7 +146,13 @@ const availableCategories = computed(() => {
 
 const selectedProduct = ref(null)
 const qty = ref(1)
+const purchaseMode = ref('frac') // 'frac' (por kilo/unidad) o 'bulk' (saco/balde completo)
 const emit = defineEmits(['add-to-cart'])
+
+// Resetear modo al seleccionar producto
+watch(selectedProduct, (newVal) => {
+  if (newVal) purchaseMode.value = 'frac'
+})
 
 // --- LÓGICA CALCULADORA NUTRICIONAL ---
 const petWeight = ref(10)
@@ -162,7 +170,7 @@ const calculatedRation = computed(() => {
 
 const durationInDays = computed(() => {
   if (!selectedProduct.value) return 0
-  const bagKg = parseProductWeight(selectedProduct.value.nombre)
+  const bagKg = selectedProduct.value.cantidadMayorista
   if (!bagKg) return 0
   return Math.floor((bagKg * 1000) / calculatedRation.value)
 })
@@ -202,6 +210,35 @@ const getImageUrl = (url) => {
      return `https://vidaanimal.helifyferdigital.cloud/api${url}`
   }
   return url
+}
+const getSafeUnit = (product) => {
+  return (product?.unidadMedida || '').toUpperCase().trim()
+}
+
+const getUnitLabel = (isBulk) => {
+  const um = getSafeUnit(selectedProduct.value)
+  if (isBulk) {
+    return um.toLowerCase()
+  } else {
+    if (um === 'SACO') return 'kg'
+    if (um === 'BALDE') return 'unid'
+    if (um === 'KILO' || um === 'KG') return 'kg'
+    if (um === 'UNIDAD') return 'unid'
+    return um.toLowerCase() || 'unid'
+  }
+}
+
+const addToCart = () => {
+  const isBulk = purchaseMode.value === 'bulk'
+  const unitName = getUnitLabel(isBulk)
+  
+  const itemToCart = {
+    ...selectedProduct.value,
+    nombre: `${selectedProduct.value.nombre} (${unitName})`,
+    precio: isBulk ? selectedProduct.value.precioMayorista : selectedProduct.value.precioVenta
+  }
+  
+  emit('add-to-cart', itemToCart, qty.value)
 }
 </script>
 
@@ -306,7 +343,35 @@ const getImageUrl = (url) => {
             <div class="detail-info">
               <div class="detail-category-tag">{{ selectedProduct.categoria?.nombre || 'General' }}</div>
               <h1>{{ selectedProduct.nombre }}</h1>
-              <div class="detail-price-big">{{ formatPrice(selectedProduct.precioVenta) }}</div>
+              <div class="purchase-mode-selector" v-if="['SACO', 'BALDE'].includes(getSafeUnit(selectedProduct))">
+                <button 
+                  class="mode-btn" 
+                  :class="{ active: purchaseMode === 'frac' }" 
+                  @click="purchaseMode = 'frac'"
+                >
+                  Por {{ getSafeUnit(selectedProduct) === 'SACO' ? 'Kilo' : 'Unidad' }}
+                </button>
+                <button 
+                  class="mode-btn" 
+                  :class="{ active: purchaseMode === 'bulk' }" 
+                  @click="purchaseMode = 'bulk'"
+                >
+                  {{ getSafeUnit(selectedProduct) === 'SACO' ? 'Saco' : 'Balde' }} Completo
+                </button>
+              </div>
+
+              <div class="detail-price-big">
+                {{ formatPrice(purchaseMode === 'bulk' ? selectedProduct.precioMayorista : selectedProduct.precioVenta) }}
+                <small class="detail-unit">
+                  x {{ getUnitLabel(purchaseMode === 'bulk') }}
+                </small>
+              </div>
+
+              <!-- Info de Ahorro/Peso -->
+              <div v-if="purchaseMode === 'bulk' && selectedProduct.cantidadMayorista" class="bag-price-info">
+                 <p class="bulk-weight-info">Peso: <b>{{ selectedProduct.cantidadMayorista }} kg</b></p>
+                 <p class="bulk-save-hint">Comprando por {{ getSafeUnit(selectedProduct).toLowerCase() }} ahorras más!</p>
+              </div>
               
               <div class="detail-description-section">
                 <h4>Descripción del producto</h4>
@@ -329,8 +394,8 @@ const getImageUrl = (url) => {
                   <button @click="qty++" class="qty-btn">+</button>
                 </div>
 
-                <button @click="emit('add-to-cart', selectedProduct, qty); clearSelection()" class="btn-add-cart-large">
-                  Añadir al Carrito
+                <button @click="addToCart(); clearSelection()" class="btn-add-cart-large">
+                  Añadir {{ qty }} {{ getUnitLabel(purchaseMode === 'bulk') }} al Carrito
                 </button>
                 <p class="store-info">📦 Disponible en nuestro local de Aucayacu.</p>
               </div>
@@ -678,7 +743,60 @@ const getImageUrl = (url) => {
   font-size: 2.4rem;
   font-weight: 900;
   color: #261313;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.detail-unit {
+  font-size: 1.2rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.purchase-mode-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.mode-btn.active {
+  background: var(--secondary);
+  color: white;
+  border-color: var(--secondary);
+  box-shadow: 0 5px 15px rgba(255, 122, 0, 0.2);
+}
+
+.bulk-weight-info {
+  font-size: 1rem;
+  color: var(--primary);
+  margin-bottom: 0.2rem;
+}
+
+.bulk-save-hint {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.bag-price-info {
+  background: #fff8f0;
+  border-left: 4px solid var(--secondary);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
 }
 
 .detail-description-section h4 {
