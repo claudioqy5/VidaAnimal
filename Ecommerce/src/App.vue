@@ -153,6 +153,15 @@ const handleBrandFilter = (brand) => {
   selectedCategory.value = ''
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Mobile menu
+const isMobileMenuOpen = ref(false)
+const closeMobileMenu = () => { isMobileMenuOpen.value = false }
+
+const mobileFilter = (species, category) => {
+  handleFilter(species, category)
+  closeMobileMenu()
+}
 </script>
 
 <template>
@@ -295,10 +304,42 @@ const handleBrandFilter = (brand) => {
             <span class="cart-count">{{ cartCount }}</span>
           </div>
           <a href="https://wa.me/51975418965" target="_blank" class="btn-cta">Contáctanos</a>
+          <!-- Hamburger button -->
+          <button class="hamburger" @click="isMobileMenuOpen = !isMobileMenuOpen" aria-label="Abrir menú">
+            <span :class="{ open: isMobileMenuOpen }"></span>
+            <span :class="{ open: isMobileMenuOpen }"></span>
+            <span :class="{ open: isMobileMenuOpen }"></span>
+          </button>
         </div>
       </div>
     </nav>
 
+    <!-- Mobile Menu Overlay -->
+    <Teleport to="body">
+      <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu"></div>
+      <div class="mobile-nav" :class="{ active: isMobileMenuOpen }">
+        <div class="mobile-nav-header">
+          <span class="logo-text">Vida<b>Animal</b></span>
+          <button @click="closeMobileMenu" class="mobile-close">✕</button>
+        </div>
+        <div class="mobile-nav-links">
+          <button @click="mobileFilter('Perro', '')" class="mobile-link">🐶 PERROS</button>
+          <button @click="mobileFilter('Gato', '')" class="mobile-link">🐱 GATOS</button>
+          <button @click="mobileFilter('Pollo', '')" class="mobile-link">🐔 POLLO</button>
+          <button @click="mobileFilter('Cuy', '')" class="mobile-link">🐹 CUY</button>
+          <button @click="mobileFilter('Chancho', '')" class="mobile-link">🐷 CHANCHO</button>
+          <button @click="mobileFilter('Conejo', '')" class="mobile-link">🐇 CONEJO</button>
+          <button @click="() => { scrollToBrands(); closeMobileMenu() }" class="mobile-link">🏷️ MARCAS</button>
+          <button @click="() => { openSoonModal(); closeMobileMenu() }" class="mobile-link">✂️ PELUQUERÍA</button>
+          <button @click="() => { scrollToMap(); closeMobileMenu() }" class="mobile-link">📍 UBÍCANOS</button>
+          <button @click="() => { scrollToAbout(); closeMobileMenu() }" class="mobile-link">🌿 NOSOTROS</button>
+        </div>
+        <div class="mobile-nav-search">
+          <span>🔍</span>
+          <input type="text" v-model="globalSearch" placeholder="¿Qué buscas hoy?" @input="closeMobileMenu">
+        </div>
+      </div>
+    </Teleport>
     <!-- Composición Animada - SOLO EN HOME -->
     <AnimatedHero @explore="handleFilter('', '')" v-if="activeView === 'home'" />
     <Features v-if="activeView === 'home'" />
@@ -800,5 +841,164 @@ background: rgba(38, 19, 19, 0.6);
   50% { transform: scale(0.9) translateY(2px); }
   75% { transform: scale(1.1) translateY(-1px); }
   100% { transform: scale(1) translateY(0); }
+}
+
+/* ==========================================
+   RESPONSIVE - HAMBURGER MENU & MOBILE
+   ========================================== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 26px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger span.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger span.open:nth-child(2) { opacity: 0; }
+.hamburger span.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9998;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -310px;
+  width: 300px;
+  height: 100%;
+  background: rgba(38, 19, 19, 0.97);
+  backdrop-filter: blur(20px);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+  padding: 0;
+  overflow-y: auto;
+}
+
+.mobile-nav.active { right: 0; }
+
+.mobile-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-nav-header .logo-text {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.mobile-nav-header .logo-text b {
+  color: var(--secondary);
+  font-weight: 800;
+}
+
+.mobile-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.mobile-close:hover { opacity: 1; }
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  flex: 1;
+}
+
+.mobile-link {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.mobile-link:hover {
+  color: var(--secondary);
+  border-left-color: var(--secondary);
+  background: rgba(255,255,255,0.04);
+}
+
+.mobile-nav-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+
+.mobile-nav-search input {
+  background: none;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 0.9rem;
+  width: 100%;
+  font-family: inherit;
+}
+
+.mobile-nav-search input::placeholder { color: rgba(255,255,255,0.4); }
+
+@media (max-width: 1024px) {
+  .nav-links, .btn-cta {
+    display: none !important;
+  }
+  .hamburger {
+    display: flex;
+  }
+  .header-search {
+    width: 140px;
+  }
+  .nav-dark .hamburger span,
+  .scrolled .hamburger span {
+    background: white;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-search {
+    display: none;
+  }
+  .main-content {
+    padding: 2rem 1rem;
+  }
+  .main-content.catalog-only {
+    padding-top: 90px;
+  }
 }
 </style>

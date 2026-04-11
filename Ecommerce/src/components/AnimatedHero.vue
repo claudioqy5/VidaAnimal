@@ -480,4 +480,23 @@ onMounted(() => {
   .layer-left, .layer-right { opacity: 0.5; }
   .ad-carousel-container { display: none; } /* Ocultar en móvil para limpiar el diseño */
 }
+
+@media (max-width: 768px) {
+  .massive-text h1 { font-size: 5rem; }
+  .hero-actions-box p { font-size: 1rem; letter-spacing: 1px; }
+  .hero-pickup-badge {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    white-space: normal;
+  }
+  .welcome-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .massive-text h1 { font-size: 3.5rem; }
+  .hero-actions-box p { font-size: 0.85rem; }
+}
 </style>
