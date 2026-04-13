@@ -8,6 +8,17 @@
         <p class="page-subtitle">Analítica avanzada de rendimiento y rentabilidad</p>
       </div>
       <div class="header-actions">
+        <!-- SELECTOR DE SEMANA (solo visible en modo semanal) -->
+        <div v-if="periodo === 'semana'" class="week-picker-wrap">
+          <button class="week-nav-btn" @click="cambiarSemana(-1)" title="Semana anterior">‹</button>
+          <div class="week-info">
+            <span class="week-label">📅 Semana</span>
+            <span class="week-range">{{ semanaRangoDisplay }}</span>
+          </div>
+          <button class="week-nav-btn" @click="cambiarSemana(1)" :disabled="esSemanActual" title="Semana siguiente">›</button>
+          <button v-if="!esSemanActual" class="today-btn" @click="volverSemanaActual">Actual</button>
+        </div>
+
         <div class="period-switcher">
           <button :class="{ active: periodo === 'semana' }" @click="periodo = 'semana'">Semanal</button>
           <button :class="{ active: periodo === 'mes' }" @click="periodo = 'mes'">Mensual</button>
@@ -97,7 +108,7 @@
                 </div>
               </div>
 
-              <!-- VISTA MENSUAL (LÍNEAS) - REORDENADO ETIQUETAS DEBAJO -->
+              <!-- VISTA MENSUAL (LÍNEAS) -->
               <div v-else class="chart-canvas line-mode animate-fade-in">
                  <div class="line-container">
                    <svg class="line-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
@@ -130,6 +141,9 @@
         <div class="sidebar">
           <div class="card ranking-full">
             <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
+            <div v-if="periodo === 'semana'" class="semana-badge">
+              {{ semanaRangoDisplay }}
+            </div>
             <div class="top-list">
               <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-row animate-pop-in" :style="{ animationDelay: (i*0.1)+'s' }">
                 <div class="top-number" :class="'nr-'+i">{{ i + 1 }}</div>
@@ -152,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 
 const stats = ref({ ventasHoy: 0, gananciaHoy: 0, ventasSemana: 0, gananciaSemana: 0, ventasMes: 0, gananciaMes: 0 });
 const graficoSemanal = ref([]);
@@ -162,10 +176,79 @@ const topMensual = ref([]);
 const loading = ref(true);
 const periodo = ref('semana');
 
+// ───────────────────────────────────────────────
+// LÓGICA DE SELECCIÓN DE SEMANA
+// ───────────────────────────────────────────────
+
+/** Devuelve el lunes de la semana a la que pertenece 'date' */
+const getLunes = (date) => {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=dom, 1=lun...
+  const diff = day === 0 ? -6 : 1 - day; // si es domingo retrocede 6 días
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const toISO = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const formatFechaCorta = (date) =>
+  new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: '2-digit' }).format(date);
+
+// Semana actual
+const lunesActual = getLunes(new Date());
+
+// Semana seleccionada (lunes)
+const semanaSeleccionada = ref(new Date(lunesActual));
+
+const domingoDeSemana = computed(() => {
+  const d = new Date(semanaSeleccionada.value);
+  d.setDate(d.getDate() + 6);
+  return d;
+});
+
+const semanaRangoDisplay = computed(() => {
+  const lunes = semanaSeleccionada.value;
+  const domingo = domingoDeSemana.value;
+  const opciones = { day: '2-digit', month: 'short' };
+  const l = new Intl.DateTimeFormat('es-ES', opciones).format(lunes);
+  const d = new Intl.DateTimeFormat('es-ES', opciones).format(domingo);
+  return `${l} – ${d}`;
+});
+
+const esSemanActual = computed(() =>
+  toISO(semanaSeleccionada.value) === toISO(lunesActual)
+);
+
+const cambiarSemana = (delta) => {
+  const nueva = new Date(semanaSeleccionada.value);
+  nueva.setDate(nueva.getDate() + delta * 7);
+  // No permitir ir más allá de la semana actual
+  if (toISO(nueva) > toISO(lunesActual)) return;
+  semanaSeleccionada.value = nueva;
+  cargar();
+};
+
+const volverSemanaActual = () => {
+  semanaSeleccionada.value = new Date(lunesActual);
+  cargar();
+};
+
+// ───────────────────────────────────────────────
+// CARGA DE DATOS
+// ───────────────────────────────────────────────
+
 const cargar = async () => {
   loading.value = true;
   try {
-    const res = await fetch('/api/Dashboard/resumen', {
+    const semISO = toISO(semanaSeleccionada.value);
+    const url = `/api/Dashboard/resumen?semanaInicio=${semISO}`;
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     });
     const data = await res.json();
@@ -182,6 +265,10 @@ const cargar = async () => {
     loading.value = false;
   }
 };
+
+// ───────────────────────────────────────────────
+// COMPUTED
+// ───────────────────────────────────────────────
 
 const periodoLabel = computed(() => periodo.value === 'semana' ? 'Semanal' : 'Mensual');
 const currentStats = computed(() => periodo.value === 'semana' ? 
@@ -221,8 +308,21 @@ onMounted(cargar);
 /* REUSO DE ESTILOS CORPORATIVOS */
 .dash-container { padding: 1.5rem; max-width: 1550px; margin: 0 auto; color: #2D3748; }
 
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin: 0; }
+.header-actions { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+
+/* WEEK PICKER */
+.week-picker-wrap { display: flex; align-items: center; gap: 0.5rem; background: white; padding: 0.4rem 0.8rem; border-radius: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+.week-nav-btn { border: none; background: #EDF2F7; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 900; color: #553C9A; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+.week-nav-btn:hover:not(:disabled) { background: #E9D8FD; transform: scale(1.1); }
+.week-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.week-info { display: flex; flex-direction: column; align-items: center; min-width: 120px; }
+.week-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #A0AEC0; }
+.week-range { font-size: 0.78rem; font-weight: 800; color: #2D3748; }
+.today-btn { border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.3rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.72rem; font-weight: 700; transition: 0.2s; white-space: nowrap; }
+.today-btn:hover { opacity: 0.85; transform: scale(1.03); }
+
 .period-switcher { background: #EDF2F7; padding: 4px; border-radius: 12px; display: flex; }
 .period-switcher button { border: none; background: transparent; padding: 0.4rem 1.2rem; border-radius: 9px; cursor: pointer; font-size: 0.8rem; color: #718096; }
 .period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
@@ -269,7 +369,7 @@ onMounted(cargar);
 .bar-v { width: 22px; background: #CBD5E0; border-radius: 8px 8px 0 0; transition: height 1s; opacity: 0.4; }
 .bar-g { width: 14px; background: #68D391; border-radius: 8px 8px 0 0; transition: height 1s 0.2s; }
 
-/* LÍNEAS - REDISEÑO TOTAL (ETIQUETAS ABAJO) */
+/* LÍNEAS */
 .line-mode { padding: 40px 10px; }
 .line-container { width: 100%; height: 100%; position: relative; }
 .line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 260px; overflow: visible; z-index: 1; pointer-events: none; }
@@ -285,24 +385,28 @@ onMounted(cargar);
 .point-v:hover { transform: scale(1.5); box-shadow: 0 0 10px rgba(0,0,0,0.1); }
 .point-g { width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #68D391; position: absolute; }
 
-/* FOOTERS UNIFICADOS (BARRAS Y LÍNEAS) */
+/* FOOTERS */
 .bar-footer, .node-footer-v2 { position: absolute; bottom: -85px; display: flex; flex-direction: column; align-items: center; text-align: center; width: 120px; z-index: 5; }
 .f-main { font-size: 0.75rem; color: #1A202C; text-transform: capitalize; margin-bottom: 2px; }
 .f-sub { font-size: 0.65rem; font-weight: 800; color: #A0AEC0; white-space: nowrap; }
 
-/* SECCIÓN RANKING */
+/* RANKING */
 .sidebar { display: flex; flex-direction: column; }
 .ranking-full { padding: 1.5rem; background: #F8FAFC; border-radius: 28px; }
+.semana-badge { font-size: 0.72rem; font-weight: 800; color: #553C9A; background: #E9D8FD; padding: 0.25rem 0.75rem; border-radius: 20px; display: inline-block; margin: 0.5rem 0 1rem; }
 .top-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
 .top-row { display: flex; gap: 1rem; background: white; padding: 1.25rem; border-radius: 22px; border: 1px solid #EDF2F7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); align-items: center; }
 .top-number { width: 30px; height: 30px; min-width: 30px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; border-radius: 12px; background: #CBD5E0; font-size: 0.75rem; }
 .nr-0 { background: #FFD700; box-shadow: 0 4px 10px rgba(255,215,0,0.3); }
 .p-name-full { font-size: 0.9rem; color: #1A202C; margin: 0 0 4px 0; }
 .p-stats { display: flex; gap: 0.8rem; font-size: 0.7rem; color: #718096; font-weight: 800; }
+.empty { color: #A0AEC0; text-align: center; padding: 1rem; font-size: 0.85rem; }
 
 .loading-full { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10rem 0; }
 .spinner-big { width: 50px; height: 50px; border: 4px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .animate-fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>

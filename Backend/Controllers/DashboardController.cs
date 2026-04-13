@@ -20,7 +20,7 @@ namespace VidaAnimal.API.Controllers
         }
 
         [HttpGet("resumen")]
-        public async Task<IActionResult> GetResumen()
+        public async Task<IActionResult> GetResumen([FromQuery] string? fecha = null, [FromQuery] string? semanaInicio = null)
         {
             try {
                 TimeZoneInfo peruTimeZone;
@@ -35,13 +35,24 @@ namespace VidaAnimal.API.Controllers
                 }
 
                 var ahoraPeru = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, peruTimeZone);
-                var hoy = ahoraPeru.Date;
-                var inicioSemana = hoy.AddDays(-(int)ahoraPeru.DayOfWeek + (int)DayOfWeek.Monday);
-                if (ahoraPeru.DayOfWeek == DayOfWeek.Sunday) inicioSemana = hoy.AddDays(-6);
+
+                // Día seleccionado (para Inicio). Por defecto: hoy.
+                var hoy = DateTime.TryParse(fecha, out var fechaParsed) ? fechaParsed.Date : ahoraPeru.Date;
+
+                // Inicio de semana seleccionada (para Dashboard). Por defecto: lunes de la semana actual.
+                DateTime inicioSemana;
+                if (DateTime.TryParse(semanaInicio, out var semanaInicioP)) {
+                    inicioSemana = semanaInicioP.Date;
+                } else {
+                    inicioSemana = ahoraPeru.Date.AddDays(-(int)ahoraPeru.DayOfWeek + (int)DayOfWeek.Monday);
+                    if (ahoraPeru.DayOfWeek == DayOfWeek.Sunday) inicioSemana = ahoraPeru.Date.AddDays(-6);
+                }
+
                 var inicioMes = new DateTime(ahoraPeru.Year, ahoraPeru.Month, 1);
-                
-                var fechaLimitePeru = inicioMes < hoy.AddDays(-7) ? inicioMes : hoy.AddDays(-7);
-                var fechaLimiteUTC = fechaLimitePeru.AddHours(-1); // Buffer de seguridad hacia ATRÁS
+
+                // Calcular fecha límite de consulta para abarcar tanto el día seleccionado como la semana seleccionada
+                var fechaMasAntigua = new[] { hoy, inicioSemana, inicioMes }.Min();
+                var fechaLimiteUTC = fechaMasAntigua.AddDays(-1); // Buffer de seguridad hacia ATRÁS
 
                 var detallesQuery = await _context.VentaDetalles
                     .Include(d => d.Venta)
@@ -120,7 +131,9 @@ namespace VidaAnimal.API.Controllers
                     topProveedores,
                     stockBajo,
                     graficoSemanal = GenerarGraficoSemanal(data, inicioSemana),
-                    graficoMensual = GenerarGraficoMensual(data, ahoraPeru)
+                    graficoMensual = GenerarGraficoMensual(data, ahoraPeru),
+                    semanaInicioUsada = inicioSemana.ToString("yyyy-MM-dd"),
+                    fechaUsada = hoy.ToString("yyyy-MM-dd")
                 });
             } catch (Exception ex) {
                 return BadRequest(new { success = false, message = ex.Message });

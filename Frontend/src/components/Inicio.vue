@@ -5,12 +5,32 @@
     <div class="page-header">
       <div class="welcome-section">
         <h1 class="page-title">🏠 Resumen del Día</h1>
-        <p class="page-date">{{ fechaActualDisplay }}</p>
+        <p class="page-date">{{ fechaDisplay }}</p>
       </div>
-      <div class="header-status">
-        <span class="status-indicator active"></span>
-        <span class="status-text">Sistema Sincronizado (Perú)</span>
-        <button class="refresh-btn" @click="cargarResumen" :disabled="loading">🔄 Recargar</button>
+      <div class="header-right">
+        <!-- SELECTOR DE FECHA -->
+        <div class="date-picker-wrap">
+          <label class="date-label">📅 Ver día:</label>
+          <input
+            id="inicio-date-picker"
+            type="date"
+            class="date-input"
+            :value="fechaSeleccionada"
+            :max="hoyISO"
+            @change="onFechaChange"
+          />
+          <button
+            v-if="!esHoy"
+            class="today-btn"
+            @click="volverAHoy"
+            title="Volver a hoy"
+          >Hoy</button>
+        </div>
+        <div class="header-status">
+          <span class="status-indicator active"></span>
+          <span class="status-text">Sistema Sincronizado (Perú)</span>
+          <button class="refresh-btn" @click="cargarResumen" :disabled="loading">🔄 Recargar</button>
+        </div>
       </div>
     </div>
 
@@ -19,7 +39,7 @@
       <div class="kpi-card k1">
         <div class="icon-wrap">💰</div>
         <div class="kpi-content">
-          <p class="kpi-label">Ventas Hoy</p>
+          <p class="kpi-label">Ventas {{ esHoy ? 'Hoy' : 'del Día' }}</p>
           <p class="kpi-value">S/ {{ formatMoney(stats.ventasHoy) }}</p>
         </div>
       </div>
@@ -58,8 +78,8 @@
         <div class="left-col">
           <!-- TOP PRODUCTOS HOY (Desde Backend) -->
           <div class="card ranking-card">
-            <h3 class="card-title">🏆 Top Productos Hoy</h3>
-            <div v-if="topProductosHoy.length === 0" class="empty-state">No hay ventas registradas aún.</div>
+            <h3 class="card-title">🏆 Top Productos {{ esHoy ? 'Hoy' : 'del Día' }}</h3>
+            <div v-if="topProductosHoy.length === 0" class="empty-state">No hay ventas registradas para este día.</div>
             <div v-else class="top-list">
               <div v-for="(p, i) in topProductosHoy" :key="p.producto" class="top-item-h animate-pop-in">
                 <span class="top-rank">{{ i + 1 }}</span>
@@ -92,8 +112,8 @@
           
           <!-- FLUJO DE VENTAS (Desde Backend) -->
           <div class="card flow-card">
-             <h3 class="card-title">🕒 Flujo de Ventas (Hoy)</h3>
-             <div v-if="!hasHourlyData" class="empty-state">Trazando curva de ventas...</div>
+             <h3 class="card-title">🕒 Flujo de Ventas ({{ esHoy ? 'Hoy' : fechaDisplay }})</h3>
+             <div v-if="!hasHourlyData" class="empty-state">Sin ventas en este día.</div>
              <div v-else class="chart-hourly-v2">
                 <div v-for="h in flujos" :key="h.hora" class="hour-unit">
                    <div class="hour-bar" :style="{ height: (h.total / maxHourlyTotal * 100) + '%' }">
@@ -146,12 +166,43 @@ const stockBajo = ref([]);
 const topProveedores = ref([]);
 const loading = ref(true);
 
-const fechaActualDisplay = computed(() => new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date()));
+// Helpers de fecha
+const toLocalISO = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const hoyISO = computed(() => toLocalISO(new Date()));
+const fechaSeleccionada = ref(hoyISO.value);
+
+const esHoy = computed(() => fechaSeleccionada.value === hoyISO.value);
+
+const fechaDisplay = computed(() => {
+  // Construimos la fecha localmente para evitar offset UTC
+  const [y, m, d] = fechaSeleccionada.value.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return new Intl.DateTimeFormat('es-ES', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  }).format(date);
+});
+
+const onFechaChange = (e) => {
+  fechaSeleccionada.value = e.target.value;
+  cargarResumen();
+};
+
+const volverAHoy = () => {
+  fechaSeleccionada.value = hoyISO.value;
+  cargarResumen();
+};
 
 const cargarResumen = async () => {
   loading.value = true;
   try {
-    const res = await fetch('/api/Dashboard/resumen', {
+    const url = `/api/Dashboard/resumen?fecha=${fechaSeleccionada.value}`;
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     });
     const data = await res.json();
@@ -180,9 +231,21 @@ onMounted(cargarResumen);
 <style scoped>
 /* REUSO DE ESTILOS PREVIOS (PREMIUM) */
 .inicio-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; margin: 0; }
-.header-status { display: flex; align-items: center; gap: 0.8rem; background: white; padding: 0.5rem 1.2rem; border-radius: 12px; }
+
+/* HEADER DERECHO */
+.header-right { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+/* DATE PICKER */
+.date-picker-wrap { display: flex; align-items: center; gap: 0.6rem; background: white; padding: 0.5rem 1rem; border-radius: 14px; border: 1px solid #E2E8F0; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+.date-label { font-size: 0.8rem; font-weight: 700; color: #553C9A; white-space: nowrap; }
+.date-input { border: none; outline: none; font-size: 0.85rem; font-weight: 700; color: #2D3748; background: transparent; cursor: pointer; }
+.date-input::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+.today-btn { border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.35rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700; transition: 0.2s; }
+.today-btn:hover { opacity: 0.85; transform: scale(1.03); }
+
+.header-status { display: flex; align-items: center; gap: 0.8rem; background: white; padding: 0.5rem 1.2rem; border-radius: 12px; border: 1px solid #E2E8F0; }
 .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #48BB78; }
 .refresh-btn { border: none; background: #EDF2F7; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; }
 
@@ -220,6 +283,8 @@ onMounted(cargarResumen);
 .loading-state { text-align: center; padding: 10rem 0; }
 .spinner { width: 40px; height: 40px; border: 4px solid #EDF2F7; border-top-color: #553C9A; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state { color: #A0AEC0; font-size: 0.85rem; text-align: center; padding: 1.5rem 0; }
 
 .animate-fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
