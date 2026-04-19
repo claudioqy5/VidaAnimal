@@ -15,8 +15,8 @@
             <span class="week-label">📅 Semana</span>
             <span class="week-range">{{ semanaRangoDisplay }}</span>
           </div>
-          <button class="week-nav-btn" @click="cambiarSemana(1)" :disabled="esSemanActual" title="Semana siguiente">›</button>
-          <button v-if="!esSemanActual" class="today-btn" @click="volverSemanaActual">Actual</button>
+          <button class="week-nav-btn" @click="cambiarSemana(1)" :disabled="esSemanaActual" title="Semana siguiente">›</button>
+          <button v-if="!esSemanaActual" class="today-btn" @click="volverSemanaActual">Actual</button>
         </div>
 
         <div class="period-switcher">
@@ -50,16 +50,16 @@
           </div>
         </div>
         <div class="kpi-card glass k3">
-          <div class="kpi-icon-wrap">ATM</div>
+          <div class="kpi-icon-wrap">📊</div>
           <div class="kpi-body">
-            <p class="kpi-label">Utilidad Real Hoy</p>
+            <p class="kpi-label">Ganancia Real Hoy</p>
             <p class="kpi-value">S/ {{ formatMoney(stats.gananciaHoy) }}</p>
           </div>
         </div>
         <div class="kpi-card glass k4">
           <div class="kpi-icon-wrap">💎</div>
           <div class="kpi-body">
-            <p class="kpi-label">Total Histórico</p>
+            <p class="kpi-label">Ventas del Mes</p>
             <p class="kpi-value">S/ {{ formatMoney(stats.ventasMes) }}</p>
           </div>
         </div>
@@ -221,7 +221,7 @@ const semanaRangoDisplay = computed(() => {
   return `${l} – ${d}`;
 });
 
-const esSemanActual = computed(() =>
+const esSemanaActual = computed(() =>
   toISO(semanaSeleccionada.value) === toISO(lunesActual)
 );
 

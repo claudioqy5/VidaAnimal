@@ -47,6 +47,7 @@ namespace VidaAnimal.API.Controllers
                     inicioSemana = ahoraPeru.Date.AddDays(-(int)ahoraPeru.DayOfWeek + (int)DayOfWeek.Monday);
                     if (ahoraPeru.DayOfWeek == DayOfWeek.Sunday) inicioSemana = ahoraPeru.Date.AddDays(-6);
                 }
+                var finSemana = inicioSemana.AddDays(6);
 
                 var inicioMes = new DateTime(ahoraPeru.Year, ahoraPeru.Month, 1);
 
@@ -68,7 +69,7 @@ namespace VidaAnimal.API.Controllers
                 var detallesHoy = data.Where(d => d.FechaPeru.Date == hoy).ToList();
                 var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
-                var ventasSemanaGroups = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
+                var ventasSemanaGroups = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
                 var ventasMesGroups = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
                 var stats = new {
@@ -78,7 +79,7 @@ namespace VidaAnimal.API.Controllers
                     clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),
                     
                     ventasSemana = ventasSemanaGroups.Sum(v => v.Total),
-                    gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0) - ventasSemanaGroups.Sum(v => v.Descuento),
+                    gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0) - ventasSemanaGroups.Sum(v => v.Descuento),
                     
                     ventasMes = ventasMesGroups.Sum(v => v.Total),
                     gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.Ganancia ?? 0) - ventasMesGroups.Sum(v => v.Descuento)
@@ -91,13 +92,13 @@ namespace VidaAnimal.API.Controllers
 
                 var flujoHoras = new List<object>();
                 for (int i = 6; i <= 22; i++) {
-                    // Usamos la hora directa de la base de datos ya que ya viene en hora de Perú
-                    var totalHora = detallesHoy.Where(d => d.Detalle.Venta.Fecha.Hour == i).Sum(d => (decimal)d.Detalle.SubTotal);
+                    // Usamos FechaPeru.Hour para respetar la zona horaria de Perú
+                    var totalHora = detallesHoy.Where(d => d.FechaPeru.Hour == i).Sum(d => (decimal)d.Detalle.SubTotal);
                     flujoHoras.Add(new { hora = i, total = totalHora });
                 }
 
                 var topSemanal = data
-                    .Where(d => d.FechaPeru.Date >= inicioSemana.Date)
+                    .Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date)
                     .GroupBy(d => d.Detalle.Producto.Nombre)
                     .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
                     .OrderByDescending(x => x.totalMonto).Take(10).ToList();
@@ -162,10 +163,12 @@ namespace VidaAnimal.API.Controllers
         private List<object> GenerarGraficoMensual(IEnumerable<dynamic> data, DateTime ahora) {
             var lista = new List<object>();
             var inicioMes = new DateTime(ahora.Year, ahora.Month, 1);
+            var finMes = new DateTime(ahora.Year, ahora.Month, DateTime.DaysInMonth(ahora.Year, ahora.Month));
             foreach (var i in Enumerable.Range(0, 5)) {
                 var sInicio = inicioMes.AddDays(i * 7);
                 if (sInicio.Month != ahora.Month) break;
-                var sFin = sInicio.AddDays(6);
+                // Clavar sFin al último día del mes para no sangrar al mes siguiente
+                var sFin = new[] { sInicio.AddDays(6), finMes }.Min();
                 var itemsSem = data.Where(d => ((DateTime)d.FechaPeru).Date >= sInicio.Date && ((DateTime)d.FechaPeru).Date <= sFin.Date).ToList();
 
                 var ventasUnicas = itemsSem.GroupBy(d => (int)d.Detalle.VentaID).Select(g => g.First().Detalle.Venta);
