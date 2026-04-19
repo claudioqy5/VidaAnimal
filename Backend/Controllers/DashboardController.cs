@@ -122,9 +122,19 @@ namespace VidaAnimal.API.Controllers
                     .Select(p => new { p.Nombre, p.StockActual, p.UnidadMedida, p.StockMinimo })
                     .Take(10).ToListAsync();
 
+                // Ganancia histórica total del sistema (todo el tiempo, directo en BD)
+                var sumaGananciaHistorica = await _context.VentaDetalles
+                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada")
+                    .SumAsync(d => d.Ganancia ?? 0);
+                var sumaDescuentosHistorica = await _context.Ventas
+                    .Where(v => v.Estado == "Completada")
+                    .SumAsync(v => v.Descuento);
+                var gananciaHistorica = sumaGananciaHistorica - sumaDescuentosHistorica;
+
                 return Ok(new {
                     success = true,
                     stats,
+                    gananciaHistorica,
                     topProductosHoy,
                     flujoHoras,
                     topSemanal,

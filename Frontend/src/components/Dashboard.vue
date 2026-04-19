@@ -50,10 +50,10 @@
           </div>
         </div>
         <div class="kpi-card glass k3">
-          <div class="kpi-icon-wrap">📊</div>
+          <div class="kpi-icon-wrap">🏆</div>
           <div class="kpi-body">
-            <p class="kpi-label">Ganancia Real Hoy</p>
-            <p class="kpi-value">S/ {{ formatMoney(stats.gananciaHoy) }}</p>
+            <p class="kpi-label">Ganancia Histórica</p>
+            <p class="kpi-value">S/ {{ formatMoney(gananciaHistorica) }}</p>
           </div>
         </div>
         <div class="kpi-card glass k4">
@@ -169,6 +169,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 
 const stats = ref({ ventasHoy: 0, gananciaHoy: 0, ventasSemana: 0, gananciaSemana: 0, ventasMes: 0, gananciaMes: 0 });
+const gananciaHistorica = ref(0);
 const graficoSemanal = ref([]);
 const graficoMensual = ref([]);
 const topSemanal = ref([]);
@@ -254,6 +255,7 @@ const cargar = async () => {
     const data = await res.json();
     if (data.success) {
       stats.value = data.stats;
+      gananciaHistorica.value = data.gananciaHistorica ?? 0;
       graficoSemanal.value = data.graficoSemanal;
       graficoMensual.value = data.graficoMensual;
       topSemanal.value = data.topSemanal || [];
