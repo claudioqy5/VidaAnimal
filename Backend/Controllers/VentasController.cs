@@ -56,12 +56,8 @@ namespace VidaAnimal.API.Controllers
                     var inicioDiaPeru = fechaFiltro.Date;
                     var finDiaPeru = inicioDiaPeru.AddDays(1);
 
-                    // Offset de Perú es -5h relative to UTC (UTC = PeruTime + 5h)
-                    // Así que el rango UTC es:
-                    var inicioUTC = inicioDiaPeru.AddHours(5);
-                    var finUTC = finDiaPeru.AddHours(5);
-
-                    query = query.Where(v => v.Fecha >= inicioUTC && v.Fecha < finUTC);
+                    // La BD ya guarda la hora en zona horaria local de Perú, no necesitamos sumar las 5 horas de UTC
+                    query = query.Where(v => v.Fecha >= inicioDiaPeru && v.Fecha < finDiaPeru);
                 }
             }
 
