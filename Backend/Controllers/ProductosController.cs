@@ -28,7 +28,7 @@ namespace VidaAnimal.API.Controllers
         public async Task<IActionResult> GetProductos()
         {
             // Calculamos la popularidad basada en la cantidad vendida en los últimos 30 días
-            var fechaLimite = DateTime.UtcNow.AddDays(-30);
+            var fechaLimite = DateTime.Now.AddDays(-30);
             
             var productosPopularidad = await _context.VentaDetalles
                 .Where(vd => vd.Venta != null && vd.Venta.Fecha >= fechaLimite && vd.Venta.Estado != "Anulada")
@@ -110,7 +110,7 @@ namespace VidaAnimal.API.Controllers
                     CantidadMayorista = modelo.CantidadMayorista,
                     NombreUnidadMayorista = modelo.NombreUnidadMayorista,
                     Activo = true,
-                    FechaCreacion = DateTime.UtcNow,
+                    FechaCreacion = DateTime.Now,
                     ImagenURL = rutaImagenBD,
                     CategoriaID = modelo.CategoriaID
                 };
@@ -136,7 +136,7 @@ namespace VidaAnimal.API.Controllers
                     {
                         ProveedorID = nuevoProducto.ProveedorID ?? 1, // Si no eligió proveedor, asume el ID 1 por defecto
                         NumeroComprobante = "INITIAL-" + nuevoProducto.ProductoID.ToString(),
-                        FechaCompra = DateTime.UtcNow,
+                        FechaCompra = DateTime.Now,
                         Total = nuevoProducto.StockActual * nuevoProducto.PrecioCosto,
                     };
 
@@ -157,7 +157,7 @@ namespace VidaAnimal.API.Controllers
 
                     var kardex = new MovimientoInventario
                     {
-                        Fecha = DateTime.UtcNow,
+                        Fecha = DateTime.Now,
                         Tipo = "ENTRADA",
                         ProductoID = nuevoProducto.ProductoID,
                         Cantidad = nuevoProducto.StockActual,

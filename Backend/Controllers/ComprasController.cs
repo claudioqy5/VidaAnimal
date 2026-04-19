@@ -54,7 +54,7 @@ namespace VidaAnimal.API.Controllers
                 {
                     ProveedorID = modelo.ProveedorID,
                     NumeroComprobante = modelo.NumeroComprobante,
-                    FechaCompra = DateTime.UtcNow,
+                    FechaCompra = DateTime.Now,
                     Total = modelo.Total,
                     UsuarioID = parsedUsuarioId // ID del que hizo login en el navegador
                 };
@@ -97,7 +97,7 @@ namespace VidaAnimal.API.Controllers
                 {
                     _context.MovimientosInventario.Add(new MovimientoInventario
                     {
-                        Fecha = DateTime.UtcNow,
+                        Fecha = DateTime.Now,
                         Tipo = "ENTRADA",
                         ProductoID = prod.ProductoID,
                         Cantidad = cantidad,

@@ -68,7 +68,7 @@ namespace VidaAnimal.API.Controllers
 
                 var data = detallesQuery.Select(d => new {
                     Detalle = d,
-                    FechaPeru = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(d.Venta.Fecha, DateTimeKind.Utc), peruTimeZone)
+                    FechaPeru = d.Venta.Fecha // La BD ya guarda la hora local de Perú gracias al VPS
                 }).ToList();
 
                 var detallesHoy = data.Where(d => d.FechaPeru.Date == hoy).ToList();
