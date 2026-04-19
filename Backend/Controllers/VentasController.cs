@@ -116,7 +116,7 @@ namespace VidaAnimal.API.Controllers
                     UsuarioID = usuarioId ?? 1,
                     SerieComprobante = req.SerieComprobante,
                     NumeroComprobante = req.NumeroComprobante,
-                    Fecha = DateTime.Now,
+                    Fecha = DateTime.UtcNow,
                     MetodoPago = string.IsNullOrEmpty(req.MetodoPago) ? "Efectivo" : req.MetodoPago,
                     Descuento = req.Descuento,
                     Observaciones = req.Observaciones,
@@ -185,7 +185,7 @@ namespace VidaAnimal.API.Controllers
                 {
                     var kardex = new MovimientoInventario
                     {
-                        Fecha = DateTime.Now,
+                        Fecha = DateTime.UtcNow,
                         Tipo = "SALIDA",
                         ProductoID = prod.ProductoID,
                         Cantidad = cantidad,

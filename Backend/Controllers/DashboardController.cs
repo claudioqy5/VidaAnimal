@@ -53,12 +53,17 @@ namespace VidaAnimal.API.Controllers
 
                 // Calcular fecha límite de consulta para abarcar tanto el día seleccionado como la semana seleccionada
                 var fechaMasAntigua = new[] { hoy, inicioSemana, inicioMes }.Min();
-                var fechaLimiteUTC = fechaMasAntigua.AddDays(-1); // Buffer de seguridad hacia ATRÁS
+                // Buffer amplio: incluimos un día antes Y validamos con FechaPeru.Date en memoria
+                // Esto garantiza que las ventas guardadas en hora local o UTC sean capturadas
+                var fechaLimiteUTC = fechaMasAntigua.AddDays(-2);
+                var fechaLimiteMaxUTC = ahoraPeru.Date.AddDays(2); // techo superior
 
                 var detallesQuery = await _context.VentaDetalles
                     .Include(d => d.Venta)
                     .Include(d => d.Producto)
-                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada" && d.Venta.Fecha >= fechaLimiteUTC)
+                    .Where(d => d.Venta != null && d.Venta.Estado == "Completada" 
+                        && d.Venta.Fecha >= fechaLimiteUTC
+                        && d.Venta.Fecha <= fechaLimiteMaxUTC)
                     .ToListAsync();
 
                 var data = detallesQuery.Select(d => new {
