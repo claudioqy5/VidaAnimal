@@ -48,19 +48,19 @@
             <p class="kpi-label">Ganancia {{ periodoLabel }}</p>
             <p class="kpi-value">S/ {{ formatMoney(currentStats.ganancia) }}</p>
           </div>
+        </div>        
+        <div class="kpi-card glass k4">
+          <div class="kpi-icon-wrap">💎</div>
+          <div class="kpi-body">
+            <p class="kpi-label">Ventas del Mes</p>
+            <p class="kpi-value">S/ {{ formatMoney(stats.ventasMes) }}</p>
+          </div>
         </div>
         <div class="kpi-card glass k3">
           <div class="kpi-icon-wrap">🏆</div>
           <div class="kpi-body">
             <p class="kpi-label">Ganancia Histórica</p>
             <p class="kpi-value">S/ {{ formatMoney(gananciaHistorica) }}</p>
-          </div>
-        </div>
-        <div class="kpi-card glass k4">
-          <div class="kpi-icon-wrap">💎</div>
-          <div class="kpi-body">
-            <p class="kpi-label">Ventas del Mes</p>
-            <p class="kpi-value">S/ {{ formatMoney(stats.ventasMes) }}</p>
           </div>
         </div>
       </div>
