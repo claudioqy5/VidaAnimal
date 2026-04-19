@@ -260,7 +260,7 @@ namespace VidaAnimal.API.Controllers
 
                         var kardex = new MovimientoInventario
                         {
-                            Fecha = DateTime.Now,
+                            Fecha = DateTime.UtcNow,
                             Tipo = "DEVOLUCION",
                             ProductoID = p.ProductoID,
                             Cantidad = incrementoStockActual,
