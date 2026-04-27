@@ -152,7 +152,7 @@ TEXTO EXTRAÍDO:
 
             var esquemaDB = @"
 BASE DE DATOS SQL SERVER: VidaAnimalBD
-ZONA HORARIA: Los datos de Fecha están en hora local de Perú (UTC-5). Usa CONVERT(date, Fecha) para comparar fechas.
+ZONA HORARIA: Los datos de Fecha estan en hora local de Peru (UTC-5). El servidor corre en UTC. Para la hora actual en Peru usa DATEADD(hour,-5,GETDATE()). Para hoy en Peru usa CONVERT(date, DATEADD(hour,-5,GETDATE())). Usa CONVERT(date, Fecha) para comparar fechas del campo Fecha.
 
 TABLAS DISPONIBLES (SOLO LECTURA):
 
