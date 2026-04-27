@@ -18,7 +18,14 @@
     <div v-else class="pos-layout">
       <!-- Panel Izquierdo: Formulario de Ingreso -->
       <div class="panel panel-left">
-        <h3 class="panel-title">1. Datos del Proveedor y Factura</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid #F0F4F8; padding-bottom: 0.8rem;">
+          <h3 class="panel-title" style="border: none; margin: 0; padding: 0;">1. Datos del Proveedor y Factura</h3>
+          <input type="file" ref="fileInputFactura" @change="subirFacturaIA" accept="application/pdf, image/jpeg, image/png, image/jpg" style="display: none;" />
+          <button type="button" class="ai-btn-small" @click="() => $refs.fileInputFactura.click()" :disabled="analizandoFactura">
+            <span v-if="!analizandoFactura">✨ Leer Factura (Foto/PDF)</span>
+            <span v-else>⏳ Leyendo...</span>
+          </button>
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label>Proveedor *</label>
@@ -153,7 +160,7 @@
     </div>
 
     <!-- Modal Formulario Rápido de Producto -->
-    <div v-if="mostrarModalProducto" class="modal-overlay" @click.self="cerrarModalProducto">
+    <div v-if="mostrarModalProducto" class="modal-overlay" @click.self="cerrarModalProducto" style="z-index: 10010;">
       <div class="modal-content">
         <div class="modal-header">
           <h3>Crear Producto Rápido</h3>
@@ -307,19 +314,132 @@
       </div>
     </div>
 
-    <!-- Modal de xito de Compra -->
-    <div v-if="mostrarModalExitoCompra" class="modal-overlay" @click.self="cerrarModalExito">
-      <div class="modal-content" style="max-width: 400px; text-align: center;">
-        <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+    <!-- Modal Revisión IA -->
+    <div v-if="mostrarModalRevisionIA" class="modal-overlay" @click.self="mostrarModalRevisionIA = false" style="z-index: 10000;">
+      <div class="modal-content" style="max-width: 90vw; width: 1350px; height: 88vh;">
+        <div class="modal-header">
+          <h3>🧠 Asistente IA: Revisión de Factura</h3>
+          <button class="close-btn" @click="mostrarModalRevisionIA = false">✕</button>
         </div>
         
-        <div class="modal-form" style="padding-top: 0; align-items: center;">
-          <h3 style="color: #2F855A; font-weight: 800; margin: 0 0 1rem 0; font-size: 1.4rem;">¡Compra Registrada!</h3>
-          <p style="color: #4A5568; margin: 0 0 1.5rem 0; line-height: 1.5;">El inventario de todos los productos y los precios de costo han sido actualizados exitosamente en la base de datos.</p>
+        <div class="modal-form" style="background: #F7FAFC; overflow-x: hidden;">
           
-          <button type="button" class="primary-btn" @click="cerrarModalExito" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 0.8rem;">
-            Aceptar y Continuar
+          <!-- RESUMEN DE LA INVERSIÓN (CABECERA IA) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #EBF8FF; padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #BEE3F8; box-shadow: 0 2px 4px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 1rem;">
+            
+            <div style="display: flex; gap: 1.5rem; flex: 1; min-width: 350px;">
+              <div style="flex: 1;">
+                <span style="display: block; font-size: 0.65rem; color: #2B6CB0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">Proveedor *</span>
+                <select v-model="compraHeader.proveedorID" style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #90CDF4; font-weight: 700; color: #2D3748; background: white; font-size: 0.85rem;">
+                  <option value="0" disabled>-- Selecciona --</option>
+                  <option v-for="p in proveedores" :key="p.proveedorID" :value="p.proveedorID">{{ p.nombre }}</option>
+                </select>
+              </div>
+              <div style="width: 140px;">
+                <span style="display: block; font-size: 0.65rem; color: #2B6CB0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">Comprobante *</span>
+                <input type="text" v-model="compraHeader.numeroComprobante" placeholder="Ej. F001-123" style="width: 100%; box-sizing: border-box; padding: 0.4rem; border-radius: 6px; border: 1px solid #90CDF4; font-weight: 700; color: #2D3748; background: white; font-size: 0.85rem;" />
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center;">
+              <div style="text-align: right; border-left: 2px dashed #90CDF4; padding-left: 1rem; padding-right: 1rem;">
+              <span style="display: block; font-size: 0.65rem; color: #2B6CB0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Inversión Total (Costo)</span>
+              <span style="font-size: 1.1rem; color: #E53E3E; font-weight: 800;">S/ {{ totalCostoIA.toFixed(2) }}</span>
+            </div>
+            <div style="text-align: right; border-left: 2px dashed #90CDF4; padding-left: 1rem; padding-right: 1rem;">
+              <span style="display: block; font-size: 0.65rem; color: #2B6CB0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Venta Proyectada</span>
+              <span style="font-size: 1.1rem; color: #38A169; font-weight: 800;">S/ {{ totalVentaIA.toFixed(2) }}</span>
+            </div>
+            <div style="text-align: right; border-left: 2px dashed #90CDF4; padding-left: 1rem;">
+              <span style="display: block; font-size: 0.65rem; color: #2B6CB0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Ganancia Estimada</span>
+              <span style="font-size: 1.1rem; color: #D69E2E; font-weight: 800;">S/ {{ (totalVentaIA - totalCostoIA).toFixed(2) }}</span>
+            </div>
+          </div>
+          </div>
+
+          <p class="modal-note" style="font-size: 0.75rem; padding: 0.5rem; margin-bottom: 1rem;">Gemma ha extraído estos productos. Verifica que estén vinculados al catálogo. Si es nuevo, pulsa el botón <b>➕</b>.</p>
+
+          <table class="cart-table" style="background: white; border-radius: 8px; border: 1px solid #E2E8F0; width: 100%; table-layout: fixed;">
+            <thead>
+              <tr>
+                <th style="width: 4%; text-align: center; font-size: 0.65rem;">#</th>
+                <th style="width: 33%; font-size: 0.65rem;">Producto en Factura</th>
+                <th style="width: 6%; font-size: 0.65rem;">Cant.</th>
+                <th style="width: 8%; font-size: 0.65rem;">Costo U.</th>
+                <th style="width: 8%; font-size: 0.65rem;">Venta U.</th>
+                <th style="width: 41%; font-size: 0.65rem;">Vincular a tu Catálogo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, idx) in productosExtraidosIA" :key="item.idUnico">
+                <td style="text-align: center; color: #A0AEC0; font-weight: 800; font-size: 0.7rem; padding: 0.4rem;">{{ idx + 1 }}</td>
+                <td style="word-break: break-word; padding: 0.4rem;"><strong style="color: #2D3748; font-size: 0.7rem;">{{ item.nombreOriginal }}</strong></td>
+                <td style="padding: 0.4rem;"><input type="number" min="0.01" step="0.01" v-model="item.cantidad" style="width: 100%; min-width: 50px; padding: 0.35rem; font-size: 0.75rem; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box;" /></td>
+                <td style="padding: 0.4rem;">
+                  <div style="display: flex; align-items: center; gap: 0.2rem;">
+                    <span style="font-weight: 700; color: #4A5568; font-size: 0.75rem;">S/</span> 
+                    <input type="number" min="0" step="0.01" v-model="item.precioCosto" style="width: 100%; min-width: 60px; padding: 0.35rem; font-size: 0.75rem; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box;" />
+                  </div>
+                </td>
+                <td style="padding: 0.4rem;">
+                  <div style="display: flex; align-items: center; gap: 0.2rem;">
+                    <span style="font-weight: 700; color: #4A5568; font-size: 0.75rem;">S/</span> 
+                    <input type="number" min="0" step="0.01" v-model="item.precioVenta" style="width: 100%; min-width: 60px; padding: 0.35rem; font-size: 0.75rem; border: 1px solid #CBD5E0; border-radius: 4px; box-sizing: border-box; background: #F7FAFC;" title="Precio de venta sugerido" />
+                  </div>
+                </td>
+                <td style="padding: 0.4rem;">
+                  <div style="display: flex; gap: 0.3rem; align-items: center; flex: 1;">
+                    <div class="custom-combobox" style="width: 100%;">
+                      <input 
+                        type="text"
+                        v-model="item.busquedaTexto"
+                        placeholder="Escribe para buscar catálogo..."
+                        class="search-input-select"
+                        style="padding: 0.35rem; font-size: 0.75rem; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                        :style="{ border: item.productoMapeadoID === 0 ? '2px solid #E53E3E' : '1px solid #CBD5E0' }"
+                        @focus="item.mostrarDropdown = true"
+                        @input="item.mostrarDropdown = true; item.productoMapeadoID = 0;"
+                        @blur="setTimeout(() => item.mostrarDropdown = false, 250)"
+                      />
+                      <span class="combobox-arrow" @click.stop="item.mostrarDropdown = !item.mostrarDropdown" style="right: 8px;">▼</span>
+                      
+                      <div v-if="item.mostrarDropdown" class="custom-dropdown custom-scrollbar" style="top: 100%; max-height: 200px; position: absolute; z-index: 10001; text-align: left;">
+                        <div class="dropdown-option" @click.stop="seleccionarMapeoNulo(item)" style="background: #FFF5F5; padding: 0.5rem;">
+                          <span style="font-weight: 800; color: #E53E3E; font-size: 0.75rem;">-- DEJAR COMO NUEVO / CREAR --</span>
+                        </div>
+                        <div 
+                          v-for="p in buscarEnCatalogo(item)" 
+                          :key="p.productoID" 
+                          class="dropdown-option"
+                          @click.stop="seleccionarMapeoReal(item, p)"
+                          style="padding: 0.5rem;"
+                        >
+                          <div class="option-main">
+                            <span class="option-name" :style="{ fontWeight: p.esSugerido ? '700' : '500' }" style="font-size: 0.75rem;">{{ p.esSugerido ? '⭐ ' : '' }}[{{ p.codigo }}] {{ p.nombre }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="quick-btn" title="Crear como nuevo" @click="crearProductoDesdeIA(item, idx)" style="width: 28px; height: 28px; font-size: 0.85rem; flex-shrink: 0;">➕</button>
+                    <button class="remove-btn" title="Ignorar este item" @click="productosExtraidosIA.splice(idx, 1)" style="width: 28px; height: 28px; font-size: 0.85rem; flex-shrink: 0; padding: 0;">✖</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="productosExtraidosIA.length === 0">
+                <td colspan="4" class="empty-cart" style="padding: 2rem !important;">No hay productos pendientes por revisar.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top: 1rem; display: flex; justify-content: flex-start;">
+            <button class="primary-btn" @click="agregarFilaManualIA" style="background-color: #3182CE; border-radius: 8px; font-size: 0.8rem; padding: 0.5rem 1rem;">➕ Agregar Fila Manualmente</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="cancel-btn" @click="mostrarModalRevisionIA = false">Cancelar</button>
+          <button type="button" class="primary-btn" @click="confirmarRevisionIA" :disabled="productosExtraidosIA.length === 0 || productosExtraidosIA.some(p => p.productoMapeadoID === 0) || compraHeader.proveedorID === 0 || compraHeader.numeroComprobante.trim() === ''" :style="{ backgroundColor: (productosExtraidosIA.some(p => p.productoMapeadoID === 0) || compraHeader.proveedorID === 0 || compraHeader.numeroComprobante.trim() === '') ? '#E2E8F0' : '#48BB78', color: (productosExtraidosIA.some(p => p.productoMapeadoID === 0) || compraHeader.proveedorID === 0 || compraHeader.numeroComprobante.trim() === '') ? '#A0AEC0' : 'white' }">
+            <span v-if="compraHeader.proveedorID === 0 || compraHeader.numeroComprobante.trim() === ''">⚠️ Falta Proveedor o Comprobante</span>
+            <span v-else-if="productosExtraidosIA.some(p => p.productoMapeadoID === 0)">⚠️ Faltan vincular productos</span>
+            <span v-else>✅ Añadir todo al carrito</span>
           </button>
         </div>
       </div>
@@ -336,6 +456,190 @@ const cargando = ref(true)
 const guardando = ref(false)
 const errorGlobal = ref('')
 const successGlobal = ref('')
+
+// LÓGICA DE INTELIGENCIA ARTIFICIAL PARA FACTURAS
+const fileInputFactura = ref(null)
+const analizandoFactura = ref(false)
+const mostrarModalRevisionIA = ref(false)
+const productosExtraidosIA = ref([])
+const indexItemIAEditando = ref(-1)
+
+const nombreProveedorMapeado = computed(() => {
+   if (compraHeader.value.proveedorID !== 0) {
+      const p = proveedores.value.find(x => x.proveedorID === compraHeader.value.proveedorID);
+      return p ? p.nombre : '';
+   }
+   return '';
+})
+
+const totalCostoIA = computed(() => {
+   return productosExtraidosIA.value.reduce((acc, item) => acc + (parseFloat(item.cantidad || 0) * parseFloat(item.precioCosto || 0)), 0);
+})
+
+const totalVentaIA = computed(() => {
+   return productosExtraidosIA.value.reduce((acc, item) => acc + (parseFloat(item.cantidad || 0) * parseFloat(item.precioVenta || 0)), 0);
+})
+
+// FUNCIONES PARA EL COMBOBOX INTELIGENTE EN LA TABLA
+const buscarEnCatalogo = (item) => {
+  const query = (item.busquedaTexto || '').toLowerCase().trim();
+  if (!query || (item.productoMapeadoID !== 0 && item.busquedaTexto.includes(']'))) {
+    return item.opcionesSugeridas.map(s => ({ ...s, esSugerido: true }));
+  }
+  
+  const palabras = query.split(/\s+/);
+  return productos.value
+    .filter(p => {
+      const n = (p.nombre || '').toLowerCase();
+      const c = (p.codigo || '').toLowerCase();
+      // Debe contener todas las palabras escritas para que coincida
+      return palabras.every(pal => n.includes(pal) || c.includes(pal));
+    })
+    .slice(0, 40); // Limitar a 40 para no saturar
+}
+
+const seleccionarMapeoNulo = (item) => {
+  item.productoMapeadoID = 0;
+  item.busquedaTexto = '';
+  item.precioVenta = 0;
+  item.mostrarDropdown = false;
+}
+
+const seleccionarMapeoReal = (item, p) => {
+  item.productoMapeadoID = p.productoID;
+  item.busquedaTexto = `[${p.codigo}] ${p.nombre}`;
+  item.precioVenta = p.precioVenta || 0;
+  item.precioCosto = p.precioCosto || 0;
+  item.mostrarDropdown = false;
+}
+
+const agregarFilaManualIA = () => {
+  productosExtraidosIA.value.push({
+    idUnico: Math.random().toString(36).substr(2, 9),
+    nombreOriginal: 'NUEVO PRODUCTO MANUAL',
+    cantidad: 1,
+    precioCosto: 0,
+    precioVenta: 0,
+    productoMapeadoID: 0,
+    opcionesSugeridas: [],
+    busquedaTexto: '',
+    mostrarDropdown: false
+  });
+}
+
+// Función de similitud de texto Jaccard (Ignora mayúsculas y acentos)
+const calcularSimilitud = (str1, str2) => {
+  if (!str1 || !str2) return 0;
+  const normalize = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim();
+  const tokens1 = normalize(str1).split(' ').filter(x => x.length > 1);
+  const tokens2 = normalize(str2).split(' ').filter(x => x.length > 1);
+  if (tokens1.length === 0 || tokens2.length === 0) return 0;
+  const intersection = tokens1.filter(t => tokens2.some(t2 => t2.includes(t) || t.includes(t2)));
+  return intersection.length / Math.max(tokens1.length, tokens2.length);
+}
+
+const subirFacturaIA = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  
+  analizandoFactura.value = true
+  const formData = new FormData()
+  formData.append("archivo", file)
+  
+  try {
+    const res = await fetch('/api/IA/AnalizarFactura', {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Error ${res.status}: ${errText}`);
+    }
+    
+    const data = await res.json()
+    if (data.success && data.datos) {
+      // 1. Mapear Proveedor
+      if (data.datos.proveedorNombre) {
+        const bestProv = proveedores.value
+          .map(p => ({ p, score: calcularSimilitud(p.nombre, data.datos.proveedorNombre) }))
+          .sort((a,b) => b.score - a.score)[0];
+        if (bestProv && bestProv.score > 0.3) compraHeader.value.proveedorID = bestProv.p.proveedorID;
+      }
+      
+      // 2. Mapear Nro Comprobante
+      if (data.datos.numeroComprobante) compraHeader.value.numeroComprobante = data.datos.numeroComprobante;
+
+      // 3. Mapear Productos
+      productosExtraidosIA.value = (data.datos.productos || []).map(prodIA => {
+        const matches = productos.value.map(p => ({
+          productoID: p.productoID,
+          nombre: p.nombre,
+          codigo: p.codigo,
+          precioVenta: p.precioVenta || 0,
+          precioCosto: p.precioCosto || 0,
+          score: calcularSimilitud(p.nombre, prodIA.nombre)
+        })).sort((a,b) => b.score - a.score);
+
+        const bestMatch = matches[0]?.score >= 0.4 ? matches[0].productoID : 0;
+        const bestVenta = matches[0]?.score >= 0.4 ? matches[0].precioVenta : 0;
+        const bestCosto = matches[0]?.score >= 0.4 ? matches[0].precioCosto : (prodIA.precioCostoUnitario > 0 ? prodIA.precioCostoUnitario : 0);
+        const bestName = matches[0]?.score >= 0.4 ? `[${matches[0].codigo}] ${matches[0].nombre}` : '';
+
+        return {
+          idUnico: Math.random().toString(36).substr(2, 9),
+          nombreOriginal: prodIA.nombre,
+          cantidad: prodIA.cantidad > 0 ? prodIA.cantidad : 1,
+          precioCosto: bestCosto,
+          precioVenta: bestVenta,
+          productoMapeadoID: bestMatch,
+          opcionesSugeridas: matches.slice(0, 15),
+          busquedaTexto: bestName,
+          mostrarDropdown: false
+        };
+      });
+
+      mostrarModalRevisionIA.value = true;
+    } else {
+      alert("La IA no pudo procesar la factura: " + (data.mensaje || "Error desconocido"))
+    }
+  } catch (err) {
+    alert("Ocurrió un error de red al contactar al cerebro de la IA: " + err.message)
+  } finally {
+    analizandoFactura.value = false
+    e.target.value = '' 
+  }
+}
+
+const confirmarRevisionIA = () => {
+  const listos = productosExtraidosIA.value.filter(p => p.productoMapeadoID !== 0);
+  listos.forEach(itemIA => {
+    const pReal = productos.value.find(p => p.productoID === itemIA.productoMapeadoID);
+    carrito.value.push({
+      productoID: pReal.productoID,
+      nombre: pReal.nombre,
+      cantidad: parseFloat(itemIA.cantidad),
+      precioCostoUnitario: parseFloat(itemIA.precioCosto),
+      subTotal: parseFloat(itemIA.cantidad) * parseFloat(itemIA.precioCosto)
+    });
+  });
+  mostrarModalRevisionIA.value = false;
+  productosExtraidosIA.value = [];
+}
+
+const crearProductoDesdeIA = (item, idx) => {
+  if (compraHeader.value.proveedorID === 0) {
+    alert("Para crear un producto nuevo, primero debes seleccionar un Proveedor en el 'Paso 1' de la pantalla principal.");
+    return;
+  }
+  
+  // Abrimos el modal con datos pre-cargados
+  abrirModalProducto();
+  nuevoProd.value.nombre = item.nombreOriginal;
+  nuevoProd.value.cantidadLlegando = item.cantidad;
+  nuevoProd.value.precioCosto = item.precioCosto;
+  indexItemIAEditando.value = idx;
+}
 
 // LÓGICA DE COMBOBOX PREMIUM
 const busquedaDetalleTemp = ref('')
@@ -583,17 +887,28 @@ const guardarProductoRapido = async () => {
     if (data.success) {
       await cargarDatos() // Refrescar catálogos
       
-      // Auto Inyectar producto al carrito de compras de inmediato
-      const cLlegada = parseFloat(nuevoProd.value.cantidadLlegando) || 1
-      const pCosto = parseFloat(nuevoProd.value.precioCosto) || 0
+      // Si se creó desde el Modal de IA, lo mapeamos en la fila correspondiente
+      if (indexItemIAEditando.value !== -1) {
+        const itemIA = productosExtraidosIA.value[indexItemIAEditando.value];
+        itemIA.productoMapeadoID = data.data.productoID;
+        itemIA.busquedaTexto = `[${data.data.codigo}] ${data.data.nombre}`;
+        itemIA.precioVenta = parseFloat(nuevoProd.value.precioVenta) || 0;
+        itemIA.precioCosto = parseFloat(nuevoProd.value.precioCosto) || 0;
+        
+        indexItemIAEditando.value = -1;
+      } else {
+        // Si NO fue desde la IA (fue desde la vista normal), Auto Inyectar al carrito de compras
+        const cLlegada = parseFloat(nuevoProd.value.cantidadLlegando) || 1;
+        const pCosto = parseFloat(nuevoProd.value.precioCosto) || 0;
 
-      carrito.value.push({
-        productoID: data.data.productoID,
-        nombre: data.data.nombre,
-        cantidad: cLlegada,
-        precioCostoUnitario: pCosto,
-        subTotal: cLlegada * pCosto
-      })
+        carrito.value.push({
+          productoID: data.data.productoID,
+          nombre: data.data.nombre,
+          cantidad: cLlegada,
+          precioCostoUnitario: pCosto,
+          subTotal: cLlegada * pCosto
+        });
+      }
 
       // Ya se inyectó al panel derecho, entonces limpiamos el formulario izquierdo
       detalleTemp.value.productoID = 0
@@ -682,6 +997,10 @@ const registrarCompra = async () => {
 .panel-title { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.1rem; color: #2D3748; border-bottom: 2px solid #F0F4F8; padding-bottom: 0.8rem; }
 .divider { height: 1px; background-color: #E2E8F0; margin: 2rem 0; }
 
+.ai-btn-small { background-color: #1A365D; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.ai-btn-small:hover:not(:disabled) { background-color: #2B6CB0; transform: translateY(-1px); }
+.ai-btn-small:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .form-group label { font-size: 0.85rem; font-weight: 600; color: #4A5568; }
@@ -769,7 +1088,7 @@ const registrarCompra = async () => {
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
 .modal-content { 
   background: white; 
-  width: 90%; 
+  width: 50%; 
   max-width: 650px; 
   max-height: 90vh; 
   border-radius: 20px; 

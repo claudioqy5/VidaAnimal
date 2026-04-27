@@ -40,6 +40,9 @@
         <p class="placeholder-text">El módulo de {{ currentTab }} estará disponible próximamente.</p>
       </div>
     </main>
+
+    <!-- Chat Bot Global -->
+    <ChatIA />
   </div>
 </template>
 
@@ -58,6 +61,7 @@ import Kardex from './components/Kardex.vue'
 import VentasCliente from './components/VentasCliente.vue'
 import HistorialCompras from './components/HistorialCompras.vue'
 import Inicio from './components/Inicio.vue'
+import ChatIA from './components/ChatIA.vue'
 
 // Estado global de la aplicación
 const currentTab = ref('inicio')

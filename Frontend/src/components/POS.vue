@@ -469,11 +469,11 @@ const guardarNuevoCliente = async () => {
 
 const productosFiltrados = computed(() => {
   if (busqueda.value.trim() === '') return productos.value
-  const q = busqueda.value.toLowerCase()
-  return productos.value.filter(p => 
-    p.nombre.toLowerCase().includes(q) || 
-    p.codigo.toLowerCase().includes(q)
-  )
+  const palabras = busqueda.value.toLowerCase().split(/\s+/).filter(w => w.length > 0)
+  return productos.value.filter(p => {
+    const texto = `${p.nombre ?? ''} ${p.codigo ?? ''}`.toLowerCase()
+    return palabras.every(palabra => texto.includes(palabra))
+  })
 })
 
 const productosPaginados = computed(() => {

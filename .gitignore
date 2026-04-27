@@ -24,3 +24,9 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# 🔐 SECRETOS - NUNCA subir a GitHub
+Backend/google-credentials.json
+google-credentials.json
+*.json.secret
+appsettings.Production.json

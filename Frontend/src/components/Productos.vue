@@ -23,12 +23,29 @@
             <span class="count-now">{{ productosFiltrados.length }}</span> de <span class="count-total">{{ productos.length }}</span> productos
           </div>
         </div>
-      <div class="sort-box">
-        <label>Ordenar por fecha:</label>
-        <select v-model="ordenFecha">
-          <option value="desc">Más recientes primero</option>
-          <option value="asc">Más antiguos primero</option>
-        </select>
+      <div class="filters-right">
+        <div class="filter-chip">
+          <span class="filter-icon">🏷️</span>
+          <select v-model="filtroCategoriaID" class="filter-select">
+            <option :value="null">Todas las categorías</option>
+            <option v-for="c in categorias" :key="c.categoriaID" :value="c.categoriaID">{{ c.nombre }}</option>
+          </select>
+        </div>
+        <div class="filter-chip">
+          <span class="filter-icon">🐾</span>
+          <select v-model="filtroEspecieID" class="filter-select">
+            <option :value="null">Todas las mascotas</option>
+            <option v-for="e in especies" :key="e.especieID" :value="e.especieID">{{ e.nombre }}</option>
+          </select>
+        </div>
+        <button v-if="filtroCategoriaID || filtroEspecieID" class="clear-filters-btn" @click="filtroCategoriaID = null; filtroEspecieID = null" title="Limpiar filtros">✕ Limpiar</button>
+        <div class="sort-box">
+          <label>Ordenar:</label>
+          <select v-model="ordenFecha">
+            <option value="desc">Más recientes</option>
+            <option value="asc">Más antiguos</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -406,18 +423,32 @@ const filePreview = ref(null)
 
 const busqueda = ref('')
 const ordenFecha = ref('desc')
+const filtroCategoriaID = ref(null)
+const filtroEspecieID = ref(null)
 
 const productosFiltrados = computed(() => {
   if (!productos.value) return []
   
   let resultado = [...productos.value]
 
-  // Filtrado por nombre o código
+  // Búsqueda inteligente: divide en palabras y exige que TODAS aparezcan en nombre o código
   if (busqueda.value.trim() !== '') {
-    const q = busqueda.value.toLowerCase()
-    resultado = resultado.filter(p => 
-      (p.nombre?.toLowerCase().includes(q)) || 
-      (p.codigo?.toLowerCase().includes(q))
+    const palabras = busqueda.value.toLowerCase().split(/\s+/).filter(w => w.length > 0)
+    resultado = resultado.filter(p => {
+      const texto = `${p.nombre ?? ''} ${p.codigo ?? ''}`.toLowerCase()
+      return palabras.every(palabra => texto.includes(palabra))
+    })
+  }
+
+  // Filtrado por categoría
+  if (filtroCategoriaID.value !== null) {
+    resultado = resultado.filter(p => p.categoriaID === filtroCategoriaID.value)
+  }
+
+  // Filtrado por especie/mascota
+  if (filtroEspecieID.value !== null) {
+    resultado = resultado.filter(p =>
+      p.especies && p.especies.some(e => e.especieID === filtroEspecieID.value)
     )
   }
 
@@ -750,19 +781,26 @@ const agregarCategoriaRapida = async () => {
 
 <style scoped>
 /* Filter bar */
-.filters-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 1rem 1.25rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #E2E8F0; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;}
-.search-box { display: flex; flex: 1; align-items: center; background: #F7FAFC; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; min-width: 250px; transition: border-color 0.2s; }
-.search-box:focus-within { border-color: #A3E4D7; box-shadow: 0 0 0 3px rgba(163, 228, 215, 0.2); }
-.search-icon { margin-right: 0.5rem; opacity: 0.4; }
-.search-box input { background: transparent; border: none; font-size: 0.95rem; width: 100%; color: #2D3748; outline: none; }
-.sort-box { display: flex; align-items: center; gap: 0.75rem; }
-.sort-box label { font-size: 0.9rem; color: #718096; font-weight: 500; }
-.sort-box select { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid #E2E8F0; background: #F7FAFC; color: #2D3748; outline: none; font-weight: 500; cursor: pointer; transition: border-color 0.2s;}
+.filters-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 0.6rem 1rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border: 1px solid #E2E8F0; margin-bottom: 1.5rem; gap: 0.75rem; flex-wrap: wrap; }
+.search-box { display: flex; flex: 1; align-items: center; background: #F7FAFC; padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid #E2E8F0; min-width: 200px; transition: border-color 0.2s; }
+.search-box:focus-within { border-color: #A3E4D7; box-shadow: 0 0 0 2px rgba(163,228,215,0.2); }
+.search-icon { margin-right: 0.4rem; opacity: 0.4; font-size: 0.85rem; }
+.search-box input { background: transparent; border: none; font-size: 0.875rem; width: 100%; color: #2D3748; outline: none; }
+.filters-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.filter-chip { display: flex; align-items: center; gap: 0.3rem; background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.3rem 0.6rem; transition: border-color 0.2s; }
+.filter-chip:focus-within { border-color: #A3E4D7; box-shadow: 0 0 0 2px rgba(163,228,215,0.2); }
+.filter-icon { font-size: 0.8rem; }
+.filter-select { background: transparent; border: none; font-size: 0.8rem; color: #2D3748; font-weight: 500; outline: none; cursor: pointer; max-width: 140px; }
+.clear-filters-btn { background: #FFF5F5; color: #C53030; border: 1px solid #FED7D7; border-radius: 7px; padding: 0.3rem 0.65rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.clear-filters-btn:hover { background: #FED7D7; }
+.sort-box { display: flex; align-items: center; gap: 0.5rem; }
+.sort-box label { font-size: 0.8rem; color: #718096; font-weight: 500; }
+.sort-box select { padding: 0.3rem 0.65rem; border-radius: 7px; border: 1px solid #E2E8F0; background: #F7FAFC; color: #2D3748; font-size: 0.8rem; outline: none; font-weight: 500; cursor: pointer; transition: border-color 0.2s; }
 .sort-box select:focus { border-color: #A3E4D7; }
 
 /* CONTADOR DE RESULTADOS */
-.search-info-row { display: flex; align-items: center; gap: 1.5rem; flex: 1; }
-.results-badge { background: rgba(241, 245, 249, 0.8); padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.85rem; color: #64748b; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; }
+.search-info-row { display: flex; align-items: center; gap: 1rem; flex: 1; }
+.results-badge { background: rgba(241,245,249,0.8); padding: 0.3rem 0.75rem; border-radius: 99px; font-size: 0.78rem; color: #64748b; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; }
 .count-now { color: #fb923c; font-weight: 700; }
 .count-total { color: #334155; font-weight: 700; }
 
