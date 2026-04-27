@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Net.Http;
 using System.Text;
@@ -35,7 +35,7 @@ namespace VidaAnimal.API.Controllers
         public async Task<IActionResult> AnalizarFactura(IFormFile archivo)
         {
             if (archivo == null || archivo.Length == 0)
-                return BadRequest(new { success = false, mensaje = "No se envió ningún archivo." });
+                return BadRequest(new { success = false, mensaje = "No se enviÃ³ ningÃºn archivo." });
 
             string extractedText = "";
 
@@ -68,7 +68,7 @@ namespace VidaAnimal.API.Controllers
                 }
                 else
                 {
-                    return BadRequest(new { success = false, mensaje = "Formato no soportado. Sube PDF o Imágenes." });
+                    return BadRequest(new { success = false, mensaje = "Formato no soportado. Sube PDF o ImÃ¡genes." });
                 }
 
                 if (string.IsNullOrWhiteSpace(extractedText))
@@ -78,8 +78,8 @@ namespace VidaAnimal.API.Controllers
 
                 // Llamar a Gemma 4 para procesar el texto
                 var prompt = @"Eres un asistente experto en extraer datos de facturas y boletas. 
-Te pasaré el texto crudo extraído de una factura/boleta mediante OCR o PDF. 
-Debes devolver UNICAMENTE un objeto JSON con el siguiente formato, no agregues texto extra ni comillas de código, solo el JSON puro:
+Te pasarÃ© el texto crudo extraÃ­do de una factura/boleta mediante OCR o PDF. 
+Debes devolver UNICAMENTE un objeto JSON con el siguiente formato, no agregues texto extra ni comillas de cÃ³digo, solo el JSON puro:
 {
   ""proveedorNombre"": ""Nombre del proveedor"",
   ""numeroComprobante"": ""F001-XXXX (si lo encuentras)"",
@@ -92,7 +92,7 @@ Debes devolver UNICAMENTE un objeto JSON con el siguiente formato, no agregues t
   ]
 }
 
-TEXTO EXTRAÍDO:
+TEXTO EXTRAÃDO:
 " + extractedText;
 
                 var payload = new
@@ -118,7 +118,7 @@ TEXTO EXTRAÍDO:
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorDetails = await response.Content.ReadAsStringAsync();
-                    return BadRequest(new { success = false, mensaje = $"Gemini respondió con error {response.StatusCode}: {errorDetails}" });
+                    return BadRequest(new { success = false, mensaje = $"Gemini respondiÃ³ con error {response.StatusCode}: {errorDetails}" });
                 }
 
                 var resultStr = await response.Content.ReadAsStringAsync();
@@ -146,7 +146,7 @@ TEXTO EXTRAÍDO:
         public async Task<IActionResult> Chatbot([FromBody] ChatRequest request)
         {
             if (string.IsNullOrEmpty(request.Mensaje))
-                return BadRequest(new { success = false, mensaje = "El mensaje no puede estar vacío." });
+                return BadRequest(new { success = false, mensaje = "El mensaje no puede estar vacÃ­o." });
 
             var auth = await GetVertexAuthAsync();
 
@@ -183,15 +183,15 @@ TABLAS DISPONIBLES (SOLO LECTURA):
             try
             {
                 // === PASO 1: Gemini genera el SQL ===
-                var promptSQL = $@"Eres un experto en SQL Server. Tu única tarea es generar una consulta SQL para responder la pregunta del usuario sobre la base de datos de 'Vida Animal' (veterinaria).
+                var promptSQL = $@"Eres un experto en SQL Server. Tu Ãºnica tarea es generar una consulta SQL para responder la pregunta del usuario sobre la base de datos de 'Vida Animal' (veterinaria).
 
 REGLAS ESTRICTAS:
 1. SOLO puedes generar sentencias SELECT. NUNCA uses INSERT, UPDATE, DELETE, DROP, ALTER, EXEC, o cualquier sentencia que modifique datos.
-2. Responde ÚNICAMENTE con el código SQL puro, sin explicaciones, sin comillas de código, sin bloques markdown, sin etiquetas sql.
+2. Responde ÃšNICAMENTE con el cÃ³digo SQL puro, sin explicaciones, sin comillas de cÃ³digo, sin bloques markdown, sin etiquetas sql.
 3. Si la pregunta NO requiere base de datos (ej. consejos generales, preguntas de ayuda del sistema), responde exactamente con: NO_SQL
 4. Limita resultados con TOP 20 cuando sea apropiado para no sobrecargar.
 5. Para fechas de ""hoy"", usa CONVERT(date, GETDATE()). Para ""este mes"" usa MONTH(Fecha)=MONTH(GETDATE()) AND YEAR(Fecha)=YEAR(GETDATE()).
-6. Usa alias descriptivos en español para las columnas (ej. AS TotalVentas, AS NombreProducto).
+6. Usa alias descriptivos en espaÃ±ol para las columnas (ej. AS TotalVentas, AS NombreProducto).
 
 {esquemaDB}
 
@@ -223,10 +223,10 @@ SQL:";
 
                 string resultadoDatos = "";
 
-                // === PASO 2: Ejecutar el SQL si lo generó ===
+                // === PASO 2: Ejecutar el SQL si lo generÃ³ ===
                 if (!string.IsNullOrEmpty(generatedSQL) && generatedSQL != "NO_SQL")
                 {
-                    // Validación de seguridad: rechazar cualquier SQL peligroso
+                    // ValidaciÃ³n de seguridad: rechazar cualquier SQL peligroso
                     var sqlUpper = generatedSQL.ToUpper();
                     var palabrasPeligrosas = new[] { "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "EXEC", "TRUNCATE", "CREATE", "MERGE" };
                     bool esPeligroso = palabrasPeligrosas.Any(p => sqlUpper.Contains(p));
@@ -254,7 +254,7 @@ SQL:";
                                 sb.AppendLine(string.Join(" | ", valores));
                                 filas++;
                             }
-                            resultadoDatos = filas > 0 ? sb.ToString() : "La consulta no devolvió resultados.";
+                            resultadoDatos = filas > 0 ? sb.ToString() : "La consulta no devolviÃ³ resultados.";
                         }
                         catch (Exception sqlEx)
                         {
@@ -265,15 +265,15 @@ SQL:";
 
                 // === PASO 3: Gemini redacta la respuesta final en lenguaje natural ===
                 var contextoRespuesta = string.IsNullOrEmpty(resultadoDatos)
-                    ? "No se necesitó consultar la base de datos para esta pregunta, o la pregunta fue de tipo general."
+                    ? "No se necesitÃ³ consultar la base de datos para esta pregunta, o la pregunta fue de tipo general."
                     : $"Resultado de la base de datos:\n{resultadoDatos}";
 
                 var promptFinal = $@"Eres 'Fer', el asistente inteligente y amigable de 'Vida Animal', una veterinaria peruana.
-Tu objetivo es responder de forma clara, breve y profesional en español. Usa moneda peruana (S/) cuando aplique.
-Si tienes datos de la base de datos, úsalos para dar una respuesta precisa y útil. Si no hay datos, responde con tu conocimiento general sobre veterinaria, negocios o el sistema.
-Mantén tus respuestas concisas (máximo 3 párrafos). Puedes usar viñetas o negritas con ** para resaltar información importante.
+Tu objetivo es responder de forma clara, breve y profesional en espaÃ±ol. Usa moneda peruana (S/) cuando aplique.
+Si tienes datos de la base de datos, Ãºsalos para dar una respuesta precisa y Ãºtil. Si no hay datos, responde con tu conocimiento general sobre veterinaria, negocios o el sistema.
+MantÃ©n tus respuestas concisas (mÃ¡ximo 3 pÃ¡rrafos). Puedes usar viÃ±etas o negritas con ** para resaltar informaciÃ³n importante.
 
-HISTORIAL DE LA CONVERSACIÓN:
+HISTORIAL DE LA CONVERSACIÃ“N:
 {request.Historial}
 
 PREGUNTA DEL USUARIO: {request.Mensaje}
@@ -323,3 +323,4 @@ RESPUESTA DE FER:";
         public string Historial { get; set; }
     }
 }
+
