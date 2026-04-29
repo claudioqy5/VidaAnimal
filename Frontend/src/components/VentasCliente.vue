@@ -70,6 +70,16 @@
     </div>
 
     <div v-else class="ventas-grid">
+      <!-- Encabezado tipo tabla -->
+      <div class="table-header-row">
+         <div>Comprobante</div>
+         <div>Cliente</div>
+         <div>Fecha / Cajero</div>
+         <div>Forma Pago</div>
+         <div>Total</div>
+         <div style="text-align: right;">Acción</div>
+      </div>
+
       <div 
         class="venta-card glass" 
         v-for="v in ventasOrdenadas" 
@@ -77,20 +87,17 @@
         :class="{ 'is-expanded': expandedVentas.has(v.ventaID), 'is-anulada': v.estado === 'Anulada' }"
         @click="toggleVenta(v.ventaID)"
       >
-        <!-- CABECERA RESUMIDA -->
+        <!-- CABECERA RESUMIDA TIPO FILA DE TABLA -->
         <div class="card-summary">
-          <div class="summary-main">
-            <span class="comprobante-badge">{{ v.serieComprobante }}-{{ v.numeroComprobante }}</span>
-              <div class="main-info">
-                <span class="cliente-name">{{ v.cliente?.nombreCompleto || 'Consumidor Final' }}</span>
-                <span class="fecha-text">{{ formatDate(v.fecha) }} • 👤 {{ v.cajero || 'Sistema' }}</span>
-              </div>
+          <div><span class="comprobante-badge">{{ v.serieComprobante }}-{{ v.numeroComprobante }}</span></div>
+          <div><span class="cliente-name">{{ v.cliente?.nombreCompleto || 'Consumidor Final' }}</span></div>
+          <div class="fecha-text-col"><span>{{ formatDate(v.fecha) }}</span><br><small>👤 {{ v.cajero || 'Sistema' }}</small></div>
+          <div><span class="metodo-badge" :class="(v.metodoPago || 'Efectivo').toLowerCase()">{{ v.metodoPago || 'Efectivo' }}</span></div>
+          <div>
+            <span class="total-value" :style="v.estado === 'Anulada' ? 'text-decoration: line-through; opacity: 0.5; font-size: 1.1rem;' : 'font-size: 1.1rem;'">S/ {{ Number(v.total).toFixed(2) }}</span>
+            <div v-if="v.estado === 'Anulada'" style="color: #E53E3E; font-weight: bold; font-size: 0.7rem; margin-top: 2px;">ANULADA</div>
           </div>
-          <div class="summary-price">
-            <span class="metodo-badge" :class="(v.metodoPago || 'Efectivo').toLowerCase()">{{ v.metodoPago || 'Efectivo' }}</span>
-            <span class="total-label" v-if="v.estado !== 'Anulada'">Pagado:</span>
-            <span class="total-label" v-else style="color: #E53E3E; font-weight: bold;">ANULADA:</span>
-            <span class="total-value" :style="v.estado === 'Anulada' ? 'text-decoration: line-through; opacity: 0.5;' : ''">S/ {{ Number(v.total).toFixed(2) }}</span>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
             <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
             <span class="expand-icon">{{ expandedVentas.has(v.ventaID) ? '▲' : '▼' }}</span>
           </div>
@@ -473,16 +480,16 @@ onMounted(async () => {
 .subtitle { color: #718096; font-size: 0.9rem; }
 
 .filters-card {
-  padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+  padding: 0.8rem 1rem; margin-bottom: 1.5rem;
   display: flex; justify-content: space-between; align-items: center;
-  border-radius: 16px; background: white; 
+  border-radius: 12px; background: white; 
   border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  flex-wrap: wrap; gap: 1rem;
+  flex-wrap: wrap; gap: 0.5rem;
 }
-.filter-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.filter-group label { font-size: 0.75rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;}
+.filter-group { display: flex; flex-direction: column; gap: 0.2rem; }
+.filter-group label { font-size: 0.7rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;}
 .filter-group select, .date-input {
-  padding: 0.7rem 1rem; border-radius: 10px; min-width: 240px;
+  padding: 0.5rem 0.75rem; border-radius: 8px; min-width: 180px; font-size: 0.85rem;
   border: 1px solid #E2E8F0; font-family: inherit; outline: none; background: #F8FAFC;
   transition: all 0.2s;
 }
@@ -490,8 +497,8 @@ onMounted(async () => {
 .date-filter-row { display: flex; gap: 0.5rem; align-items: center; }
 
 .btn-clear-filter {
-  padding: 0.7rem 1rem; border-radius: 10px; border: 1px solid #A7C7E7;
-  background: #EBF8FF; color: #2C5282; font-weight: 700; font-size: 0.8rem;
+  padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #A7C7E7;
+  background: #EBF8FF; color: #2C5282; font-weight: 700; font-size: 0.75rem;
   cursor: pointer; transition: 0.2s; white-space: nowrap;
 }
 .btn-clear-filter:hover { background: #BEE3F8; border-color: #63B3ED; }
@@ -507,7 +514,7 @@ onMounted(async () => {
   -webkit-text-fill-color: transparent;
 }
 
-.btn-reporte { background: #2D3748; color: white; border: none; border-radius: 10px; padding: 0.8rem 1.25rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: 0.2s ease; margin-left: 1.5rem; white-space: nowrap; align-self: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.btn-reporte { background: #2D3748; color: white; border: none; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s ease; margin-left: 1rem; white-space: nowrap; align-self: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 .btn-reporte:hover { background: #1A202C; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.15);}
 .btn-reporte:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -526,19 +533,28 @@ onMounted(async () => {
 .venta-card:hover { border-color: #A7C7E7; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 .venta-card.is-expanded { border-color: #A7C7E7; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 
-/* CONTENIDO RESUMIDO */
-.card-summary {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem 1.25rem;
+.table-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 0.8fr 100px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 700; color: #A0AEC0; font-size: 0.75rem; text-transform: uppercase;
+  margin-bottom: 0.25rem;
 }
-.summary-main { display: flex; align-items: center; gap: 1.5rem; }
+/* CONTENIDO RESUMIDO TABLA */
+.card-summary {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.2fr 0.8fr 0.8fr 100px;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  gap: 0.5rem;
+}
 .comprobante-badge {
   background: #EDF2F7; color: #4A5568; padding: 0.35rem 0.75rem;
-  border-radius: 8px; font-weight: 700; font-size: 0.9rem; font-family: 'Syncopate', sans-serif;
+  border-radius: 8px; font-weight: 700; font-size: 0.8rem; font-family: 'Syncopate', sans-serif;
 }
-.main-info { display: flex; flex-direction: column; }
-.cliente-name { font-weight: 600; color: #2D3748; font-size: 1rem; }
-.fecha-text { font-size: 0.8rem; color: #A0AEC0; }
+.cliente-name { font-weight: 600; color: #2D3748; font-size: 0.95rem; }
+.fecha-text-col { font-size: 0.8rem; color: #4A5568; line-height: 1.2; }
+.fecha-text-col small { color: #A0AEC0; }
 
 .summary-price { display: flex; align-items: center; gap: 1rem; }
 .btn-pdf { background: #EBF8FF; color: #2B6CB0; border: 1px solid #90CDF4; border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 0.25rem;}

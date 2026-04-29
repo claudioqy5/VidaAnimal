@@ -85,7 +85,7 @@
         <!-- Datos del Comprobante Compacto Organizado -->
         <div class="ticket-header-form">
           <!-- Fila 1: Serie y Número en paralelo -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
             <div class="form-group-compact">
               <label class="compact-label">Serie *</label>
               <input type="text" v-model="ticket.serie" class="header-input-mini" placeholder="B001" required />
@@ -97,9 +97,9 @@
           </div>
 
           <!-- Fila 2: Cliente -->
-          <div style="margin-top: 0.75rem;">
-            <div class="label-with-action">
-              <label class="compact-label">Cliente (Opcional)</label>
+          <div style="margin-top: 0.5rem;">
+            <div class="label-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.1rem;">
+              <label class="compact-label" style="margin-bottom: 0;">Cliente (Opcional)</label>
               <button class="btn-text-link-mini" @click="mostrarModalNuevoCliente = true">+ Nuevo Cliente</button>
             </div>
             <select v-model="ticket.clienteID" @change="verificarCumpleanos" class="header-input-mini" style="width: 100%;">
@@ -121,61 +121,56 @@
           </div>
           
           <div class="cart-item" v-for="(item, index) in carrito" :key="index">
-            <!-- Botón Borrar (Esquina Superior Derecha - Igual a imagen) -->
-            <button class="remove-btn-styled" @click="eliminarDelCarrito(index)">✕</button>
+            <!-- Botón Borrar -->
+            <button class="remove-btn-styled" @click="eliminarDelCarrito(index)" title="Quitar producto">✕</button>
 
-            <!-- Título del Producto -->
-            <p class="item-name-bold">{{ item.producto.nombre }}</p>
-            
-            <!-- DESCRIPCIÓN CON PRECIO EDITABLE -->
-            <div v-if="item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE'" class="item-desc-line">
-               <span>S/&nbsp;</span>
-               <input type="number" 
-                      v-model.number="item.precioVentaUnitario" 
-                      @change="validarPrecioCosto(index)" 
-                      class="desc-price-input" 
-                      step="0.10" 
-                      :readonly="usuarioRol === 'CAJERO'" />
-               <span>&nbsp;x {{ item.producto.unidadMedida.toLowerCase() }}</span>
+            <!-- Fila 1: Título y Selector -->
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-right: 1.5rem;">
+               <p class="item-name-bold" style="margin: 0; font-size: 0.95rem; line-height: 1.2; flex: 1;">{{ item.producto.nombre }}</p>
+               
+               <!-- SELECTOR -->
+               <div v-if="item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE'" style="flex-shrink: 0;">
+                 <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini" style="padding: 0.1rem 0.4rem; font-size: 0.8rem; height: 26px; border-radius: 6px; border: 1px solid #CBD5E0; color: #4A5568;">
+                   <option :value="item.producto.unidadMedida === 'SACO' ? 'KG' : 'UND'">x {{ item.producto.unidadMedida === 'SACO' ? 'Kg' : 'Und' }}</option>
+                   <option :value="item.producto.unidadMedida">x {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Bulto' }}</option>
+                 </select>
+               </div>
             </div>
-
-            <!-- SELECTOR -->
-            <div v-else class="item-selector-row">
-               <select v-model="item.tipoVenta" @change="cambiarTipoVenta(index)" class="desc-select-mini">
-                 <option :value="item.producto.unidadMedida === 'SACO' ? 'KG' : 'UND'">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Kilo (Kg)' : 'Unidad (Und)' }}</option>
-                 <option :value="item.producto.unidadMedida">Vender por {{ item.producto.unidadMedida === 'SACO' ? 'Saco' : 'Balde/Bolsa' }}</option>
-               </select>
-               <div class="item-desc-line" style="margin-top: 0.25rem;">
+            
+            <!-- Fila 2: Precio -->
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+               <div class="item-desc-line" style="font-size: 0.85rem; height: 26px;">
                  <span>S/&nbsp;</span>
-                 <input type="number" v-model.number="item.precioVentaUnitario" @change="validarPrecioCosto(index)" class="desc-price-input" step="0.10" />
-                 <span>&nbsp;x {{ item.tipoVenta.toLowerCase() }}</span>
+                 <input type="number" 
+                        v-model.number="item.precioVentaUnitario" 
+                        @change="validarPrecioCosto(index)" 
+                        class="desc-price-input" 
+                        style="width: 50px; font-size: 0.9rem;"
+                        step="0.10" 
+                        :readonly="usuarioRol === 'CAJERO' && (item.producto.unidadMedida !== 'SACO' && item.producto.unidadMedida !== 'BALDE')" />
+                 <span>&nbsp;x {{ (item.producto.unidadMedida === 'SACO' || item.producto.unidadMedida === 'BALDE') ? item.tipoVenta.toLowerCase() : item.producto.unidadMedida.toLowerCase() }}</span>
                </div>
             </div>
 
-            <!-- FILA DE ACCIONES -->
-            <div class="item-visual-actions">
-              <div class="action-stack">
-                <span class="action-caption-gray">{{ item.tipoVenta === 'KG' ? 'INGRESAR CANT. (KG)' : 'INGRESAR CANTIDAD' }}</span>
-                <div class="qty-control-styled">
-                  <button @click="restarCantidad(index)" class="qty-btn-styled">-</button>
-                  <input type="number" v-model.number="item.cantidad" class="qty-input-styled" step="0.001" min="0.001" />
-                  <button @click="sumarCantidad(index)" class="qty-btn-styled">+</button>
+            <!-- FILA DE ACCIONES (Cantidad, Monto Exacto, Subtotal) -->
+            <div class="item-visual-actions" style="align-items: flex-end;">
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <div class="qty-control-styled" style="height: 28px;">
+                  <button @click="restarCantidad(index)" class="qty-btn-styled" style="width: 26px; font-size: 1.1rem; line-height: 1;">-</button>
+                  <input type="number" v-model.number="item.cantidad" class="qty-input-styled" step="0.001" min="0.001" style="width: 45px; height: 24px; font-size: 0.9rem;" />
+                  <button @click="sumarCantidad(index)" class="qty-btn-styled" style="width: 26px; font-size: 1.1rem; line-height: 1;">+</button>
                 </div>
-              </div>
 
-              <!-- Botón Monto Exacto (Igual a imagen) -->
-              <div v-if="item.tipoVenta === 'KG'" class="action-stack" style="margin-left: 0.5rem;">
-                <span class="action-caption-gray">MONTO EXACTO</span>
-                <button class="calc-btn-styled" @click="abrirModalSoles(index)">
-                   💰 <span style="font-weight: 600;">S/</span>
+                <!-- Botón Monto Exacto -->
+                <button v-if="item.tipoVenta === 'KG'" class="calc-btn-styled" @click="abrirModalSoles(index)" style="height: 28px; padding: 0 0.4rem; font-size: 0.75rem;" title="Vender por Monto en Soles">
+                   💰 S/
                 </button>
               </div>
 
-              <div class="subtotal-stack">
-                <span class="action-caption-gray">SUBTOTAL</span>
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                   <span class="item-subtotal-big">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
-                </div>
+              <!-- SUBTOTAL APILADO -->
+              <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;">
+                 <span class="action-caption-gray" style="font-size: 0.65rem; letter-spacing: 0.05em; line-height: 1; margin-bottom: 0.2rem;">SUBTOTAL</span>
+                 <span class="item-subtotal-big" style="font-size: 1.05rem; line-height: 1;">S/ {{ (item.cantidad * item.precioVentaUnitario).toFixed(2) }}</span>
               </div>
             </div>
           </div>
@@ -788,15 +783,15 @@ const cerrarModalNuevoCliente = () => {
 
 .ticket-title { 
   margin: 0; 
-  padding: 1.25rem 1.5rem; 
+  padding: 0.8rem 1rem; 
   background: white; 
   border-bottom: 1px solid #E2E8F0; 
-  font-size: 1.25rem; 
+  font-size: 1.15rem; 
   font-weight: 800; 
   color: #1A365D;
   text-transform: uppercase;  
 }
-.ticket-header-form { padding: 1.25rem 1.5rem; background: white; }
+.ticket-header-form { padding: 0.8rem 1rem; background: white; }
 
 .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4A5568; margin-bottom: 0.4rem;}
 .form-group input, .form-group select { 
@@ -830,8 +825,10 @@ const cerrarModalNuevoCliente = () => {
   flex-direction: column; 
   
 }
-.cart-items-container::-webkit-scrollbar { width: 4px; }
-.cart-items-container::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
+.cart-items-container::-webkit-scrollbar { width: 10px; }
+.cart-items-container::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+.cart-items-container::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 10px; border: 2px solid #F1F5F9; }
+.cart-items-container::-webkit-scrollbar-thumb:hover { background: #64748B; }
 
 .empty-cart { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #A0AEC0; text-align: center;}
 .cart-icon-big { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;}
@@ -850,8 +847,8 @@ const cerrarModalNuevoCliente = () => {
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
 
 .header-input-mini { 
-  width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #CBD5E0; 
-  font-family: inherit; font-size: 0.95rem; color: #2D3748; 
+  width: 100%; padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid #CBD5E0; 
+  font-family: inherit; font-size: 0.9rem; color: #2D3748; 
   background: white; outline: none; transition: all 0.2s; box-sizing: border-box;
 }
 .header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.15); }
@@ -860,20 +857,20 @@ const cerrarModalNuevoCliente = () => {
 .compact-label { display: block; font-size: 0.75rem; font-weight: 600; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
 .btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
-/* Estilos Refinados Finales (Imagen Exacta) */
+/* Estilos Refinados Finales (Compactos) */
 .cart-item { 
-  background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid #EBEEF2; 
-  display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+  background: white; border-radius: 8px; padding: 0.6rem 0.8rem; border: 1px solid #EBEEF2; 
+  display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   position: relative; /* Para la X en la esquina */
 }
 
-.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 600; color: #2D3748; font-size: 1.05rem; }
+.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 700; color: #1E293B; font-size: 0.95rem; }
 
 .remove-btn-styled { 
-  position: absolute; top: 12px; right: 12px;
+  position: absolute; top: 8px; right: 8px;
   background: #FFF1F2; border: 1px solid #FDA4AF; color: #E11D48; 
-  border-radius: 6px; width: 30px; height: 30px; cursor: pointer; 
+  border-radius: 4px; width: 24px; height: 24px; cursor: pointer; 
   font-size: 0.9rem; display: flex; align-items: center; justify-content: center; 
   transition: all 0.2s;
 }
