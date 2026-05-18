@@ -7,11 +7,27 @@
       </div>
     </div>
 
-    <!-- Filtros y Búsqueda -->
     <div class="filters-card glass">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" v-model="busqueda" placeholder="Buscar por Nro. Comprobante o Proveedor..." />
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Fecha:</label>
+          <input type="date" v-model="filtroFecha" class="date-input" />
+        </div>
+        <div class="filter-group">
+          <label>Proveedor:</label>
+          <select v-model="filtroProveedor" class="select-input">
+            <option value="">Todos los proveedores</option>
+            <option v-for="prov in proveedoresUnicos" :key="prov" :value="prov">{{ prov }}</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" v-model="busqueda" placeholder="Buscar Nro. o texto..." />
+        </div>
+        <button v-if="filtroFecha || filtroProveedor || busqueda" @click="limpiarFiltros" class="btn-clear">Limpiar</button>
+      </div>
+      <div class="stats-row">
+        <span class="stat-badge">Mostrando: {{ comprasFiltradas.length }} registros</span>
       </div>
     </div>
 
@@ -122,8 +138,16 @@ import autoTable from 'jspdf-autotable';
 const compras = ref([])
 const cargando = ref(true)
 const busqueda = ref('')
+const filtroFecha = ref(new Date().toISOString().split('T')[0]) // Por defecto hoy
+const filtroProveedor = ref('')
 const mostrarModalDetalle = ref(false)
 const compraSeleccionada = ref(null)
+
+const limpiarFiltros = () => {
+  busqueda.value = ''
+  filtroFecha.value = ''
+  filtroProveedor.value = ''
+}
 
 const cargarCompras = async () => {
   cargando.value = true
@@ -142,13 +166,31 @@ const cargarCompras = async () => {
   }
 }
 
+const proveedoresUnicos = computed(() => {
+  const provs = compras.value.map(c => c.proveedor?.nombre).filter(Boolean);
+  return [...new Set(provs)].sort();
+});
+
 const comprasFiltradas = computed(() => {
-  if (!busqueda.value) return compras.value
-  const t = busqueda.value.toLowerCase()
-  return compras.value.filter(c => 
-    c.numeroComprobante.toLowerCase().includes(t) || 
-    (c.proveedor && c.proveedor.nombre.toLowerCase().includes(t))
-  )
+  let list = compras.value;
+  
+  if (filtroFecha.value) {
+    list = list.filter(c => c.fechaCompra && c.fechaCompra.startsWith(filtroFecha.value));
+  }
+  
+  if (filtroProveedor.value) {
+    list = list.filter(c => c.proveedor && c.proveedor.nombre === filtroProveedor.value);
+  }
+
+  if (busqueda.value) {
+    const t = busqueda.value.toLowerCase()
+    list = list.filter(c => 
+      (c.numeroComprobante && c.numeroComprobante.toLowerCase().includes(t)) || 
+      (c.proveedor && c.proveedor.nombre.toLowerCase().includes(t))
+    )
+  }
+  
+  return list;
 })
 
 const formatearFecha = (f) => new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -221,9 +263,16 @@ onMounted(() => cargarCompras())
 .title { font-size: 1.75rem; font-weight: 700; color: #1A202C; margin: 0 0 0.25rem 0; }
 .subtitle { color: #718096; margin: 0; font-size: 0.95rem; }
 
-.filters-card { background: white; padding: 1.25rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #E2E8F0; }
-.search-box { display: flex; align-items: center; background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 0.5rem 1rem; }
+.filters-card { background: white; padding: 1.25rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 1rem; }
+.filter-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.filter-group label { font-size: 0.8rem; font-weight: 600; color: #718096; }
+.date-input, .select-input { padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; color: #2D3748; background: #F8FAFC; }
+.search-box { display: flex; align-items: center; background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.1rem 1rem; flex: 1; min-width: 200px; height: 38px;}
 .search-box input { border: none; background: transparent; padding: 0.5rem; width: 100%; outline: none; color: #2D3748; }
+.btn-clear { padding: 0.6rem 1rem; background: #FED7D7; color: #9B2335; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.stats-row { font-size: 0.85rem; color: #A0AEC0; }
+.stat-badge { background: #EBF8FF; color: #2B6CB0; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 600; }
 
 .table-container { background: white; border-radius: 16px; border: 1px solid #E2E8F0; overflow: hidden; }
 .main-table { width: 100%; border-collapse: collapse; }

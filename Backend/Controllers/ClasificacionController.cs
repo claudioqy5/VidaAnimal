@@ -34,6 +34,27 @@ namespace VidaAnimal.API.Controllers
             return Ok(new { success = true, data = modelo });
         }
 
+        [HttpPut("especies/{id}")]
+        public async Task<IActionResult> ActualizarEspecie(int id, [FromBody] Especie modelo)
+        {
+            if (id != modelo.EspecieID) return BadRequest(new { success = false, message = "ID mismatch" });
+            _context.Entry(modelo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, data = modelo });
+        }
+
+        [HttpDelete("especies/{id}")]
+        public async Task<IActionResult> EliminarEspecie(int id)
+        {
+            var especie = await _context.Especies.FindAsync(id);
+            if (especie == null) return NotFound(new { success = false, message = "Especie no encontrada" });
+            
+            // Soft delete
+            especie.Activo = false;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Especie eliminada (inactivada)" });
+        }
+
         // --- CATEGORIAS ---
         [HttpGet("categorias")]
         public async Task<IActionResult> GetCategorias()
@@ -48,6 +69,27 @@ namespace VidaAnimal.API.Controllers
             _context.Categorias.Add(modelo);
             await _context.SaveChangesAsync();
             return Ok(new { success = true, data = modelo });
+        }
+
+        [HttpPut("categorias/{id}")]
+        public async Task<IActionResult> ActualizarCategoria(int id, [FromBody] Categoria modelo)
+        {
+            if (id != modelo.CategoriaID) return BadRequest(new { success = false, message = "ID mismatch" });
+            _context.Entry(modelo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, data = modelo });
+        }
+
+        [HttpDelete("categorias/{id}")]
+        public async Task<IActionResult> EliminarCategoria(int id)
+        {
+            var categoria = await _context.Categorias.FindAsync(id);
+            if (categoria == null) return NotFound(new { success = false, message = "Categoría no encontrada" });
+            
+            // Soft delete
+            categoria.Activo = false;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Categoría eliminada (inactivada)" });
         }
     }
 }

@@ -9,22 +9,36 @@
 
     <!-- Filtros -->
     <div class="filters-card glass">
-      <div class="search-box">
-        <input type="text" v-model="searchQuery" placeholder="Buscar por producto u observación..." />
-      </div>
-      <div class="filter-group">
-        <select v-model="filterTipo">
-          <option value="">Todos los tipos</option>
-          <option value="ENTRADA">📥 Entradas</option>
-          <option value="SALIDA">📤 Salidas</option>
-          <option value="AJUSTE">🔧 Ajustes</option>
-        </select>
-      </div>
-      <div class="stats-mini">
-        <div class="stat-item">
-          <span class="label">Total Movimientos:</span>
-          <span class="value">{{ movimientos.length }}</span>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Fecha:</label>
+          <input type="date" v-model="filtroFecha" class="date-input" />
         </div>
+        <div class="filter-group">
+          <label>Tipo:</label>
+          <select v-model="filterTipo" class="select-input">
+            <option value="">Todos los tipos</option>
+            <option value="ENTRADA">📥 Entradas</option>
+            <option value="SALIDA">📤 Salidas</option>
+            <option value="AJUSTE">🔧 Ajustes</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Responsable:</label>
+          <select v-model="filtroResponsable" class="select-input">
+            <option value="">Todos</option>
+            <option v-for="resp in responsablesUnicos" :key="resp" :value="resp">{{ resp }}</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" v-model="searchQuery" placeholder="Producto u observación..." />
+        </div>
+        <button v-if="filtroFecha || filterTipo || filtroResponsable || searchQuery" @click="limpiarFiltros" class="btn-clear">Limpiar</button>
+      </div>
+      
+      <div class="stats-row">
+        <span class="stat-badge">Mostrando: {{ filteredMovimientos.length }} registros</span>
       </div>
     </div>
 
@@ -96,6 +110,15 @@ const movimientos = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const filterTipo = ref('');
+const filtroFecha = ref(new Date().toISOString().split('T')[0]); // Por defecto hoy
+const filtroResponsable = ref('');
+
+const limpiarFiltros = () => {
+  searchQuery.value = '';
+  filterTipo.value = '';
+  filtroFecha.value = '';
+  filtroResponsable.value = '';
+};
 
 const fetchKardex = async () => {
   loading.value = true;
@@ -112,9 +135,24 @@ const fetchKardex = async () => {
   }
 };
 
+const responsablesUnicos = computed(() => {
+  const resp = movimientos.value.map(m => m.usuarioNombre || 'Sistema').filter(Boolean);
+  return [...new Set(resp)].sort();
+});
+
 const filteredMovimientos = computed(() => {
   let list = [...movimientos.value];
+  
+  if (filtroFecha.value) {
+    list = list.filter(m => m.fecha && m.fecha.startsWith(filtroFecha.value));
+  }
+  
   if (filterTipo.value) list = list.filter(m => m.tipo === filterTipo.value);
+  
+  if (filtroResponsable.value) {
+    list = list.filter(m => (m.usuarioNombre || 'Sistema') === filtroResponsable.value);
+  }
+  
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
     list = list.filter(m => 
@@ -139,32 +177,22 @@ onMounted(fetchKardex);
 </script>
 
 <style scoped>
-.kardex-container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+.kardex-container { padding: 2rem; margin: 0 auto; }
 .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
 .header-section h1 { font-size: 1.8rem; color: #2D3748; margin-bottom: 0.25rem; }
 .subtitle { color: #718096; font-size: 0.9rem; }
 
-.filters-card {
-  padding: 1.25rem; margin-bottom: 1.5rem;
-  display: flex; gap: 1rem; align-items: center;
-  border-radius: 16px; flex-wrap: wrap;
-  background: white; border: 1px solid #E2E8F0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.search-box { flex: 1; min-width: 200px; }
-.search-box input {
-  width: 100%; padding: 0.7rem 1rem; border-radius: 10px;
-  border: 1px solid #E2E8F0; font-family: inherit; outline: none;
-}
-.search-box input:focus { border-color: #A7C7E7; }
-.filter-group select {
-  padding: 0.7rem 1rem; border-radius: 10px;
-  border: 1px solid #E2E8F0; font-family: inherit; outline: none; background: white;
-}
-.stats-mini { display: flex; gap: 1.5rem; }
-.stat-item { display: flex; gap: 0.5rem; align-items: center; }
-.stat-item .label { color: #718096; font-size: 0.9rem; }
-.stat-item .value { font-weight: 700; color: #2D3748; }
+.filters-card { background: white; padding: 1.25rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.filter-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+.filter-group label { font-size: 0.8rem; font-weight: 600; color: #718096; }
+.date-input, .select-input { padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; color: #2D3748; background: #F8FAFC; }
+.search-box { display: flex; align-items: center; background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.1rem 1rem; flex: 1; min-width: 200px; height: 38px;}
+.search-box input { border: none; background: transparent; padding: 0.5rem; width: 100%; outline: none; color: #2D3748; }
+.btn-clear { padding: 0.6rem 1rem; background: #FED7D7; color: #9B2335; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.stats-row { font-size: 0.85rem; color: #A0AEC0; }
+.stat-badge { background: #EBF8FF; color: #2B6CB0; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 600; }
+
 
 .table-card {
   border-radius: 16px; overflow: hidden;

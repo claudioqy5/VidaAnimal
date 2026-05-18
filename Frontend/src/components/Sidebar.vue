@@ -42,6 +42,7 @@ const menu = [
   { id: 'pos',             label: 'Punto de Venta',       icon: '🛒', roles: ['ADMINISTRADOR', 'CAJERO'] },
   { id: 'ventas-cliente',  label: 'Historial de Ventas',  icon: '📅', roles: ['ADMINISTRADOR', 'CAJERO'] },
   { id: 'productos',       label: 'Productos',            icon: '🐾', roles: ['ADMINISTRADOR', 'CAJERO'] },
+  { id: 'clasificacion',   label: 'Categorías y Especies', icon: '🏷️', roles: ['ADMINISTRADOR'] },
 
   { id: 'users',           label: 'Usuarios',             icon: '👥', roles: ['ADMINISTRADOR'] },
   { id: 'clientes',        label: 'Clientes',             icon: '👨‍👩‍👧', roles: ['ADMINISTRADOR', 'CAJERO'] },  
@@ -120,6 +121,22 @@ const filteredMenu = computed(() => {
   gap: 0.5rem;
   position: relative;
   z-index: 1;
+  overflow-y: auto;
+}
+
+/* Estilizar el scrollbar para que sea delgado y estético */
+.nav-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.nav-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nav-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+.nav-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }
 .nav-item {
   display: flex;

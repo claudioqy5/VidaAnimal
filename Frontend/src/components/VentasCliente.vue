@@ -9,53 +9,58 @@
 
     <!-- Selector de Filtros y Orden -->
     <div class="filters-card glass">
-      <div class="filter-group">
-        <label>Filtrar por Cliente:</label>
-        <select v-model="selectedClienteID" @change="fetchVentas">
-          <option value="">Todos los clientes</option>
-          <option v-for="c in clientes" :key="c.clienteID" :value="c.clienteID">
-            {{ c.nombreCompleto }} — {{ c.documentoIdentidad }}
-          </option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Forma de Pago:</label>
-        <select v-model="selectedMetodoPago">
-          <option value="">Todas (Efec / Yape)</option>
-          <option value="efectivo">💵 Efectivo</option>
-          <option value="yape">📱 Yape</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Ordenar por:</label>
-        <select v-model="orderBy">
-          <option value="fecha_desc">📌 Fecha: Recientes primero</option>
-          <option value="fecha_asc">📌 Fecha: Antiguas primero</option>
-          <option value="monto_desc">💰 Monto: Mayor a Menor</option>
-          <option value="monto_asc">💰 Monto: Menor a Mayor</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label>Filtrar por Fecha:</label>
-        <div class="date-filter-row">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Filtrar por Fecha:</label>
           <input type="date" v-model="selectedFecha" @change="fetchVentas" class="date-input" />
-          <button v-if="selectedFecha" class="btn-clear-filter" @click="verTodoElHistorial" title="Ver todo el historial">
-            Ver Todo
+        </div>
+        
+        <div class="filter-group">
+          <label>Filtrar por Cliente:</label>
+          <select v-model="selectedClienteID" @change="fetchVentas" class="select-input">
+            <option value="">Todos los clientes</option>
+            <option v-for="c in clientes" :key="c.clienteID" :value="c.clienteID">
+              {{ c.nombreCompleto }} — {{ c.documentoIdentidad }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Forma de Pago:</label>
+          <select v-model="selectedMetodoPago" class="select-input">
+            <option value="">Todas (Efec / Yape)</option>
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="yape">📱 Yape</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Ordenar por:</label>
+          <select v-model="orderBy" class="select-input">
+            <option value="fecha_desc">📌 Fecha: Recientes primero</option>
+            <option value="fecha_asc">📌 Fecha: Antiguas primero</option>
+            <option value="monto_desc">💰 Monto: Mayor a Menor</option>
+            <option value="monto_asc">💰 Monto: Menor a Mayor</option>
+          </select>
+        </div>
+
+        <button v-if="selectedFecha" class="btn-clear" @click="verTodoElHistorial" title="Ver todo el historial">
+          Ver Todo
+        </button>
+      </div>
+      
+      <div class="stats-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span class="stat-badge">Mostrando: {{ ventasOrdenadas.length }} ventas</span>
+        
+        <div v-if="usuarioRol === 'ADMINISTRADOR'" style="display: flex; align-items: center; gap: 1rem;">
+          <div class="stat-item">
+            <span class="label" style="font-size: 0.8rem; font-weight: 600; color: #718096; margin-right: 0.5rem;">Monto Total:</span>
+            <span class="value highlight" style="font-size: 1.2rem; font-weight: 800;">S/ {{ totalGeneral.toFixed(2) }}</span>
+          </div>
+          <button class="btn-reporte" @click="descargarReporteVentas" :disabled="ventasOrdenadas.length === 0">
+            📄 Generar Reporte
           </button>
         </div>
-      </div>
-
-      <div v-if="usuarioRol === 'ADMINISTRADOR'" class="stats-mini">
-        <div class="stat-item">
-          <span class="label">Monto Total:</span>
-          <span class="value highlight">S/ {{ totalGeneral.toFixed(2) }}</span>
-        </div>
-        <button class="btn-reporte" @click="descargarReporteVentas" :disabled="ventasOrdenadas.length === 0">
-          📄 Generar Reporte
-        </button>
       </div>
     </div>
 
@@ -474,34 +479,19 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.ventas-container { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.ventas-container { padding: 2rem; margin: 0 auto; }
 .header-section { margin-bottom: 2rem; }
 .header-section h1 { font-size: 1.8rem; color: #2D3748; margin-bottom: 0.25rem; }
 .subtitle { color: #718096; font-size: 0.9rem; }
 
-.filters-card {
-  padding: 0.8rem 1rem; margin-bottom: 1.5rem;
-  display: flex; justify-content: space-between; align-items: center;
-  border-radius: 12px; background: white; 
-  border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  flex-wrap: wrap; gap: 0.5rem;
-}
-.filter-group { display: flex; flex-direction: column; gap: 0.2rem; }
-.filter-group label { font-size: 0.7rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;}
-.filter-group select, .date-input {
-  padding: 0.5rem 0.75rem; border-radius: 8px; min-width: 180px; font-size: 0.85rem;
-  border: 1px solid #E2E8F0; font-family: inherit; outline: none; background: #F8FAFC;
-  transition: all 0.2s;
-}
-
-.date-filter-row { display: flex; gap: 0.5rem; align-items: center; }
-
-.btn-clear-filter {
-  padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #A7C7E7;
-  background: #EBF8FF; color: #2C5282; font-weight: 700; font-size: 0.75rem;
-  cursor: pointer; transition: 0.2s; white-space: nowrap;
-}
-.btn-clear-filter:hover { background: #BEE3F8; border-color: #63B3ED; }
+.filters-card { background: white; padding: 1.25rem; border-radius: 16px; margin-bottom: 1.5rem; border: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.filter-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-width: 150px;}
+.filter-group label { font-size: 0.8rem; font-weight: 600; color: #718096; }
+.date-input, .select-input { padding: 0.6rem 1rem; border-radius: 10px; border: 1px solid #E2E8F0; outline: none; color: #2D3748; background: #F8FAFC; width: 100%;}
+.btn-clear { padding: 0.6rem 1rem; background: #FED7D7; color: #9B2335; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; height: 38px;}
+.stats-row { font-size: 0.85rem; color: #A0AEC0; }
+.stat-badge { background: #EBF8FF; color: #2B6CB0; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 600; }
 
 .stats-mini { display: flex; align-items: flex-end; }
 .stat-item { display: flex; flex-direction: column; align-items: flex-end;}
