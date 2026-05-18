@@ -116,7 +116,7 @@ const fotosAniversario = ref(Object.values(fotosModules).map(m => m.default));
 
 const verificarAniversario = () => {
   const hoy = new Date();
-  if (hoy.getDate() === 17) {
+  if (hoy.getDate() === 22) {
     const fechaStr = hoy.toISOString().split('T')[0];
     const flag = localStorage.getItem('aniversario_mostrado');
     if (flag !== fechaStr) {
