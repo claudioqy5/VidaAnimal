@@ -47,6 +47,7 @@
 
     <!-- Pantalla Completa de Aniversario de Amor (Aparece los 22 de cada mes) -->
     <div v-if="mostrarAniversario" class="fullscreen-love-modal">
+      <!-- Corazones Flotantes (En el fondo) -->
       <div class="floating-hearts">
         <span class="heart h1">❤️</span>
         <span class="heart h2">💖</span>
@@ -55,33 +56,50 @@
         <span class="heart h5">💕</span>
         <span class="heart h6">💘</span>
       </div>
-      
-      <div class="love-content animate-float">
-        <h1 class="love-title">¡Feliz Aniversario,<br>{{ primerNombre }}!</h1>
-        
-        <div class="love-card">
-          <p class="love-text main-message">
-            ¡Hoy celebramos un mes más de nuestra hermosa relación! 👩‍❤️‍👨
-          </p>
-          <p class="love-text sub-message">
-            Quiero recordarte lo increíblemente orgulloso/a que estoy de nosotros y de todo lo que estamos logrando con <b>Vida Animal</b>. 
-            El negocio está yendo por buen camino, estamos haciendo las cosas de corazón y cada esfuerzo, cada madrugada, vale la pena.
-          </p>
-          <p class="love-text highlight-message">
-            Nunca te rindas, porque juntos somos el mejor equipo, en el amor y en la vida. ¡Te amo infinitamente! 🚀❤️
-          </p>
-        </div>
 
-        <!-- Galería de Recuerdos -->
-        <div v-if="fotosAniversario.length > 0" class="gallery-container">
-          <div v-for="(foto, idx) in fotosAniversario" :key="idx" class="polaroid-wrapper" :style="{ animationDelay: (idx * 0.4) + 's' }">
-            <div class="polaroid">
-              <img :src="foto" alt="Nuestro recuerdo hermoso" />
+      <div class="love-content">
+        <div class="love-layout">
+          <!-- Lado Izquierdo: Titulo + Mensaje Editorial -->
+          <div class="love-left-panel">
+            <h1 class="love-title">
+              ¡FELIZ<br>MESARIOOO,<br>{{ primerNombre }}!
+            </h1>
+            
+            <div class="love-divider"></div>
+
+            <div class="love-letter">
+              <p class="love-text-main">
+                ¡Feliz mesario amorcitooooo, hoy celebramos un mesecito más! 👩‍❤️‍👨
+              </p>                        
+              <p class="love-text-sub">              
+                No queria que este día tan especial siga pasando desapercibido, sabes que te amo mucho perita, se que no estamos juntos fisicamente pero te quiero mandar en enorme beso y abrazo con todo mi corazón.
+                <br>  
+                <br>
+                Y tambien quiero reconocer el esfuerzo que haces todos los dias para sacar adelante el proyecto en el que estamos encaminados mascota              
+                enserio, al parecer todo está yendo por buen camino, estamos haciendo las cosas de corazón y cada esfuerzo, vale la pena.
+              </p>
+              <p class="love-text-highlight">
+                Somos el mejor equipo mi gordi, en el amor y en la vida. ¡Te amo infinitamente! 🍐❤️
+              </p>
+              
+              <button class="love-btn" @click="cerrarAniversario">
+                <span>Continuar con <span style="color: #eb6856ff;">VIDA ANIMAL</span></span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Lado Derecho: Galería Editorial Minimalista (Desde arriba) -->
+          <div class="love-gallery-panel">
+            <div v-if="fotosAniversario.length > 0" class="gallery-grid">
+              <div v-for="(foto, idx) in fotosAniversario" :key="idx" class="gallery-item">
+                <img :src="foto" alt="Nuestro recuerdo hermoso" />
+              </div>
             </div>
           </div>
         </div>
-        
-        <button class="love-btn" @click="cerrarAniversario">Continuar a nuestro negocio ✨</button>
       </div>
     </div>
   </div>
@@ -296,103 +314,223 @@ const cerrarSesion = () => {
   to { opacity: 1; transform: translateY(0); } 
 }
 
-/* Pantalla Completa Aniversario Amor */
+/* Pantalla Completa Aniversario Amor (Editorial Minimalist Design) */
 .fullscreen-love-modal {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-  display: flex; align-items: center; justify-content: center; z-index: 10000;
-  overflow: hidden;
+  background-color: #77a362;
+  display: flex; align-items: flex-start; justify-content: center; z-index: 10000;
+  overflow-y: auto;
+  padding: 3rem 2rem;
+}
+
+/* Custom scrollbar matching the green aesthetic */
+.fullscreen-love-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.fullscreen-love-modal::-webkit-scrollbar-track {
+  background: #77a362;
+}
+.fullscreen-love-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+}
+.fullscreen-love-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .love-content {
-  text-align: center; max-width: 850px; padding: 2rem;
-  z-index: 2; position: relative; width: 90%;
+  width: 100%;
+  max-width: 1350px;
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.love-left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .love-title {
-  font-family: 'Syncopate', sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900;
-  color: white; text-shadow: 0px 4px 20px rgba(213, 63, 140, 0.5);
-  margin-bottom: 2rem; line-height: 1.1; letter-spacing: -2px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: clamp(3rem, 7.5vw, 14vh);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #931b1b; /* Vibrant rich red */
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  margin: 0 0 1.5rem 0;
+  text-shadow: none;
 }
 
-.love-card {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  padding: 3.5rem 2rem; border-radius: 40px; margin-bottom: 3rem;
-  box-shadow: 0 30px 60px rgba(213, 63, 140, 0.2);
+.love-divider {
+  height: 1px;
+  background-color: #931b1b;
+  opacity: 0.25;
+  width: 100%;
+  margin-bottom: 2rem;
 }
 
-.love-text {
+.love-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .love-layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.love-letter {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.love-text-main {
   font-family: 'Inter', sans-serif;
-  color: #702a46;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: #1A1A1A;
+  margin: 0;
 }
 
-.main-message { font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: 0.02em; }
-.sub-message { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600; margin-bottom: 2rem; line-height: 1.7; color: #5B2138;}
-.highlight-message { font-size: clamp(1.1rem, 2.5vw, 1.4rem); font-weight: 900; color: #D53F8C; font-style: italic; }
+.love-text-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: #4A4A4A;
+  margin: 0;
+}
+
+.love-text-highlight {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #931b1b;  
+  margin: 0;
+}
 
 .love-btn {
-  background: white; color: #D53F8C; border: none; padding: 1.25rem 3.5rem;
-  border-radius: 50px; font-weight: 900; font-size: 1.2rem; cursor: pointer;
-  transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.1em;
-  box-shadow: 0 15px 30px rgba(213, 63, 140, 0.3);
-}
-.love-btn:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 20px 40px rgba(213, 63, 140, 0.5); color: #B83280;}
-
-.animate-float { animation: float 6s ease-in-out infinite; }
-@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
-
-/* Galería Polaroids */
-.gallery-container {
-  display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem;
-}
-
-.polaroid-wrapper {
-  animation: floatPolaroid 4s ease-in-out infinite alternate;
-}
-
-.polaroid {
-  background: white; padding: 10px 10px 25px 10px; border-radius: 4px;
-  box-shadow: 0 10px 20px rgba(213, 63, 140, 0.2);
-  transform: rotate(-3deg); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: pointer; position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1A1A1A;
+  color: #F4F3EF;
+  border: none;
+  padding: 1.25rem 2rem;
+  border-radius: 0; /* Minimalist sharp corners */
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  width: fit-content;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
-.polaroid-wrapper:nth-child(even) .polaroid { transform: rotate(4deg); }
-.polaroid-wrapper:nth-child(3n) .polaroid { transform: rotate(-5deg); }
-
-.polaroid:hover {
-  transform: scale(1.25) rotate(0deg) !important;
-  box-shadow: 0 20px 40px rgba(213, 63, 140, 0.5); z-index: 10;
+.love-btn:hover {
+  background: #C53030;
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
-.polaroid img {
-  width: 130px; height: 130px; object-fit: cover; border-radius: 2px;
+.btn-arrow {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  transition: transform 0.3s ease;
 }
 
-@keyframes floatPolaroid {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-12px); }
+.love-btn:hover .btn-arrow {
+  transform: translateX(6px);
 }
 
-/* Corazones Flotantes */
-.floating-hearts { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 0; overflow: hidden;}
+.love-gallery-panel {
+  width: 100%;
+}
 
-.heart { position: absolute; opacity: 0; animation: floatUp 8s linear infinite; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));}
-.h1 { left: 10%; animation-delay: 0s; font-size: 4rem; animation-duration: 9s;}
-.h2 { left: 30%; animation-delay: 2s; font-size: 2.5rem; animation-duration: 7s;}
-.h3 { left: 75%; animation-delay: 4s; font-size: 5rem; animation-duration: 11s;}
-.h4 { left: 85%; animation-delay: 1s; font-size: 3rem; animation-duration: 8s;}
-.h5 { left: 50%; animation-delay: 5s; font-size: 2rem; animation-duration: 6s;}
-.h6 { left: 20%; animation-delay: 6s; font-size: 3.5rem; animation-duration: 10s;}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
 
-@keyframes floatUp { 
-  0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; } 
-  20% { opacity: 0.8; } 
-  80% { opacity: 0.6; } 
-  100% { transform: translateY(-20vh) rotate(360deg) scale(1.2); opacity: 0; } 
+.gallery-item {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #E2E2DF;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  position: relative;
+}
+
+.gallery-item:first-child {
+  grid-column: span 2;
+  aspect-ratio: 2 / 1; /* Beautiful double-width hero image for standard 5-photo layouts */
+}
+
+.gallery-item:hover {
+  transform: scale(1.02);
+  z-index: 2;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: grayscale(15%) contrast(102%);
+}
+
+.gallery-item:hover img {
+  filter: grayscale(0%) contrast(100%);
+  transform: scale(1.03);
+}
+
+/* Corazones Flotantes en el Fondo (Con opacidad reducida para no competir con el diseño minimalista) */
+.floating-hearts {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.heart {
+  position: absolute;
+  opacity: 0;
+  animation: floatUpUp 8s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.03));
+}
+
+.h1 { left: 10%; animation-delay: 0s; font-size: 3.5rem; animation-duration: 9s;}
+.h2 { left: 30%; animation-delay: 2s; font-size: 2.2rem; animation-duration: 7s;}
+.h3 { left: 75%; animation-delay: 4s; font-size: 4.5rem; animation-duration: 11s;}
+.h4 { left: 85%; animation-delay: 1s; font-size: 2.8rem; animation-duration: 8s;}
+.h5 { left: 50%; animation-delay: 5s; font-size: 1.8rem; animation-duration: 6s;}
+.h6 { left: 20%; animation-delay: 6s; font-size: 3rem; animation-duration: 10s;}
+
+@keyframes floatUpUp { 
+  0% { transform: translateY(105vh) rotate(0deg) scale(0.6); opacity: 0; } 
+  15% { opacity: 0.35; } 
+  85% { opacity: 0.25; } 
+  100% { transform: translateY(-20vh) rotate(360deg) scale(1.1); opacity: 0; } 
 }
 </style>
