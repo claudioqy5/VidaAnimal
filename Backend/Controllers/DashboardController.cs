@@ -20,7 +20,7 @@ namespace VidaAnimal.API.Controllers
         }
 
         [HttpGet("resumen")]
-        public async Task<IActionResult> GetResumen([FromQuery] string? fecha = null, [FromQuery] string? semanaInicio = null, [FromQuery] int? anio = null)
+        public async Task<IActionResult> GetResumen([FromQuery] string? fecha = null, [FromQuery] string? semanaInicio = null, [FromQuery] int? anio = null, [FromQuery] int? mes = null)
         {
             try {
                 TimeZoneInfo peruTimeZone;
@@ -49,8 +49,11 @@ namespace VidaAnimal.API.Controllers
                 }
                 var finSemana = inicioSemana.AddDays(6);
 
-                var inicioMes = new DateTime(ahoraPeru.Year, ahoraPeru.Month, 1);
                 var anioTarget = anio ?? ahoraPeru.Year;
+                var mesTarget = mes ?? ahoraPeru.Month;
+                var inicioMes = new DateTime(anioTarget, mesTarget, 1);
+                var finMes = new DateTime(anioTarget, mesTarget, DateTime.DaysInMonth(anioTarget, mesTarget));
+                
                 var inicioAnio = new DateTime(anioTarget, 1, 1);
                 var finAnio = new DateTime(anioTarget, 12, 31);
 
@@ -85,7 +88,7 @@ namespace VidaAnimal.API.Controllers
                 var ventasHoyGroups = detallesHoy.GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
                 var ventasSemanaGroups = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
-                var ventasMesGroups = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
+                var ventasMesGroups = data.Where(d => d.FechaPeru.Month == mesTarget && d.FechaPeru.Year == anioTarget).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
                 var ventasAnioGroups = data.Where(d => d.FechaPeru.Year == anioTarget).GroupBy(d => d.Detalle.VentaID).Select(g => g.First().Detalle.Venta).ToList();
 
                 var stats = new {
@@ -98,7 +101,7 @@ namespace VidaAnimal.API.Controllers
                     gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0) - ventasSemanaGroups.Sum(v => v.Descuento),
                     
                     ventasMes = ventasMesGroups.Sum(v => v.Total),
-                    gananciaMes = data.Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year).Sum(d => d.Detalle.Ganancia ?? 0) - ventasMesGroups.Sum(v => v.Descuento),
+                    gananciaMes = data.Where(d => d.FechaPeru.Month == mesTarget && d.FechaPeru.Year == anioTarget).Sum(d => d.Detalle.Ganancia ?? 0) - ventasMesGroups.Sum(v => v.Descuento),
 
                     ventasAnio = ventasAnioGroups.Sum(v => v.Total),
                     gananciaAnio = data.Where(d => d.FechaPeru.Year == anioTarget).Sum(d => d.Detalle.Ganancia ?? 0) - ventasAnioGroups.Sum(v => v.Descuento)
@@ -123,7 +126,7 @@ namespace VidaAnimal.API.Controllers
                     .OrderByDescending(x => x.totalMonto).Take(10).ToList();
 
                 var topMensual = data
-                    .Where(d => d.FechaPeru.Month == ahoraPeru.Month && d.FechaPeru.Year == ahoraPeru.Year)
+                    .Where(d => d.FechaPeru.Month == mesTarget && d.FechaPeru.Year == anioTarget)
                     .GroupBy(d => d.Detalle.Producto.Nombre)
                     .Select(g => new { nombre = g.Key, totalMonto = g.Sum(d => d.Detalle.SubTotal), totalUnidades = g.Sum(d => d.Detalle.Cantidad) })
                     .OrderByDescending(x => x.totalMonto).Take(10).ToList();
@@ -136,7 +139,7 @@ namespace VidaAnimal.API.Controllers
 
                 var topProveedores = await _context.Compras
                     .Include(c => c.Proveedor)
-                    .Where(c => c.FechaCompra.Month == ahoraPeru.Month && c.FechaCompra.Year == ahoraPeru.Year && c.Proveedor != null)
+                    .Where(c => c.FechaCompra.Month == mesTarget && c.FechaCompra.Year == anioTarget && c.Proveedor != null)
                     .GroupBy(c => c.Proveedor.Nombre)
                     .Select(g => new { nombre = g.Key, totalInvertido = g.Sum(c => c.Total) })
                     .OrderByDescending(x => x.totalInvertido).Take(5).ToListAsync();
@@ -168,7 +171,7 @@ namespace VidaAnimal.API.Controllers
                     topProveedores,
                     stockBajo,
                     graficoSemanal = GenerarGraficoSemanal(data, inicioSemana),
-                    graficoMensual = GenerarGraficoMensual(data, ahoraPeru),
+                    graficoMensual = GenerarGraficoMensual(data, anioTarget, mesTarget),
                     graficoAnual = GenerarGraficoAnual(data, anioTarget),
                     semanaInicioUsada = inicioSemana.ToString("yyyy-MM-dd"),
                     fechaUsada = hoy.ToString("yyyy-MM-dd")
@@ -197,13 +200,13 @@ namespace VidaAnimal.API.Controllers
             return lista;
         }
 
-        private List<object> GenerarGraficoMensual(IEnumerable<dynamic> data, DateTime ahora) {
+        private List<object> GenerarGraficoMensual(IEnumerable<dynamic> data, int anio, int mes) {
             var lista = new List<object>();
-            var inicioMes = new DateTime(ahora.Year, ahora.Month, 1);
-            var finMes = new DateTime(ahora.Year, ahora.Month, DateTime.DaysInMonth(ahora.Year, ahora.Month));
+            var inicioMes = new DateTime(anio, mes, 1);
+            var finMes = new DateTime(anio, mes, DateTime.DaysInMonth(anio, mes));
             foreach (var i in Enumerable.Range(0, 5)) {
                 var sInicio = inicioMes.AddDays(i * 7);
-                if (sInicio.Month != ahora.Month) break;
+                if (sInicio.Month != mes) break;
                 // Clavar sFin al último día del mes para no sangrar al mes siguiente
                 var sFin = new[] { sInicio.AddDays(6), finMes }.Min();
                 var itemsSem = data.Where(d => ((DateTime)d.FechaPeru).Date >= sInicio.Date && ((DateTime)d.FechaPeru).Date <= sFin.Date).ToList();

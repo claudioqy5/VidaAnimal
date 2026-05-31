@@ -19,7 +19,16 @@
           <button v-if="!esSemanaActual" class="today-btn" @click="volverSemanaActual">Actual</button>
         </div>
 
-        <!-- SELECTOR DE AÑO (solo visible en modo anual) -->
+        <!-- SELECTOR DE MES (solo visible en modo mensual) -->
+        <div v-if="periodo === 'mes'" class="week-picker-wrap">
+          <button class="week-nav-btn" @click="cambiarMes(-1)" title="Mes anterior">‹</button>
+          <div class="week-info">
+            <span class="week-label">📅 Mes</span>
+            <span class="week-range">{{ mesNombreDisplay }} {{ anioSeleccionadoMes }}</span>
+          </div>
+          <button class="week-nav-btn" @click="cambiarMes(1)" :disabled="esMesActual" title="Mes siguiente">›</button>
+          <button v-if="!esMesActual" class="today-btn" @click="volverMesActual">Actual</button>
+        </div>
         <div v-if="periodo === 'anual'" class="week-picker-wrap">
           <button class="week-nav-btn" @click="cambiarAnio(-1)" title="Año anterior">‹</button>
           <div class="week-info">
@@ -263,6 +272,50 @@ const volverSemanaActual = () => {
 };
 
 // ───────────────────────────────────────────────
+// LÓGICA DE SELECCIÓN DE MES
+// ───────────────────────────────────────────────
+const mesSeleccionado = ref(new Date().getMonth() + 1);
+const anioSeleccionadoMes = ref(new Date().getFullYear());
+const mesesNombres = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+const mesNombreDisplay = computed(() => mesesNombres[mesSeleccionado.value - 1]);
+
+const esMesActual = computed(() => {
+  const hoy = new Date();
+  return mesSeleccionado.value === (hoy.getMonth() + 1) && anioSeleccionadoMes.value === hoy.getFullYear();
+});
+
+const cambiarMes = (delta) => {
+  let nuevoMes = mesSeleccionado.value + delta;
+  let nuevoAnio = anioSeleccionadoMes.value;
+  if (nuevoMes < 1) {
+    nuevoMes = 12;
+    nuevoAnio -= 1;
+  } else if (nuevoMes > 12) {
+    nuevoMes = 1;
+    nuevoAnio += 1;
+  }
+  
+  const hoy = new Date();
+  if (nuevoAnio > hoy.getFullYear() || (nuevoAnio === hoy.getFullYear() && nuevoMes > (hoy.getMonth() + 1))) {
+    return;
+  }
+  
+  mesSeleccionado.value = nuevoMes;
+  anioSeleccionadoMes.value = nuevoAnio;
+  cargar();
+};
+
+const volverMesActual = () => {
+  const hoy = new Date();
+  mesSeleccionado.value = hoy.getMonth() + 1;
+  anioSeleccionadoMes.value = hoy.getFullYear();
+  cargar();
+};
+
+// ───────────────────────────────────────────────
 // LÓGICA DE SELECCIÓN DE AÑO
 // ───────────────────────────────────────────────
 const anioActualLocal = new Date().getFullYear();
@@ -290,7 +343,10 @@ const cargar = async () => {
   loading.value = true;
   try {
     const semISO = toISO(semanaSeleccionada.value);
-    const url = `/api/Dashboard/resumen?semanaInicio=${semISO}&anio=${anioSeleccionado.value}`;
+    const aTarget = periodo.value === 'anual' ? anioSeleccionado.value : (periodo.value === 'mes' ? anioSeleccionadoMes.value : anioActualLocal);
+    const mTarget = periodo.value === 'mes' ? mesSeleccionado.value : '';
+    
+    const url = `/api/Dashboard/resumen?semanaInicio=${semISO}&anio=${aTarget}&mes=${mTarget}`;
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     });
@@ -362,6 +418,10 @@ const createLinePath = (data, key) => {
 };
 
 onMounted(cargar);
+
+watch(periodo, () => {
+  cargar();
+});
 </script>
 
 <style scoped>
