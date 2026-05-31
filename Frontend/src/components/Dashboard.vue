@@ -366,7 +366,7 @@ onMounted(cargar);
 
 <style scoped>
 /* REUSO DE ESTILOS CORPORATIVOS */
-.dash-container { padding: 1.5rem; max-width: 1550px; margin: 0 auto; color: #2D3748; }
+.dash-container { padding: 1.5rem; margin: 0 auto; color: #2D3748; }
 
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin: 0; }

@@ -34,38 +34,6 @@
       </div>
     </div>
 
-    <!-- KPIs CORE -->
-    <div class="kpi-grid">
-      <div class="kpi-card k1">
-        <div class="icon-wrap">💰</div>
-        <div class="kpi-content">
-          <p class="kpi-label">Ventas {{ esHoy ? 'Hoy' : 'del Día' }}</p>
-          <p class="kpi-value">S/ {{ formatMoney(stats.ventasHoy) }}</p>
-        </div>
-      </div>
-      <div class="kpi-card k2">
-        <div class="icon-wrap">📃</div>
-        <div class="kpi-content">
-          <p class="kpi-label">Transacciones</p>
-          <p class="kpi-value">{{ stats.transaccionesHoy || 0 }}</p>
-        </div>
-      </div>
-      <div class="kpi-card k3">
-        <div class="icon-wrap">👥</div>
-        <div class="kpi-content">
-          <p class="kpi-label">Clientes</p>
-          <p class="kpi-value">{{ stats.clientesHoy || 0 }}</p>
-        </div>
-      </div>
-      <div class="kpi-card k4">
-        <div class="icon-wrap">📊</div>
-        <div class="kpi-content">
-          <p class="kpi-label">Utilidad Real</p>
-          <p class="kpi-value">S/ {{ formatMoney(stats.gananciaHoy) }}</p>
-        </div>
-      </div>
-    </div>
-
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
       <p>Actualizando indicadores...</p>
@@ -73,6 +41,7 @@
 
     <template v-else>
       <div class="main-dashboard">
+        
         
         <!-- COLUMNA IZQUIERDA -->
         <div class="left-col">
@@ -109,6 +78,37 @@
 
         <!-- COLUMNA DERECHA -->
         <div class="right-col">
+          <!-- KPIs CORE (Movido aquí para alinear la columna izquierda) -->
+          <div class="kpi-grid">
+            <div class="kpi-card k1">
+              <div class="icon-wrap">💰</div>
+              <div class="kpi-content">
+                <p class="kpi-label">Ventas {{ esHoy ? 'Hoy' : 'del Día' }}</p>
+                <p class="kpi-value">S/ {{ formatMoney(stats.ventasHoy) }}</p>
+              </div>
+            </div>
+            <div class="kpi-card k2">
+              <div class="icon-wrap">📃</div>
+              <div class="kpi-content">
+                <p class="kpi-label">Transacciones</p>
+                <p class="kpi-value">{{ stats.transaccionesHoy || 0 }}</p>
+              </div>
+            </div>
+            <div class="kpi-card k3">
+              <div class="icon-wrap">👥</div>
+              <div class="kpi-content">
+                <p class="kpi-label">Clientes</p>
+                <p class="kpi-value">{{ stats.clientesHoy || 0 }}</p>
+              </div>
+            </div>
+            <div class="kpi-card k4">
+              <div class="icon-wrap">📊</div>
+              <div class="kpi-content">
+                <p class="kpi-label">Utilidad Real</p>
+                <p class="kpi-value">S/ {{ formatMoney(stats.gananciaHoy) }}</p>
+              </div>
+            </div>
+          </div>
           
           <!-- FLUJO DE VENTAS (Desde Backend) -->
           <div class="card flow-card">
@@ -230,7 +230,7 @@ onMounted(cargarResumen);
 
 <style scoped>
 /* REUSO DE ESTILOS PREVIOS (PREMIUM) */
-.inicio-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+.inicio-container { padding: 1.5rem; margin: 0 auto; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
 .page-title { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; margin: 0; }
 
@@ -267,7 +267,7 @@ onMounted(cargarResumen);
 .top-rank.prov { background: #B2F5EA; color: #319795; }
 .p-name {font-size: 0.9rem; margin: 0; }
 
-.inventory-list-v { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.inventory-list-v { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .inv-item-v { background: #FFF9F2; padding: 1rem; border-radius: 18px; border: 1px solid #FED7D7; }
 .inv-bar-container { background: #EDF2F7; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 0.5rem; margin-bottom: 0.5rem; }
 .inv-bar { height: 100%; transition: 1s; }
