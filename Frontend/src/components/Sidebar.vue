@@ -12,7 +12,7 @@
         @click="$emit('change-tab', item.id)"
       >
         <span class="icon">{{ item.icon }}</span>
-        {{ item.label }}
+        <span class="nav-label">{{ item.label }}</span>
       </button>
     </nav>
     <div class="user-profile" v-if="usuario">
@@ -62,7 +62,7 @@ const filteredMenu = computed(() => {
 
 <style scoped>
 .sidebar {
-  width: var(--sidebar-w, 16rem);
+  width: 5.5rem;
   height: 100vh;
   background-image: url('../assets/fondosidebar.jpg');  
   background-size: cover;
@@ -73,9 +73,15 @@ const filteredMenu = computed(() => {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   /* Overlay oscuro para bajar brillo y dar look minimalista */
   isolation: isolate;
+  transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow-x: hidden;
+  box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+}
+.sidebar:hover {
+  width: 16rem;
 }
 .sidebar::before {
   content: '';
@@ -85,18 +91,20 @@ const filteredMenu = computed(() => {
   z-index: 0;
 }
 .logo {
-  padding: 1.5rem;
+  padding: 1.5rem 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid rgba(255,255,255,0.15);
   position: relative;
   z-index: 1;
+  min-width: 16rem;
 }
 .logo-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
+  min-width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,6 +120,13 @@ const filteredMenu = computed(() => {
   font-family: 'Syncopate', sans-serif;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+.sidebar:hover .logo h2 {
+  opacity: 1;
+  transition-delay: 0.1s;
 }
 .nav-menu {
   flex: 1;
@@ -122,6 +137,7 @@ const filteredMenu = computed(() => {
   position: relative;
   z-index: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Estilizar el scrollbar para que sea delgado y estético */
@@ -142,7 +158,7 @@ const filteredMenu = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.15rem;
   border-radius: 12px;
   color: #4A5568;
   font-family: 'Poiret One', sans-serif;
@@ -154,6 +170,13 @@ const filteredMenu = computed(() => {
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar:hover .nav-item {
+  min-width: 14rem;
+  white-space: normal;
+  overflow: visible;
 }
 .nav-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
@@ -167,19 +190,33 @@ const filteredMenu = computed(() => {
 }
 .nav-item .icon {
   font-size: 1.25rem;
+  min-width: 24px;
+}
+.nav-label {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  line-height: 1.2;
+}
+.sidebar:hover .nav-label {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.1s;
 }
 .user-profile {
-  padding: 1.5rem;
+  padding: 1.5rem 1.25rem;
   border-top: 1px solid rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
   position: relative;
   z-index: 1;
+  min-width: 16rem;
 }
 .avatar {
   width: 40px;
   height: 40px;
+  min-width: 40px;
   border-radius: 50%;
   background-color: rgba(0,0,0,0.05);
   display: flex;
@@ -188,6 +225,17 @@ const filteredMenu = computed(() => {
   font-size: 1.25rem;
   border: 1px solid rgba(0,0,0,0.1);
   color: #2D3748;
+}
+.info {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  white-space: nowrap;
+}
+.sidebar:hover .info {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.1s;
 }
 .info p { margin: 0; }
 .info .name {

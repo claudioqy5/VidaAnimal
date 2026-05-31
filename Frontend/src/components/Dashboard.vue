@@ -19,9 +19,21 @@
           <button v-if="!esSemanaActual" class="today-btn" @click="volverSemanaActual">Actual</button>
         </div>
 
+        <!-- SELECTOR DE AÑO (solo visible en modo anual) -->
+        <div v-if="periodo === 'anual'" class="week-picker-wrap">
+          <button class="week-nav-btn" @click="cambiarAnio(-1)" title="Año anterior">‹</button>
+          <div class="week-info">
+            <span class="week-label">📅 Año</span>
+            <span class="week-range">{{ anioSeleccionado }}</span>
+          </div>
+          <button class="week-nav-btn" @click="cambiarAnio(1)" :disabled="esAnioActual" title="Año siguiente">›</button>
+          <button v-if="!esAnioActual" class="today-btn" @click="volverAnioActual">Actual</button>
+        </div>
+
         <div class="period-switcher">
           <button :class="{ active: periodo === 'semana' }" @click="periodo = 'semana'">Semanal</button>
           <button :class="{ active: periodo === 'mes' }" @click="periodo = 'mes'">Mensual</button>
+          <button :class="{ active: periodo === 'anual' }" @click="periodo = 'anual'">Anual</button>
         </div>
         <button class="refresh-btn" @click="cargar" :disabled="loading">🔄</button>
       </div>
@@ -33,45 +45,32 @@
     </div>
 
     <template v-else>
-      <!-- KPIs SUPERIORES -->
-      <div class="kpi-grid">
-        <div class="kpi-card glass k1">
-          <div class="kpi-icon-wrap">💵</div>
-          <div class="kpi-body">
-            <p class="kpi-label">Ventas {{ periodoLabel }}</p>
-            <p class="kpi-value">S/ {{ formatMoney(currentStats.ventas) }}</p>
-          </div>
-        </div>
-        <div class="kpi-card glass k2">
-          <div class="kpi-icon-wrap">📈</div>
-          <div class="kpi-body">
-            <p class="kpi-label">Ganancia {{ periodoLabel }}</p>
-            <p class="kpi-value">S/ {{ formatMoney(currentStats.ganancia) }}</p>
-          </div>
-        </div>        
-        <div class="kpi-card glass k4">
-          <div class="kpi-icon-wrap">💎</div>
-          <div class="kpi-body">
-            <p class="kpi-label">Ventas del Mes</p>
-            <p class="kpi-value">S/ {{ formatMoney(stats.ventasMes) }}</p>
-          </div>
-        </div>
-        <div class="kpi-card glass k3">
-          <div class="kpi-icon-wrap">🏆</div>
-          <div class="kpi-body">
-            <p class="kpi-label">Ganancia Histórica</p>
-            <p class="kpi-value">S/ {{ formatMoney(gananciaHistorica) }}</p>
-          </div>
-        </div>
-      </div>
-
       <!-- GRID PRINCIPAL -->
       <div class="main-layout">
         
-        <!-- SECCIÓN GRÁFICO (Eje Y + Grid Lineas) -->
-        <div class="card chart-section">
-          <div class="card-header-v2">
-            <h2 class="card-title-v2">📈 Fluctuación del Rendimiento</h2>
+        <div class="left-content">
+          <!-- KPIs SUPERIORES -->
+          <div class="kpi-grid">
+            <div class="kpi-card glass k1">
+              <div class="kpi-icon-wrap">💵</div>
+              <div class="kpi-body">
+                <p class="kpi-label">Ventas {{ periodoLabel }}</p>
+                <p class="kpi-value">S/ {{ formatMoney(currentStats.ventas) }}</p>
+              </div>
+            </div>
+            <div class="kpi-card glass k2">
+              <div class="kpi-icon-wrap">📈</div>
+              <div class="kpi-body">
+                <p class="kpi-label">Ganancia {{ periodoLabel }}</p>
+                <p class="kpi-value">S/ {{ formatMoney(currentStats.ganancia) }}</p>
+              </div>
+            </div>        
+          </div>
+
+          <!-- SECCIÓN GRÁFICO (Eje Y + Grid Lineas) -->
+          <div class="card chart-section">
+            <div class="card-header-v2">
+              <h2 class="card-title-v2">📈 Fluctuación del Rendimiento</h2>
             <div class="chart-legend">
               <span class="leg-item"><i class="dot-v"></i> Venta</span>
               <span class="leg-item"><i class="dot-g"></i> Ganancia</span>
@@ -109,7 +108,7 @@
               </div>
 
               <!-- VISTA MENSUAL (LÍNEAS) -->
-              <div v-else class="chart-canvas line-mode animate-fade-in">
+              <div v-else-if="periodo === 'mes'" class="chart-canvas line-mode animate-fade-in">
                  <div class="line-container">
                    <svg class="line-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
                      <path :d="createLinePath(graficoMensual, 'totalVentas')" class="l-v" />
@@ -133,8 +132,26 @@
                    </div>
                  </div>
               </div>
+
+              <!-- VISTA ANUAL (BARRAS) -->
+              <div v-else-if="periodo === 'anual'" class="chart-canvas grid-mode animate-fade-in">
+                <div v-for="item in graficoAnual" :key="item.mes" class="bar-unit">
+                  <div class="bar-labels">
+                    <span class="v-val">S/ {{ formatMoney(item.totalVentas) }}</span>
+                    <span class="g-val">S/ {{ formatMoney(item.totalGanancia) }}</span>
+                  </div>
+                  <div class="bar-pair">
+                    <div class="bar-v" :style="{ height: getBarHeight(item.totalVentas, maxChartVal) + '%' }"></div>
+                    <div class="bar-g" :style="{ height: getBarHeight(item.totalGanancia, maxChartVal) + '%' }"></div>
+                  </div>
+                  <div class="bar-footer">
+                    <strong class="f-main">{{ item.mesCorto }}</strong>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
         </div>
 
         <!-- SECCIÓN RANKING (Nombres Completos) -->
@@ -143,6 +160,9 @@
             <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
             <div v-if="periodo === 'semana'" class="semana-badge">
               {{ semanaRangoDisplay }}
+            </div>
+            <div v-else-if="periodo === 'anual'" class="semana-badge">
+              Año {{ anioSeleccionado }}
             </div>
             <div class="top-list">
               <div v-for="(p, i) in currentTop" :key="p.nombre" class="top-row animate-pop-in" :style="{ animationDelay: (i*0.1)+'s' }">
@@ -168,12 +188,14 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 
-const stats = ref({ ventasHoy: 0, gananciaHoy: 0, ventasSemana: 0, gananciaSemana: 0, ventasMes: 0, gananciaMes: 0 });
+const stats = ref({ ventasHoy: 0, gananciaHoy: 0, ventasSemana: 0, gananciaSemana: 0, ventasMes: 0, gananciaMes: 0, ventasAnio: 0, gananciaAnio: 0 });
 const gananciaHistorica = ref(0);
 const graficoSemanal = ref([]);
 const graficoMensual = ref([]);
+const graficoAnual = ref([]);
 const topSemanal = ref([]);
 const topMensual = ref([]);
+const topAnual = ref([]);
 const loading = ref(true);
 const periodo = ref('semana');
 
@@ -241,6 +263,26 @@ const volverSemanaActual = () => {
 };
 
 // ───────────────────────────────────────────────
+// LÓGICA DE SELECCIÓN DE AÑO
+// ───────────────────────────────────────────────
+const anioActualLocal = new Date().getFullYear();
+const anioSeleccionado = ref(anioActualLocal);
+
+const esAnioActual = computed(() => anioSeleccionado.value === anioActualLocal);
+
+const cambiarAnio = (delta) => {
+  const nuevo = anioSeleccionado.value + delta;
+  if (nuevo > anioActualLocal) return;
+  anioSeleccionado.value = nuevo;
+  cargar();
+};
+
+const volverAnioActual = () => {
+  anioSeleccionado.value = anioActualLocal;
+  cargar();
+};
+
+// ───────────────────────────────────────────────
 // CARGA DE DATOS
 // ───────────────────────────────────────────────
 
@@ -248,7 +290,7 @@ const cargar = async () => {
   loading.value = true;
   try {
     const semISO = toISO(semanaSeleccionada.value);
-    const url = `/api/Dashboard/resumen?semanaInicio=${semISO}`;
+    const url = `/api/Dashboard/resumen?semanaInicio=${semISO}&anio=${anioSeleccionado.value}`;
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     });
@@ -258,8 +300,10 @@ const cargar = async () => {
       gananciaHistorica.value = data.gananciaHistorica ?? 0;
       graficoSemanal.value = data.graficoSemanal;
       graficoMensual.value = data.graficoMensual;
+      graficoAnual.value = data.graficoAnual || [];
       topSemanal.value = data.topSemanal || [];
       topMensual.value = data.topMensual || [];
+      topAnual.value = data.topAnual || [];
     }
   } catch (e) {
     console.error(e);
@@ -272,14 +316,28 @@ const cargar = async () => {
 // COMPUTED
 // ───────────────────────────────────────────────
 
-const periodoLabel = computed(() => periodo.value === 'semana' ? 'Semanal' : 'Mensual');
-const currentStats = computed(() => periodo.value === 'semana' ? 
-  { ventas: stats.value.ventasSemana, ganancia: stats.value.gananciaSemana } : 
-  { ventas: stats.value.ventasMes, ganancia: stats.value.gananciaMes });
-const currentTop = computed(() => periodo.value === 'semana' ? topSemanal.value : topMensual.value);
+const periodoLabel = computed(() => {
+  if (periodo.value === 'semana') return 'Semanal';
+  if (periodo.value === 'mes') return 'Mensual';
+  return 'Anual';
+});
+const currentStats = computed(() => {
+  if (periodo.value === 'semana') return { ventas: stats.value.ventasSemana, ganancia: stats.value.gananciaSemana };
+  if (periodo.value === 'mes') return { ventas: stats.value.ventasMes, ganancia: stats.value.gananciaMes };
+  return { ventas: stats.value.ventasAnio, ganancia: stats.value.gananciaAnio };
+});
+const currentTop = computed(() => {
+  if (periodo.value === 'semana') return topSemanal.value;
+  if (periodo.value === 'mes') return topMensual.value;
+  return topAnual.value;
+});
 
 const maxChartVal = computed(() => {
-  const data = periodo.value === 'semana' ? graficoSemanal.value : graficoMensual.value;
+  let data = [];
+  if (periodo.value === 'semana') data = graficoSemanal.value;
+  else if (periodo.value === 'mes') data = graficoMensual.value;
+  else data = graficoAnual.value;
+  
   const vals = data.map(d => Math.max(d.totalVentas, d.totalGanancia));
   return Math.max(...vals, 1);
 });
@@ -330,12 +388,10 @@ onMounted(cargar);
 .period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 .refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; }
 
-.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
-.kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); }
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
+.kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); }
 .k1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 .k2 { background: linear-gradient(135deg, #48BB78 0%, #38A169 100%); }
-.k3 { background: linear-gradient(135deg, #4299E1 0%, #3182CE 100%); }
-.k4 { background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%); }
 .kpi-icon-wrap { font-size: 1.6rem; background: rgba(255,255,255,0.15); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
 .kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; }
 .kpi-value { font-size: 1.35rem; font-weight: 900; margin: 0; }

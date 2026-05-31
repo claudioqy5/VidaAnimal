@@ -206,10 +206,15 @@ const cerrarSesion = () => {
 
 .main-content {
   flex: 1;
-  margin-left: var(--sidebar-w, 16rem);
+  margin-left: 5.5rem;
   padding: 2rem;
   max-width: 100%;
   overflow-x: hidden;
+  transition: margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.app-layout:has(.sidebar:hover) .main-content {
+  margin-left: 16rem;
 }
 
 /* Header UI */
