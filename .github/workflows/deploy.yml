@@ -23,6 +23,12 @@ jobs:
         npm install
         npm run build
 
+    - name: Install and Build Mobile PWA
+      run: |
+        cd Mobile
+        npm install
+        npm run build
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -38,7 +44,7 @@ jobs:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
-        source: "Frontend/dist/**,publish/**"
+        source: "Frontend/dist/**,Mobile/dist/**,publish/**"
         target: "/var/www/vida-animal"
         strip_components: 0
 

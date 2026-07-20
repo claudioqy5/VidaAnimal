@@ -31,8 +31,9 @@ namespace VidaAnimal.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
+            var correoNorm = login.Correo.Trim().ToLower();
             var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Correo == login.Correo && u.Activo == true);
+                .FirstOrDefaultAsync(u => u.Correo.ToLower() == correoNorm && u.Activo == true);
 
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(login.Password, usuario.PasswordHash))
             {
