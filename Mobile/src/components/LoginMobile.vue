@@ -1,31 +1,30 @@
 <template>
   <div class="login-screen">
-    <div class="login-glow login-glow-1"></div>
-    <div class="login-glow login-glow-2"></div>
-
     <div class="login-card fade-in">
       <!-- Logo -->
-      <div class="login-logo-fallback">🐾</div>
+      <div class="login-logo-wrap">🐾</div>
 
       <h1 class="login-title">Vida Animal</h1>
       <p class="login-subtitle">POS Móvil · Sistema de Ventas</p>
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
-          <label class="label">Correo Electrónico</label>
+          <label class="label" for="login-email">Correo electrónico</label>
           <input
+            id="login-email"
             v-model="correo"
             type="email"
             required
             autocomplete="email"
             class="input"
-            placeholder="admin@vidaanimal.com"
+            placeholder="usuario@vidaanimal.com"
           />
         </div>
 
         <div class="form-group">
-          <label class="label">Contraseña</label>
+          <label class="label" for="login-password">Contraseña</label>
           <input
+            id="login-password"
             v-model="password"
             type="password"
             required
@@ -36,14 +35,23 @@
         </div>
 
         <div v-if="error" class="banner banner-error" style="border-radius: var(--radius-sm); margin: 0;">
-          {{ error }}
+          ⚠️ {{ error }}
         </div>
 
-        <button type="submit" class="btn btn-primary btn-full" :disabled="cargando" style="margin-top: 0.5rem; font-size: 1rem; min-height: 52px; border-radius: var(--radius);">
-          <span v-if="cargando" class="spinner" style="width: 20px; height: 20px; border-width: 2px; flex-shrink: 0;"></span>
+        <button
+          type="submit"
+          class="btn btn-primary btn-full"
+          :disabled="cargando"
+          style="margin-top: 0.25rem; font-size: 1rem; min-height: 52px; border-radius: var(--radius);"
+        >
+          <span v-if="cargando" class="spinner"></span>
           {{ cargando ? 'Ingresando...' : 'Ingresar al Sistema' }}
         </button>
       </form>
+
+      <p style="margin-top: 1.25rem; text-align: center; font-size: 0.75rem; color: var(--text-muted);">
+        Vida Animal © {{ new Date().getFullYear() }}
+      </p>
     </div>
   </div>
 </template>
@@ -65,7 +73,6 @@ const handleLogin = async () => {
     const response = await fetch('/api/Auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Normalizamos el correo a minúsculas para evitar problemas de mayúsculas
       body: JSON.stringify({ correo: correo.value.trim().toLowerCase(), password: password.value })
     })
 
