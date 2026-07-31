@@ -604,10 +604,10 @@ select.input {
   background: var(--bg-white);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 0.85rem;
+  padding: 0.65rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.4rem;
   box-shadow: var(--shadow-sm);
 }
 
@@ -619,11 +619,11 @@ select.input {
 }
 
 .cart-item-name {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-primary);
   flex: 1;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .cart-item-remove {
@@ -651,18 +651,18 @@ select.input {
 }
 
 .cart-price-label {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 
 .price-input-inline {
-  width: 70px;
+  width: 60px;
   background: var(--bg-input);
   border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 0.28rem 0.5rem;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;
@@ -691,13 +691,13 @@ select.input {
 }
 
 .qty-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
   background: var(--bg-white);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -708,10 +708,10 @@ select.input {
 .qty-btn:active { background: var(--green-light); }
 
 .qty-input {
-  width: 46px;
+  width: 40px;
   background: transparent;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;
@@ -720,32 +720,32 @@ select.input {
 }
 
 .btn-monto {
-  height: 34px;
-  padding: 0 0.65rem;
-  border-radius: 8px;
+  height: 28px;
+  padding: 0 0.5rem;
+  border-radius: 6px;
   background: var(--blue-bg);
   border: 1px solid var(--blue-border);
   color: var(--blue);
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
   font-family: inherit;
   transition: background 0.15s;
 }
 .btn-monto:active { transform: scale(0.95); }
 
 .tipo-select {
-  height: 34px;
-  padding: 0 0.5rem;
-  border-radius: 8px;
+  height: 28px;
+  padding: 0 0.4rem;
+  border-radius: 6px;
   background: var(--bg-input);
   border: 1.5px solid var(--border);
   color: var(--text-secondary);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -757,15 +757,15 @@ select.input {
 }
 
 .subtotal-label {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   color: var(--text-muted);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .subtotal-value {
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--green);
 }
