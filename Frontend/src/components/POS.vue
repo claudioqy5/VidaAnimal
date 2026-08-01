@@ -179,13 +179,13 @@
         <div class="ticket-divider"></div>
 
         <!-- Totales y Cobro Compacto -->
-        <div class="ticket-footer" style="padding: 0.75rem 1.25rem;">
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <div class="ticket-footer" style="padding: clamp(0.5rem, 1.2vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem);">
+          <div style="display: flex; flex-direction: column; gap: clamp(0.2rem, 0.8vh, 0.5rem);">
             
             <!-- Tipo de Comprobante -->
-            <div style="margin-bottom: 0.4rem;">
-              <label style="font-size: 0.7rem; font-weight: 700; color: #718096; display: block; margin-bottom: 0.2rem;">TIPO DE COMPROBANTE</label>
-              <select v-model="ticket.tipoComprobante" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; font-size: 0.85rem; color: #2D3748; background: white; outline: none;">
+            <div style="margin-bottom: clamp(0.1rem, 0.5vh, 0.4rem);">
+              <label style="font-size: clamp(0.6rem, 1vh, 0.7rem); font-weight: 700; color: #718096; display: block; margin-bottom: 0.2rem;">TIPO DE COMPROBANTE</label>
+              <select v-model="ticket.tipoComprobante" style="width: 100%; box-sizing: border-box; padding: clamp(0.3rem, 0.8vh, 0.5rem); border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; font-size: clamp(0.75rem, 1.2vh, 0.85rem); color: #2D3748; background: white; outline: none;">
                 <option value="Nota de Venta">📄 Nota de Venta (Interno)</option>
                 <option value="Boleta">🧾 Boleta Electrónica</option>
                 <option value="Factura">🏢 Factura Electrónica</option>
@@ -193,46 +193,46 @@
             </div>
 
             <!-- Datos de Facturación (Boleta/Factura) -->
-            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'" style="margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; background: #F7FAFC; padding: 0.6rem; border-radius: 8px; border: 1px dashed #CBD5E0;">
+            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'" style="margin-bottom: clamp(0.1rem, 0.5vh, 0.4rem); display: flex; flex-direction: column; gap: 0.3rem; background: #F7FAFC; padding: clamp(0.3rem, 0.8vh, 0.5rem); border-radius: 6px; border: 1px dashed #CBD5E0;">
               <div style="display: flex; gap: 0.4rem;">
                 <input 
                   type="text" 
                   v-model="ticket.documentoCliente" 
                   :placeholder="ticket.tipoComprobante === 'Factura' ? 'RUC (Obligatorio)' : 'DNI (Opcional)'" 
-                  style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: 0.85rem; outline: none;"
+                  style="flex: 1; min-width: 0; box-sizing: border-box; padding: clamp(0.25rem, 0.7vh, 0.4rem) 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: clamp(0.75rem, 1.2vh, 0.85rem); outline: none;"
                   :maxLength="ticket.tipoComprobante === 'Factura' ? 11 : 8"
                 />
-                <button @click.prevent style="padding: 0 0.7rem; border-radius: 6px; border: 1px solid #E2E8F0; background: white; cursor: pointer;">🔍</button>
+                <button @click.prevent style="padding: 0 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; background: white; cursor: pointer;">🔍</button>
               </div>
               <input 
                 v-if="ticket.tipoComprobante === 'Factura'"
                 type="text" 
                 v-model="ticket.razonSocial" 
                 placeholder="Razón Social (Obligatorio)" 
-                style="width: 100%; box-sizing: border-box; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: 0.85rem; outline: none;"
+                style="width: 100%; box-sizing: border-box; padding: clamp(0.25rem, 0.7vh, 0.4rem) 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: clamp(0.75rem, 1.2vh, 0.85rem); outline: none;"
               />
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.3rem; font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.2rem; font-size: clamp(0.75rem, 1.2vh, 0.85rem);">
                <span>Subtotal: <b style="color: #475569;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
                <div style="display: flex; align-items: center; gap: 0.3rem; color: #BE123C;">
                  <span>Desc: -S/</span>
-                 <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" style="width: 50px; text-align: center; border: 1px solid #FECDD3; border-radius: 6px; padding: 0.2rem; font-weight: 800; color: #BE123C; background: #FFF1F2;" />
+                 <input type="number" v-model.number="ticket.descuento" min="0" step="0.5" style="width: 45px; text-align: center; border: 1px solid #FECDD3; border-radius: 6px; padding: 0.15rem; font-weight: 800; color: #BE123C; background: #FFF1F2; font-size: clamp(0.75rem, 1.2vh, 0.85rem);" />
                </div>
             </div>
 
-            <input type="text" v-model="ticket.observaciones" placeholder="Notas de la venta..." style="width: 100%; height: 34px; border-radius: 8px; border: 1px solid #E2E8F0; padding: 0 0.75rem; font-size: 0.8rem; color: #475569;" />
+            <input type="text" v-model="ticket.observaciones" placeholder="Notas de la venta..." style="width: 100%; box-sizing: border-box; padding: clamp(0.3rem, 0.8vh, 0.5rem); border-radius: 6px; border: 1px solid #E2E8F0; font-size: clamp(0.75rem, 1.2vh, 0.85rem); color: #475569; outline: none;" />
 
-            <div style="display: flex; gap: 0.5rem;">
-              <button class="metodo-btn-mini" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" :class="{'active': ticket.metodoPago === 'Efectivo'}" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
-              <button class="metodo-btn-mini" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" :class="{'active': ticket.metodoPago === 'Yape'}" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
+            <div style="display: flex; gap: 0.4rem;">
+              <button class="metodo-btn-mini" style="flex: 1; padding: clamp(0.3rem, 0.8vh, 0.5rem); font-size: clamp(0.75rem, 1.2vh, 0.85rem); border-radius: 6px; cursor: pointer; border: 1px solid #E2E8F0; background: white;" :style="ticket.metodoPago === 'Efectivo' ? 'background:#EBF4FF;border-color:#63B3ED;color:#2B6CB0;font-weight:700;' : ''" @click="ticket.metodoPago = 'Efectivo'">💵 Efectivo</button>
+              <button class="metodo-btn-mini" style="flex: 1; padding: clamp(0.3rem, 0.8vh, 0.5rem); font-size: clamp(0.75rem, 1.2vh, 0.85rem); border-radius: 6px; cursor: pointer; border: 1px solid #E2E8F0; background: white;" :style="ticket.metodoPago === 'Yape' ? 'background:#EBF4FF;border-color:#63B3ED;color:#2B6CB0;font-weight:700;' : ''" @click="ticket.metodoPago = 'Yape'">📱 Yape</button>
             </div>
 
-            <div class="total-row" style="margin: 0.2rem 0;">
-              <span style="font-size: 1.1rem; font-weight: 800; color: #1E293B;">TOTAL</span>
-              <span class="total-monto" style="font-size: 1.6rem; font-weight: 900; color: #0F172A;">S/ {{ totalVenta.toFixed(2) }}</span>
+            <div class="total-row" style="margin: 0.1rem 0; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: clamp(0.9rem, 1.5vh, 1.1rem); font-weight: 800; color: #1E293B;">TOTAL</span>
+              <span class="total-monto" style="font-size: clamp(1.2rem, 2vh, 1.6rem); font-weight: 900; color: #0F172A;">S/ {{ totalVenta.toFixed(2) }}</span>
             </div>
-            <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: 0.85rem; border-radius: 12px; font-size: 1.1rem; margin-top: 0.5rem; width: 100%;">
+            <button class="checkout-btn" :disabled="carrito.length === 0 || vendiendo" @click="procesarVenta" style="padding: clamp(0.5rem, 1.2vh, 0.85rem); border-radius: 8px; font-size: clamp(0.9rem, 1.5vh, 1.1rem); margin-top: 0.2rem; width: 100%; border: none; background: #3182ce; color: white; cursor: pointer; font-weight: 700; transition: background 0.2s;">
               <span v-if="vendiendo" class="spinner-small"></span>
               {{ vendiendo ? 'Procesando...' : 'Generar Venta 💳' }}
             </button>
@@ -821,25 +821,25 @@ const cerrarModalNuevoCliente = () => {
 
 .ticket-title { 
   margin: 0; 
-  padding: 0.8rem 1rem; 
+  padding: 1.2vh 1rem; 
   background: white; 
   border-bottom: 1px solid #E2E8F0; 
-  font-size: 1.15rem; 
+  font-size: clamp(0.9rem, 1.5vh, 1.05rem); 
   font-weight: 800; 
   color: #1A365D;
   text-transform: uppercase;  
 }
-.ticket-header-form { padding: 0.8rem 1rem; background: white; }
+.ticket-header-form { padding: 1.2vh 1rem; background: white; }
 
-.form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #4A5568; margin-bottom: 0.4rem;}
+.form-group label { display: block; font-size: clamp(0.7rem, 1vh, 0.75rem); font-weight: 700; color: #4A5568; margin-bottom: 0.2rem;}
 .form-group input, .form-group select { 
   width: 100%; 
   box-sizing: border-box; 
-  padding: 0.75rem; 
-  border-radius: 10px; 
+  padding: clamp(0.4rem, 1vh, 0.6rem); 
+  border-radius: 6px; 
   border: 1px solid #CBD5E0; 
   font-family: inherit; 
-  font-size: 1rem; 
+  font-size: clamp(0.8rem, 1.2vh, 0.9rem); 
   font-weight: 600;
   color: #2D3748;
   outline: none; 
@@ -857,11 +857,10 @@ const cerrarModalNuevoCliente = () => {
 .cart-items-container { 
   flex: 1; 
   overflow-y: auto; 
-  padding: 0.75rem; 
+  padding: clamp(0.4rem, 1vh, 0.75rem); 
   background: #F8FAFC; 
   display: flex; 
   flex-direction: column; 
-  
 }
 .cart-items-container::-webkit-scrollbar { width: 10px; }
 .cart-items-container::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
@@ -873,37 +872,34 @@ const cerrarModalNuevoCliente = () => {
 
 .cart-item { 
   background: white; 
-  border-radius: 10px; 
-  padding: 0.65rem 0.85rem; 
-  border: 1px solid #E2E8F0; 
+  border-radius: 8px; 
+  padding: clamp(0.4rem, 1vh, 0.6rem) 0.6rem; 
+  border: 1px solid #EBEEF2; 
   display: flex; 
   flex-direction: column; 
-  gap: 0.5rem; 
+  gap: 0.2rem; 
+  margin-bottom: 0.4rem;
   animation: slideInX 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  position: relative;
 }
 @keyframes slideInX { from { transform: translateX(20px); opacity: 0; } }
 
 .header-input-mini { 
-  width: 100%; padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid #CBD5E0; 
-  font-family: inherit; font-size: 0.9rem; color: #2D3748; 
+  width: 100%; padding: clamp(0.3rem, 0.8vh, 0.45rem) 0.5rem; border-radius: 6px; border: 1px solid #CBD5E0; 
+  font-family: inherit; font-size: clamp(0.75rem, 1.2vh, 0.85rem); color: #2D3748; 
   background: white; outline: none; transition: all 0.2s; box-sizing: border-box;
 }
 .header-input-mini:focus { border-color: #A7C7E7; box-shadow: 0 0 0 3px rgba(167, 199, 231, 0.15); }
 
 .form-group-compact { display: flex; flex-direction: column; gap: 2px; }
-.compact-label { display: block; font-size: 0.75rem; font-weight: 600; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
-.btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; outline: none; }
+.compact-label { display: block; font-size: clamp(0.65rem, 0.9vh, 0.7rem); font-weight: 600; color: #4A5568; margin-bottom: 0.1rem; text-transform: uppercase; letter-spacing: 0.025em; }
+.btn-text-link-mini { background: none; border: none; color: #3182CE; font-size: clamp(0.65rem, 0.9vh, 0.7rem); font-weight: 700; cursor: pointer; padding: 0; outline: none; }
 
 /* Estilos Refinados Finales (Compactos) */
-.cart-item { 
-  background: white; border-radius: 8px; padding: 0.6rem 0.8rem; border: 1px solid #EBEEF2; 
-  display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  position: relative; /* Para la X en la esquina */
-}
+/* (La clase .cart-item se unificó arriba) */
 
-.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 700; color: #1E293B; font-size: 0.95rem; }
+.item-name-bold { margin: 0 1.5rem 0 0; font-weight: 700; color: #1E293B; font-size: clamp(0.8rem, 1.2vh, 0.9rem); line-height: 1.1; }
 
 .remove-btn-styled { 
   position: absolute; top: 8px; right: 8px;
@@ -915,11 +911,11 @@ const cerrarModalNuevoCliente = () => {
 .remove-btn-styled:hover { background: #FDA4AF; color: white; }
 
 .item-desc-line { 
-  display: flex; align-items: center; font-size: 0.95rem; color: #718096; font-weight: 500;
+  display: flex; align-items: center; font-size: clamp(0.75rem, 1.1vh, 0.85rem); color: #718096; font-weight: 500;
 }
 .desc-price-input { 
-  border: none; background: transparent; font-size: 0.95rem; font-weight: 600; 
-  color: #718096; width: 65px; padding: 0.1rem; outline: none;
+  border: none; background: transparent; font-size: clamp(0.75rem, 1.1vh, 0.85rem); font-weight: 600; 
+  color: #718096; width: 55px; padding: 0.1rem; outline: none;
 }
 
 .item-selector-row { display: flex; flex-direction: column; width: 100%; margin: 0.25rem 0; }
