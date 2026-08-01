@@ -4,25 +4,10 @@
 
   <!-- Si SÍ hay usuario, mostramos la App normal -->
   <div v-else class="app-layout">
-    <Sidebar :activeTab="currentTab" :usuario="usuarioLogueado" @change-tab="tab => currentTab = tab" />
+    <Sidebar :activeTab="currentTab" :usuario="usuarioLogueado" @change-tab="tab => currentTab = tab" @logout="cerrarSesion" />
     
     <main class="main-content">
-      <!-- Barra superior para saber quién está conectado -->
-      <header class="top-header">
-        <div class="user-info">
-          <h2 class="welcome-text">Bienvenido, {{ usuarioLogueado.nombre }}</h2>
-          <span class="role-badge" :class="usuarioLogueado.rol === 'ADMINISTRADOR' ? 'role-admin' : 'role-cashier'">
-            {{ usuarioLogueado.rol }}
-          </span>
-        </div>
-        
-        <button @click="cerrarSesion" class="logout-btn">
-          <svg class="logout-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-          </svg>
-          Salir
-        </button>
-      </header>
+      <!-- Header removido para maximizar espacio vertical -->
 
       <Dashboard v-if="currentTab === 'dashboard'" />
       <Inicio v-else-if="currentTab === 'inicio'" />
@@ -207,7 +192,7 @@ const cerrarSesion = () => {
 .main-content {
   flex: 1;
   margin-left: 5.5rem;
-  padding: 2rem;
+  padding: 1rem 1.5rem;
   max-width: 100%;
   overflow-x: hidden;
   transition: margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -217,73 +202,7 @@ const cerrarSesion = () => {
   margin-left: 16rem;
 }
 
-/* Header UI */
-.top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #E2E8F0;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.welcome-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2D3748;
-  margin: 0;
-}
-
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  width: fit-content;
-}
-
-.role-admin {
-  background-color: rgba(195, 177, 225, 0.2);
-  color: #553C9A;
-}
-
-.role-cashier {
-  background-color: rgba(167, 199, 231, 0.2);
-  color: #2B6CB0;
-}
-
-/* Logout Button */
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #E53E3E;
-  background-color: #FFF5F5;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.logout-btn:hover {
-  background-color: #FED7D7;
-}
-
-.logout-icon {
-  width: 16px;
-  height: 16px;
-}
+/* Se eliminó el CSS del top-header porque se movió al Sidebar */
 
 /* Placeholder Views */
 .placeholder-view {

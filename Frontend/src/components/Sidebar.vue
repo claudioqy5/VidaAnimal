@@ -15,12 +15,20 @@
         <span class="nav-label">{{ item.label }}</span>
       </button>
     </nav>
-    <div class="user-profile" v-if="usuario">
-      <div class="avatar">👨‍💼</div>
-      <div class="info">
-        <p class="name">{{ usuario.nombre }}</p>
-        <p class="role">{{ usuario.rol }}</p>
+    <div class="user-profile" v-if="usuario" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="avatar">👨‍💼</div>
+        <div class="info" style="flex: 1; overflow: hidden;">
+          <p class="name" style="margin: 0; font-weight: 700; color: #1A202C; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ usuario.nombre }}</p>
+          <p class="role" style="margin: 0; font-size: 0.7rem; color: #718096;">{{ usuario.rol }}</p>
+        </div>
       </div>
+      <button @click="$emit('logout')" style="padding: 0.4rem; border: none; border-radius: 6px; background: #FFF5F5; color: #C53030; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.4rem; font-size: 0.85rem; transition: background 0.2s; width: 100%;">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        Salir
+      </button>
     </div>
   </aside>
 </template>
@@ -33,7 +41,7 @@ const props = defineProps({
   usuario: { type: Object, required: false, default: () => ({}) }
 })
 
-defineEmits(['change-tab'])
+defineEmits(['change-tab', 'logout'])
 
 const menu = [
   { id: 'inicio',          label: 'Inicio',              icon: '🏠', roles: ['ADMINISTRADOR', 'CAJERO'] },
