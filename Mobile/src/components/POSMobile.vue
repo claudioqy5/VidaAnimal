@@ -174,6 +174,39 @@
 
         <!-- TICKET FOOTER: descuento, observaciones, método pago, total, botón -->
         <div class="ticket-footer" style="margin: 1rem;">
+          
+          <!-- Tipo de Comprobante -->
+          <div style="margin-bottom: 0.75rem;">
+            <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">TIPO DE COMPROBANTE</label>
+            <select v-model="ticket.tipoComprobante" class="input input-sm" style="font-weight: 600; font-size: 0.85rem;">
+              <option value="Nota de Venta">📄 Nota de Venta (Interno)</option>
+              <option value="Boleta">🧾 Boleta Electrónica</option>
+              <option value="Factura">🏢 Factura Electrónica</option>
+            </select>
+          </div>
+
+          <!-- Datos de Facturación (Boleta/Factura) -->
+          <div v-if="ticket.tipoComprobante !== 'Nota de Venta'" style="margin-bottom: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; background: var(--bg-surface); padding: 0.6rem; border-radius: var(--radius-sm); border: 1px dashed var(--border);">
+            <div style="display: flex; gap: 0.4rem;">
+              <input 
+                type="tel" 
+                v-model="ticket.documentoCliente" 
+                :placeholder="ticket.tipoComprobante === 'Factura' ? 'RUC (Obligatorio)' : 'DNI (Opcional)'" 
+                class="input input-sm"
+                :maxLength="ticket.tipoComprobante === 'Factura' ? 11 : 8"
+                style="flex: 1;"
+              />
+              <button class="btn btn-secondary" style="padding: 0 0.75rem; font-size: 0.8rem;" title="Buscar en RENIEC/SUNAT" @click.prevent>🔍</button>
+            </div>
+            <input 
+              v-if="ticket.tipoComprobante === 'Factura'"
+              type="text" 
+              v-model="ticket.razonSocial" 
+              placeholder="Razón Social (Obligatorio)" 
+              class="input input-sm"
+            />
+          </div>
+
           <!-- Descuento -->
           <div class="discount-row">
             <span class="discount-left">Subtotal: <b style="color: var(--text-primary);">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
@@ -293,7 +326,10 @@ const ticket = ref({
   clienteID: 0,
   descuento: 0,
   observaciones: '',
-  metodoPago: 'Efectivo'
+  metodoPago: 'Efectivo',
+  tipoComprobante: 'Nota de Venta',
+  documentoCliente: '',
+  razonSocial: ''
 })
 
 // Modales
@@ -548,6 +584,9 @@ const cerrarModalVentaExitosa = () => {
   ticket.value.descuento = 0
   ticket.value.observaciones = ''
   ticket.value.metodoPago = 'Efectivo'
+  ticket.value.tipoComprobante = 'Nota de Venta'
+  ticket.value.documentoCliente = ''
+  ticket.value.razonSocial = ''
   generarCorrelativo()
   cargarDatos()
 }

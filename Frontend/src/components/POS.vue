@@ -181,6 +181,38 @@
         <!-- Totales y Cobro Compacto -->
         <div class="ticket-footer" style="padding: 0.75rem 1.25rem;">
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            
+            <!-- Tipo de Comprobante -->
+            <div style="margin-bottom: 0.4rem;">
+              <label style="font-size: 0.7rem; font-weight: 700; color: #718096; display: block; margin-bottom: 0.2rem;">TIPO DE COMPROBANTE</label>
+              <select v-model="ticket.tipoComprobante" style="width: 100%; box-sizing: border-box; padding: 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; font-size: 0.85rem; color: #2D3748; background: white; outline: none;">
+                <option value="Nota de Venta">📄 Nota de Venta (Interno)</option>
+                <option value="Boleta">🧾 Boleta Electrónica</option>
+                <option value="Factura">🏢 Factura Electrónica</option>
+              </select>
+            </div>
+
+            <!-- Datos de Facturación (Boleta/Factura) -->
+            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'" style="margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; background: #F7FAFC; padding: 0.6rem; border-radius: 8px; border: 1px dashed #CBD5E0;">
+              <div style="display: flex; gap: 0.4rem;">
+                <input 
+                  type="text" 
+                  v-model="ticket.documentoCliente" 
+                  :placeholder="ticket.tipoComprobante === 'Factura' ? 'RUC (Obligatorio)' : 'DNI (Opcional)'" 
+                  style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: 0.85rem; outline: none;"
+                  :maxLength="ticket.tipoComprobante === 'Factura' ? 11 : 8"
+                />
+                <button @click.prevent style="padding: 0 0.7rem; border-radius: 6px; border: 1px solid #E2E8F0; background: white; cursor: pointer;">🔍</button>
+              </div>
+              <input 
+                v-if="ticket.tipoComprobante === 'Factura'"
+                type="text" 
+                v-model="ticket.razonSocial" 
+                placeholder="Razón Social (Obligatorio)" 
+                style="width: 100%; box-sizing: border-box; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: 0.85rem; outline: none;"
+              />
+            </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.3rem; font-size: 0.9rem;">
                <span>Subtotal: <b style="color: #475569;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
                <div style="display: flex; align-items: center; gap: 0.3rem; color: #BE123C;">
@@ -329,7 +361,10 @@ const ticket = ref({
   clienteID: 0,
   descuento: 0,
   observaciones: '',
-  metodoPago: 'Efectivo'
+  metodoPago: 'Efectivo',
+  tipoComprobante: 'Nota de Venta',
+  documentoCliente: '',
+  razonSocial: ''
 })
 
 const mostrarModalSoles = ref(false)
@@ -691,6 +726,9 @@ const cerrarModalNuevoCliente = () => {
   ticket.value.descuento = 0
   ticket.value.observaciones = ''
   ticket.value.metodoPago = 'Efectivo'
+  ticket.value.tipoComprobante = 'Nota de Venta'
+  ticket.value.documentoCliente = ''
+  ticket.value.razonSocial = ''
   generarCorrelativo()
   cargarDatos() // Recargar para actualizar los nuevos niveles de stock en la grilla visual
 }
