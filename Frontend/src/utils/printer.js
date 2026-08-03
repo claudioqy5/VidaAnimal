@@ -60,6 +60,8 @@ function buildFooter() {
  * Se usa box-sizing border-box y ancho fijo de 80mm.
  */
 const TICKET_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
   @page {
     size: 80mm auto;
     margin: 0mm 2mm;
@@ -68,7 +70,7 @@ const TICKET_CSS = `
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -89,10 +91,10 @@ const TICKET_CSS = `
     margin-bottom: 4px;
   }
   .store-text { flex: 1; }
-  .store-name { font-size: 14px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
-  .store-address { font-size: 9px; color: #333; margin-top: 2px; }
-  .store-contact { font-size: 9px; color: #333; }
-  .store-web { font-size: 9px; color: #333; }
+  .store-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; text-transform: uppercase; }
+  .store-address { font-size: 9px; color: #444; margin-top: 2px; font-weight: 400; }
+  .store-contact { font-size: 9px; color: #444; font-weight: 400; }
+  .store-web { font-size: 9px; color: #444; font-weight: 400; }
   .store-logo {
     width: 40px;
     height: 40px;
@@ -100,70 +102,80 @@ const TICKET_CSS = `
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .header-divider { font-size: 9px; color: #888; margin: 4px 0; letter-spacing: 0.5px; }
+  .header-divider { font-size: 9px; color: #ccc; margin: 4px 0; letter-spacing: 0.5px; border-top: 1px dashed #bbb; padding-top: 4px; }
 
   /* ── Comprobante info ── */
-  .comp-info { margin-bottom: 4px; }
-  .comp-title { font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-  .comp-number { font-size: 10px; text-align: center; margin-top: 1px; }
-  .comp-date { font-size: 9px; color: #444; margin-top: 2px; }
-  .comp-client { font-size: 9px; color: #444; margin-top: 1px; }
-  .comp-pay { font-size: 9px; color: #444; margin-top: 1px; }
-  .comp-obs { font-size: 9px; color: #555; margin-top: 2px; font-style: italic; }
-  .section-div { font-size: 9px; color: #888; margin: 4px 0; }
+  .comp-info { margin-bottom: 6px; }
+  .comp-title { font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.8px; color: #111; }
+  .comp-number { font-size: 12px; font-weight: 800; text-align: center; margin-top: 2px; color: #000; }
+  .comp-date { font-size: 9px; color: #555; margin-top: 3px; font-weight: 400; }
+  .comp-client { font-size: 9px; color: #555; margin-top: 1px; font-weight: 500; }
+  .comp-pay { font-size: 9px; color: #555; margin-top: 1px; }
+  .comp-obs { font-size: 9px; color: #666; margin-top: 3px; font-style: italic; }
+  .section-div { margin: 5px 0; border-top: 1px dashed #bbb; }
 
   /* ── Tabla de productos ── */
   table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  thead th { font-size: 9px; font-weight: 700; text-transform: uppercase; border-bottom: 1px dashed #555; padding-bottom: 2px; }
+  thead th { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
   th.left, td.left { text-align: left; }
   th.right, td.right { text-align: right; }
   th.center, td.center { text-align: center; }
-  tbody td { font-size: 10px; padding: 2px 0; vertical-align: top; }
-  .prod-name { max-width: 35mm; word-break: break-word; }
-  tfoot tr td { border-top: 1px dashed #555; padding-top: 2px; }
-  .total-row td { font-size: 12px; font-weight: 900; }
-  .discount-row td { font-size: 10px; }
-  .subtotal-row td { font-size: 10px; }
+  tbody td { font-size: 10px; padding: 2px 0; vertical-align: top; color: #111; }
+  .prod-name { max-width: 35mm; word-break: break-word; font-weight: 500; }
+  tfoot tr td { border-top: 1px solid #ddd; padding-top: 3px; }
+  .total-row td { font-size: 13px; font-weight: 800; color: #000; }
+  .discount-row td { font-size: 10px; color: #555; }
+  .subtotal-row td { font-size: 10px; color: #555; }
 
   /* ── Resumen de cierre de caja ── */
   .summary-table { width: 100%; font-size: 10px; margin: 4px 0; }
   .summary-table td { padding: 2px 0; }
-  .summary-label { font-weight: 700; }
-  .summary-value { text-align: right; font-weight: 900; }
-  .summary-big td { font-size: 13px; font-weight: 900; border-top: 1px solid #000; padding-top: 3px; margin-top: 3px; }
+  .summary-label { font-weight: 600; color: #333; }
+  .summary-value { text-align: right; font-weight: 700; }
+  .summary-big td { font-size: 14px; font-weight: 800; border-top: 1px solid #000; padding-top: 4px; margin-top: 3px; }
 
   /* ── Footer ── */
-  .ticket-footer { text-align: center; margin-top: 6px; }
-  .footer-divider { font-size: 9px; color: #888; }
-  .footer-thanks { font-size: 11px; font-weight: 700; margin-top: 3px; }
-  .footer-web { font-size: 9px; color: #555; margin-top: 2px; }
+  .ticket-footer { text-align: center; margin-top: 8px; }
+  .footer-divider { border-top: 1px dashed #bbb; margin-bottom: 5px; }
+  .footer-thanks { font-size: 11px; font-weight: 700; color: #111; margin-top: 4px; }
+  .footer-web { font-size: 9px; color: #666; margin-top: 2px; font-weight: 400; }
 
   /* Anulada */
   .anulada-stamp {
     text-align: center;
-    font-size: 16px;
-    font-weight: 900;
+    font-size: 14px;
+    font-weight: 800;
     letter-spacing: 2px;
-    border: 3px solid #000;
-    padding: 2px 6px;
+    border: 2px solid #c00;
+    color: #c00;
+    padding: 2px 8px;
     display: inline-block;
     margin: 4px auto;
     transform: rotate(-5deg);
+    border-radius: 3px;
   }
 `
 
+
 /**
- * Abre una ventana de impresión con el HTML del ticket y lanza el diálogo.
+ * Abre el diálogo de impresión usando un iframe oculto para evitar abrir nuevas pestañas.
  * @param {string} bodyHtml — HTML del contenido del ticket (sin head/style).
- * @param {string} title — Título de la ventana.
+ * @param {string} title — Título de la ventana (para el nombre del archivo PDF a generar).
  */
 function openPrintWindow(bodyHtml, title = 'Ticket Vida Animal') {
-  const win = window.open('', '_blank', 'width=400,height=600')
-  if (!win) {
-    alert('Por favor, permite las ventanas emergentes de este sitio para imprimir.')
-    return
-  }
-  win.document.write(`
+  // Crear un iframe invisible
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -175,17 +187,23 @@ function openPrintWindow(bodyHtml, title = 'Ticket Vida Animal') {
         ${bodyHtml}
       </body>
     </html>
-  `)
-  win.document.close()
-  // Espera a que cargue el logo antes de imprimir
-  win.addEventListener('load', () => {
+  `);
+  doc.close();
+
+  // Esperar a que los recursos (como el logo) carguen antes de imprimir
+  iframe.onload = () => {
     setTimeout(() => {
-      win.focus()
-      win.print()
-      // Cierra la ventana automáticamente cuando el usuario termina (o cancela)
-      win.addEventListener('afterprint', () => win.close())
-    }, 300)
-  })
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      
+      // Remover el iframe después de un tiempo prudencial
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 5000); // 5 segundos para asegurar que el spooler capture la vista
+    }, 300);
+  };
 }
 
 /**
