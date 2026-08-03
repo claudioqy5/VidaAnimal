@@ -275,7 +275,10 @@
         </div>
         <h3>¡Transacción Aprobada!</h3>
         <p>La venta se registró correctamente. Se ha descontado el stock del inventario.</p>
-        <button class="primary-btn" @click="cerrarModalNuevoCliente">Emitir Nuevo Ticket</button>
+        <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+          <button class="primary-btn" style="flex: 1; background: #276749;" @click="imprimirUltimaVenta">🖨️ Imprimir Ticket</button>
+          <button class="primary-btn" style="flex: 1;" @click="cerrarModalNuevoCliente">Nuevo Ticket</button>
+        </div>
       </div>
     </div>
 
@@ -324,6 +327,7 @@
 </template>
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { imprimirTicketVenta } from '../utils/printer.js'
 
 const API_URL = '/api'
 const IMAGE_BASE = '/api'
@@ -354,6 +358,7 @@ const itemsPerPage = 12
 const carrito = ref([])
 const vendiendo = ref(false)
 const mostrarModalVenta = ref(false)
+const lastSaleData = ref(null) // Datos de la última venta para imprimir
 
 const ticket = ref({
   serie: 'B001',
@@ -709,6 +714,25 @@ const procesarVenta = async () => {
     
     const data = await res.json()
     if (data.success) {
+      // Capturar datos de la venta para impresión
+      const clienteActual = clientes.value.find(c => c.clienteID == ticket.value.clienteID)
+      lastSaleData.value = {
+        serieComprobante: ticket.value.serie,
+        numeroComprobante: ticket.value.numero,
+        fecha: new Date().toISOString(),
+        metodoPago: ticket.value.metodoPago,
+        observaciones: ticket.value.observaciones,
+        descuento: Number(ticket.value.descuento) || 0,
+        subTotal: carrito.value.reduce((s, i) => s + i.cantidad * i.precioVentaUnitario, 0),
+        total: Math.max(carrito.value.reduce((s, i) => s + i.cantidad * i.precioVentaUnitario, 0) - (Number(ticket.value.descuento) || 0), 0),
+        cajero: (() => { try { return JSON.parse(localStorage.getItem('usuario') || '{}').nombreCompleto || '' } catch { return '' } })(),
+        cliente: clienteActual ? { nombreCompleto: clienteActual.nombreCompleto, documentoIdentidad: clienteActual.documentoIdentidad } : null,
+        detalleVentas: carrito.value.map(i => ({
+          producto: { nombre: i.producto.nombre, codigo: i.producto.codigo },
+          cantidad: i.cantidad,
+          precioUnitario: i.precioVentaUnitario,
+        }))
+      }
       mostrarModalVenta.value = true
     } else {
       errorGlobal.value = data.mensaje || 'Error al procesar la venta. Revisa el stock disponible.'
@@ -731,6 +755,12 @@ const cerrarModalNuevoCliente = () => {
   ticket.value.razonSocial = ''
   generarCorrelativo()
   cargarDatos() // Recargar para actualizar los nuevos niveles de stock en la grilla visual
+}
+
+const imprimirUltimaVenta = () => {
+  if (lastSaleData.value) {
+    imprimirTicketVenta(lastSaleData.value)
+  }
 }
 </script>
 

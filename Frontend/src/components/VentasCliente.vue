@@ -58,7 +58,10 @@
             <span class="value highlight" style="font-size: 1.2rem; font-weight: 800;">S/ {{ totalGeneral.toFixed(2) }}</span>
           </div>
           <button class="btn-reporte" @click="descargarReporteVentas" :disabled="ventasOrdenadas.length === 0">
-            📄 Generar Reporte
+            📄 Reporte PDF
+          </button>
+          <button class="btn-print-cierre" @click="handleImprimirCierre" :disabled="ventasOrdenadas.length === 0" title="Imprimir resumen en impresora térmica 80mm">
+            🖨️ Imprimir Cierre
           </button>
         </div>
       </div>
@@ -103,6 +106,7 @@
             <div v-if="v.estado === 'Anulada'" style="color: #E53E3E; font-weight: bold; font-size: 0.7rem; margin-top: 2px;">ANULADA</div>
           </div>
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
+            <button class="btn-print" title="Imprimir ticket en impresora térmica" @click.stop="imprimirTicketVenta(v)">🖨️</button>
             <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
             <span class="expand-icon">{{ expandedVentas.has(v.ventaID) ? '▲' : '▼' }}</span>
           </div>
@@ -197,6 +201,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { imprimirTicketVenta, imprimirCierreCaja } from '../utils/printer.js';
 
 const API_BASE = '/api';
 const getToken = () => localStorage.getItem('jwt_token');
@@ -418,6 +423,16 @@ const formatDate = (dateStr) => {
   });
 };
 
+const handleImprimirCierre = () => {
+  const clienteSeleccionado = clientes.value.find(c => c.clienteID == selectedClienteID.value);
+  imprimirCierreCaja(ventasOrdenadas.value, {
+    fecha: selectedFecha.value || '',
+    cliente: clienteSeleccionado?.nombreCompleto || '',
+    metodoPago: selectedMetodoPago.value || '',
+  });
+};
+
+
 const descargarReporteVentas = () => {
   const doc = new jsPDF();
   
@@ -550,6 +565,12 @@ onMounted(async () => {
 .btn-pdf { background: #EBF8FF; color: #2B6CB0; border: 1px solid #90CDF4; border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 0.25rem;}
 .btn-pdf:hover { background: #BEE3F8; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(43,108,176, 0.15);}
 .btn-pdf:active { transform: translateY(0); }
+.btn-print { background: #F0FFF4; color: #276749; border: 1px solid #9AE6B4; border-radius: 6px; padding: 0.4rem 0.55rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; }
+.btn-print:hover { background: #C6F6D5; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(39,103,73, 0.15); }
+.btn-print:active { transform: translateY(0); }
+.btn-print-cierre { background: #F0FFF4; color: #276749; border: 1px solid #9AE6B4; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s ease; white-space: nowrap; align-self: center; box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+.btn-print-cierre:hover { background: #C6F6D5; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(39,103,73,0.15); }
+.btn-print-cierre:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 .total-label { font-size: 0.8rem; color: #718096; }
 .total-value { 
   font-size: 1.25rem; font-weight: 800; color: #2C5282;
