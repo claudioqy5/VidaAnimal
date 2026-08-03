@@ -37,7 +37,7 @@ function buildHeader() {
         </div>
         <img class="store-logo" src="${STORE_INFO.logoUrl}" alt="Logo Vida Animal" onerror="this.style.display='none'" />
       </div>
-      <div class="header-divider">================================</div>
+      <div class="section-div"></div>
     </div>
   `
 }
@@ -48,8 +48,8 @@ function buildHeader() {
 function buildFooter() {
   return `
     <div class="ticket-footer">
-      <div class="footer-divider">================================</div>
-      <div class="footer-thanks">¡Gracias por su compra!</div>
+      <div class="section-div"></div>
+      <div class="footer-thanks">¡Gracias por su preferencia!</div>
       <div class="footer-web">${STORE_INFO.web}</div>
     </div>
   `
@@ -92,72 +92,77 @@ const TICKET_CSS = `
   }
 
   /* ── Header ── */
-  .ticket-header { text-align: left; margin-bottom: 4px; }
+  .ticket-header { text-align: left; margin-bottom: 2px; }
   .header-top {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 4px;
     margin-bottom: 4px;
   }
   .store-text { flex: 1; }
-  .store-name { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; text-transform: uppercase; }
-  .store-address { font-size: 9px; color: #444; margin-top: 2px; font-weight: 400; }
-  .store-contact { font-size: 9px; color: #444; font-weight: 400; }
-  .store-web { font-size: 9px; color: #444; font-weight: 400; }
+  .store-name { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
+  .store-address { font-size: 10px; color: #000; margin-top: 2px; font-weight: 500; }
+  .store-contact { font-size: 10px; color: #000; font-weight: 500; }
+  .store-web { font-size: 10px; color: #000; font-weight: 500; }
   .store-logo {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     object-fit: contain;
     border-radius: 50%;
     flex-shrink: 0;
+    /* Filtros agresivos para que las impresoras térmicas impriman bien las imágenes a color */
+    filter: grayscale(100%) contrast(200%) brightness(1.2);
   }
-  .header-divider { font-size: 9px; color: #ccc; margin: 4px 0; letter-spacing: 0.5px; border-top: 1px dashed #bbb; padding-top: 4px; }
+
+  /* ── Separadores ── */
+  .section-div {
+    width: 100%;
+    border-top: 1.5px dashed #000;
+    margin: 6px 0;
+  }
 
   /* ── Comprobante info ── */
   .comp-info { margin-bottom: 6px; }
-  .comp-title { font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.8px; color: #111; }
-  .comp-number { font-size: 12px; font-weight: 800; text-align: center; margin-top: 2px; color: #000; }
-  .comp-date { font-size: 9px; color: #555; margin-top: 3px; font-weight: 400; }
-  .comp-client { font-size: 9px; color: #555; margin-top: 1px; font-weight: 500; }
-  .comp-pay { font-size: 9px; color: #555; margin-top: 1px; }
-  .comp-obs { font-size: 9px; color: #666; margin-top: 3px; font-style: italic; }
-  .section-div { margin: 5px 0; border-top: 1px dashed #bbb; }
+  .comp-title { font-size: 12px; font-weight: 800; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+  .comp-number { font-size: 13px; font-weight: 900; text-align: center; margin-top: 2px; }
+  .comp-date { font-size: 10px; margin-top: 4px; font-weight: 500; }
+  .comp-client { font-size: 10px; margin-top: 2px; font-weight: 600; }
+  .comp-pay { font-size: 10px; margin-top: 2px; font-weight: 500; }
+  .comp-obs { font-size: 10px; margin-top: 4px; font-weight: 600; font-style: italic; border-left: 2px solid #000; padding-left: 4px; }
 
   /* ── Tabla de productos ── */
   table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  thead th { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+  thead th { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #000; padding-bottom: 4px; }
   th.left, td.left { text-align: left; }
   th.right, td.right { text-align: right; }
   th.center, td.center { text-align: center; }
-  tbody td { font-size: 10px; padding: 2px 0; vertical-align: top; color: #111; }
-  .prod-name { max-width: 35mm; word-break: break-word; font-weight: 500; }
-  tfoot tr td { border-top: 1px solid #ddd; padding-top: 3px; }
-  .total-row td { font-size: 13px; font-weight: 800; color: #000; }
-  .discount-row td { font-size: 10px; color: #555; }
-  .subtotal-row td { font-size: 10px; color: #555; }
+  tbody td { font-size: 11px; padding: 4px 0; vertical-align: top; font-weight: 600; }
+  .prod-name { max-width: 38mm; word-break: break-word; font-weight: 700; padding-right: 4px; }
+  tfoot tr td { border-top: 1.5px solid #000; padding-top: 4px; }
+  .total-row td { font-size: 15px; font-weight: 900; padding-top: 6px; }
+  .discount-row td { font-size: 11px; font-weight: 600; }
+  .subtotal-row td { font-size: 11px; font-weight: 600; }
 
   /* ── Resumen de cierre de caja ── */
-  .summary-table { width: 100%; font-size: 10px; margin: 4px 0; }
-  .summary-table td { padding: 2px 0; }
-  .summary-label { font-weight: 600; color: #333; }
-  .summary-value { text-align: right; font-weight: 700; }
-  .summary-big td { font-size: 14px; font-weight: 800; border-top: 1px solid #000; padding-top: 4px; margin-top: 3px; }
+  .summary-table { width: 100%; font-size: 11px; margin: 4px 0; }
+  .summary-table td { padding: 3px 0; font-weight: 600; }
+  .summary-label { font-weight: 700; }
+  .summary-value { text-align: right; font-weight: 800; }
+  .summary-big td { font-size: 15px; font-weight: 900; border-top: 1.5px solid #000; padding-top: 6px; margin-top: 4px; }
 
   /* ── Footer ── */
-  .ticket-footer { text-align: center; margin-top: 8px; }
-  .footer-divider { border-top: 1px dashed #bbb; margin-bottom: 5px; }
-  .footer-thanks { font-size: 11px; font-weight: 700; color: #111; margin-top: 4px; }
-  .footer-web { font-size: 9px; color: #666; margin-top: 2px; font-weight: 400; }
+  .ticket-footer { text-align: center; margin-top: 10px; }
+  .footer-thanks { font-size: 12px; font-weight: 800; margin-top: 4px; }
+  .footer-web { font-size: 10px; margin-top: 2px; font-weight: 500; }
 
   /* Anulada */
   .anulada-stamp {
     text-align: center;
-    font-size: 14px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 900;
     letter-spacing: 2px;
-    border: 2px solid #c00;
-    color: #c00;
+    border: 2px solid #000;
     padding: 2px 8px;
     display: inline-block;
     margin: 4px auto;
