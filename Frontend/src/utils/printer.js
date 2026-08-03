@@ -73,12 +73,22 @@ const TICKET_CSS = `
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    /* Evitar difuminado en impresoras térmicas de bajos DPI */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+    text-rendering: optimizeSpeed;
   }
   body {
     width: 76mm;
     font-size: 11px;
     color: #000;
     background: #fff;
+  }
+  
+  /* Forzar que TODO sea absolutamente negro para evitar renderizado por semitonos (dithering) */
+  h1, h2, h3, h4, h5, h6, p, span, div, td, th {
+    color: #000 !important;
   }
 
   /* ── Header ── */
