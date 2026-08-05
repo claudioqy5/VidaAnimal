@@ -97,7 +97,12 @@
       >
         <!-- CABECERA RESUMIDA TIPO FILA DE TABLA -->
         <div class="card-summary">
-          <div><span class="comprobante-badge">{{ v.serieComprobante }}-{{ v.numeroComprobante }}</span></div>
+          <div>
+            <span class="comprobante-badge">{{ v.serieComprobante }}-{{ v.numeroComprobante }}</span>
+            <div style="font-size: 0.7rem; font-weight: 700; color: #4A5568; margin-top: 2px;">
+              {{ v.serieComprobante?.startsWith('B') ? '🧾 Boleta Electrónica' : '📄 Nota de Venta' }}
+            </div>
+          </div>
           <div><span class="cliente-name">{{ v.cliente?.nombreCompleto || 'Consumidor Final' }}</span></div>
           <div class="fecha-text-col"><span>{{ formatDate(v.fecha) }}</span><br><small>👤 {{ v.cajero || 'Sistema' }}</small></div>
           <div><span class="metodo-badge" :class="(v.metodoPago || 'Efectivo').toLowerCase()">{{ v.metodoPago || 'Efectivo' }}</span></div>
