@@ -92,33 +92,23 @@
               <select v-model="ticket.tipoComprobante" style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #CBD5E0; font-weight: 700; font-size: 0.85rem; color: #2D3748; background: #F7FAFC; outline: none;">
                 <option value="Nota de Venta">📄 Nota (Interno)</option>
                 <option value="Boleta Electrónica">🧾 Boleta Electrónica</option>
-                <option value="Factura Electrónica">🏢 Factura Electrónica</option>
               </select>
             </div>
             
-            <!-- DATOS DE FACTURACIÓN (DNI/RUC) -->
-            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #4A5568; display: block; margin-bottom: 0.2rem;">{{ ticket.tipoComprobante === 'Factura Electrónica' ? 'RUC *' : 'DNI (Opcional)' }}</label>
+            <!-- DATOS DE FACTURACIÓN (DNI) -->
+            <div v-if="ticket.tipoComprobante === 'Boleta Electrónica'">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #4A5568; display: block; margin-bottom: 0.2rem;">DNI (Opcional)</label>
               <div style="display: flex; gap: 0.2rem;">
                 <input 
                   type="text" 
                   v-model="ticket.documentoCliente" 
-                  :placeholder="ticket.tipoComprobante === 'Factura Electrónica' ? 'RUC' : 'DNI'" 
+                  placeholder="DNI del Cliente" 
                   style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid #CBD5E0; font-size: 0.85rem; outline: none;"
-                  :maxLength="ticket.tipoComprobante === 'Factura Electrónica' ? 11 : 8"
+                  maxLength="8"
                 />
                 <button @click.prevent style="padding: 0 0.4rem; border-radius: 6px; border: 1px solid #CBD5E0; background: white; cursor: pointer;">🔍</button>
               </div>
             </div>
-          </div>
-          
-          <div v-if="ticket.tipoComprobante === 'Factura Electrónica'" style="margin-bottom: 0.5rem;">
-            <input 
-              type="text" 
-              v-model="ticket.razonSocial" 
-              placeholder="Razón Social (Obligatorio)" 
-              style="width: 100%; box-sizing: border-box; padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid #CBD5E0; font-size: 0.85rem; outline: none;"
-            />
           </div>
 
           <!-- Fila 1: Serie y Número en paralelo -->
