@@ -68,6 +68,20 @@
               </div>
             </div>
             <div class="kpi-card glass k2">
+              <div class="kpi-icon-wrap">🧾</div>
+              <div class="kpi-body">
+                <p class="kpi-label">Boletas {{ periodoLabel }}</p>
+                <p class="kpi-value">S/ {{ formatMoney(currentStats.boletas) }}</p>
+              </div>
+            </div>
+            <div class="kpi-card glass k3">
+              <div class="kpi-icon-wrap">📄</div>
+              <div class="kpi-body">
+                <p class="kpi-label">Notas {{ periodoLabel }}</p>
+                <p class="kpi-value">S/ {{ formatMoney(currentStats.notas) }}</p>
+              </div>
+            </div>
+            <div class="kpi-card glass k4">
               <div class="kpi-icon-wrap">📈</div>
               <div class="kpi-body">
                 <p class="kpi-label">Ganancia {{ periodoLabel }}</p>
@@ -378,9 +392,24 @@ const periodoLabel = computed(() => {
   return 'Anual';
 });
 const currentStats = computed(() => {
-  if (periodo.value === 'semana') return { ventas: stats.value.ventasSemana, ganancia: stats.value.gananciaSemana };
-  if (periodo.value === 'mes') return { ventas: stats.value.ventasMes, ganancia: stats.value.gananciaMes };
-  return { ventas: stats.value.ventasAnio, ganancia: stats.value.gananciaAnio };
+  if (periodo.value === 'semana') return { 
+    ventas: stats.value.ventasSemana, 
+    boletas: stats.value.ventasBoletaSemana,
+    notas: stats.value.ventasNotaSemana,
+    ganancia: stats.value.gananciaSemana 
+  };
+  if (periodo.value === 'mes') return { 
+    ventas: stats.value.ventasMes, 
+    boletas: stats.value.ventasBoletaMes,
+    notas: stats.value.ventasNotaMes,
+    ganancia: stats.value.gananciaMes 
+  };
+  return { 
+    ventas: stats.value.ventasAnio, 
+    boletas: stats.value.ventasBoletaAnio,
+    notas: stats.value.ventasNotaAnio,
+    ganancia: stats.value.gananciaAnio 
+  };
 });
 const currentTop = computed(() => {
   if (periodo.value === 'semana') return topSemanal.value;

@@ -100,12 +100,18 @@ namespace VidaAnimal.API.Controllers
                     clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),
                     
                     ventasSemana = ventasSemanaGroups.Sum(v => v.Total),
+                    ventasBoletaSemana = ventasSemanaGroups.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
+                    ventasNotaSemana = ventasSemanaGroups.Where(v => v.SerieComprobante == null || !v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
                     gananciaSemana = data.Where(d => d.FechaPeru.Date >= inicioSemana.Date && d.FechaPeru.Date <= finSemana.Date).Sum(d => d.Detalle.Ganancia ?? 0) - ventasSemanaGroups.Sum(v => v.Descuento),
                     
                     ventasMes = ventasMesGroups.Sum(v => v.Total),
+                    ventasBoletaMes = ventasMesGroups.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
+                    ventasNotaMes = ventasMesGroups.Where(v => v.SerieComprobante == null || !v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
                     gananciaMes = data.Where(d => d.FechaPeru.Month == mesTarget && d.FechaPeru.Year == anioTarget).Sum(d => d.Detalle.Ganancia ?? 0) - ventasMesGroups.Sum(v => v.Descuento),
 
                     ventasAnio = ventasAnioGroups.Sum(v => v.Total),
+                    ventasBoletaAnio = ventasAnioGroups.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
+                    ventasNotaAnio = ventasAnioGroups.Where(v => v.SerieComprobante == null || !v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
                     gananciaAnio = data.Where(d => d.FechaPeru.Year == anioTarget).Sum(d => d.Detalle.Ganancia ?? 0) - ventasAnioGroups.Sum(v => v.Descuento)
                 };
 
