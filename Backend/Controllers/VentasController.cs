@@ -252,7 +252,9 @@ namespace VidaAnimal.API.Controllers
                         {
                             var resultado = await _apisPeruService.EnviarBoletaAsync(ventaParaFacturar);
                             ventaParaFacturar.EnviadoSunat = resultado.Success;
-                            ventaParaFacturar.SunatStatus = resultado.SunatStatus;
+                            ventaParaFacturar.SunatStatus = resultado.Success 
+                                ? (resultado.SunatStatus ?? "ACEPTADO") 
+                                : (resultado.Message != null && resultado.Message.Length > 250 ? resultado.Message.Substring(0, 250) : resultado.Message);
                             ventaParaFacturar.SunatXmlUrl = resultado.XmlUrl;
                             ventaParaFacturar.SunatPdfUrl = resultado.PdfUrl;
                             ventaParaFacturar.SunatCdrUrl = resultado.CdrUrl;

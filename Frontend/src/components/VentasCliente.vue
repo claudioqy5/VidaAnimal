@@ -177,7 +177,8 @@
               </div>
             </div>
             <div v-else-if="v.serieComprobante?.startsWith('B')" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #FFFAF0; border: 1px solid #F6AD55; border-radius: 8px;">
-              <p style="font-weight: 600; color: #744210; font-size: 0.82rem;">⚠️ Esta boleta no fue enviada a SUNAT correctamente. Revisa la configuración de APIsPERU.</p>
+              <p style="font-weight: 600; color: #744210; font-size: 0.82rem;">⚠️ Esta boleta no fue enviada a SUNAT correctamente.</p>
+              <p v-if="v.sunatStatus" style="font-size: 0.78rem; color: #9C4221; margin-top: 4px; word-break: break-word;"><b>Respuesta servidor:</b> {{ v.sunatStatus }}</p>
             </div>
             
             <div class="actions-footer" style="margin-top: 1.5rem; text-align: right;">
