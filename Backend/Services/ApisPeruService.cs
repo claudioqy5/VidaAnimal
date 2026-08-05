@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -25,16 +25,16 @@ namespace VidaAnimal.API.Services
             _config = config;
         }
 
-        private async Task<string?> GetTokenAsync()
+        private async Task<(string? Token, string? Error)> GetTokenAsync()
         {
             if (!string.IsNullOrEmpty(_cachedToken) && DateTime.UtcNow < _tokenExpiry)
-                return _cachedToken;
+                return (_cachedToken, null);
 
             var username = _config["ApisPeruConfig:Username"];
             var password = _config["ApisPeruConfig:Password"];
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-                throw new InvalidOperationException("No se han configurado las credenciales de APIsPERU (ApisPeruConfig:Username / Password) en appsettings.json.");
+                return (null, "No se han configurado las credenciales de APIsPERU en appsettings.json.");
 
             var payload = JsonSerializer.Serialize(new { username, password });
             var response = await _httpClient.PostAsync(
@@ -42,22 +42,25 @@ namespace VidaAnimal.API.Services
                 new StringContent(payload, Encoding.UTF8, "application/json")
             );
 
-            if (!response.IsSuccessStatusCode) return null;
+            var responseBody = await response.Content.ReadAsStringAsync();
 
-            var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            if (!response.IsSuccessStatusCode)
+                return (null, $"Login APIsPERU HTTP {(int)response.StatusCode}: {responseBody}");
+
+            var json = JsonDocument.Parse(responseBody);
             var token = json.RootElement.GetProperty("token").GetString();
             _cachedToken = token;
             _tokenExpiry = DateTime.UtcNow.AddHours(23);
-            return token;
+            return (token, null);
         }
 
         public async Task<(bool Success, string Message, string? XmlUrl, string? PdfUrl, string? CdrUrl, string? SunatStatus)> EnviarBoletaAsync(Venta venta)
         {
             try
             {
-                var token = await GetTokenAsync();
+                var (token, tokenError) = await GetTokenAsync();
                 if (token == null)
-                    return (false, "Error al obtener token de APIsPERU. Verifica las credenciales.", null, null, null, null);
+                    return (false, tokenError ?? "Error al obtener token de APIsPERU.", null, null, null, "ERROR_AUTH");
 
                 var ruc = _config["ApisPeruConfig:Ruc"] ?? "";
 
