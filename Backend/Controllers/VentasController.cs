@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using VidaAnimal.API.Data;
 using VidaAnimal.API.Models;
+using VidaAnimal.API.Services;
 
 namespace VidaAnimal.API.Controllers
 {
@@ -16,10 +17,12 @@ namespace VidaAnimal.API.Controllers
     public class VentasController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IApisPeruService _apisPeruService;
 
-        public VentasController(AppDbContext context)
+        public VentasController(AppDbContext context, IApisPeruService apisPeruService)
         {
             _context = context;
+            _apisPeruService = apisPeruService;
         }
 
         [HttpGet]
@@ -196,7 +199,48 @@ namespace VidaAnimal.API.Controllers
 
                 await _context.SaveChangesAsync(); // Guardar Kardex
 
-                return Ok(new { success = true, mensaje = "Venta exitosa y stock actualizado.", id = nuevaVenta.VentaID });
+                // === FACTURACIÓN ELECTRÓNICA ===
+                // Si es Boleta Electrónica, enviar a SUNAT a través de APIsPERU
+                if (req.TipoComprobante == "Boleta Electrónica")
+                {
+                    try
+                    {
+                        // Recargar la venta con sus relaciones para el servicio
+                        var ventaParaFacturar = await _context.Ventas
+                            .Include(v => v.VentaDetalles).ThenInclude(d => d.Producto)
+                            .Include(v => v.Cliente)
+                            .FirstOrDefaultAsync(v => v.VentaID == nuevaVenta.VentaID);
+
+                        if (ventaParaFacturar != null)
+                        {
+                            var resultado = await _apisPeruService.EnviarBoletaAsync(ventaParaFacturar);
+                            ventaParaFacturar.EnviadoSunat = resultado.Success;
+                            ventaParaFacturar.SunatStatus = resultado.SunatStatus;
+                            ventaParaFacturar.SunatXmlUrl = resultado.XmlUrl;
+                            ventaParaFacturar.SunatPdfUrl = resultado.PdfUrl;
+                            ventaParaFacturar.SunatCdrUrl = resultado.CdrUrl;
+                            await _context.SaveChangesAsync();
+
+                            return Ok(new
+                            {
+                                success = true,
+                                mensaje = resultado.Success
+                                    ? $"Venta exitosa. Boleta enviada a SUNAT: {resultado.SunatStatus}"
+                                    : $"Venta guardada, pero error al enviar a SUNAT: {resultado.Message}",
+                                id = nuevaVenta.VentaID,
+                                enviadoSunat = resultado.Success,
+                                sunatPdfUrl = resultado.PdfUrl
+                            });
+                        }
+                    }
+                    catch (Exception sunatEx)
+                    {
+                        // Si falla el envío SUNAT, la venta ya está guardada; solo informamos
+                        return Ok(new { success = true, mensaje = $"Venta guardada, pero no se pudo conectar con APIsPERU: {sunatEx.Message}", id = nuevaVenta.VentaID, enviadoSunat = false });
+                    }
+                }
+
+                return Ok(new { success = true, mensaje = "Venta exitosa y stock actualizado.", id = nuevaVenta.VentaID, enviadoSunat = false });
             }
             catch (Exception ex)
             {
@@ -293,6 +337,7 @@ namespace VidaAnimal.API.Controllers
         public decimal Descuento { get; set; } = 0;
         public string? MetodoPago { get; set; }
         public string? Observaciones { get; set; }
+        public string? TipoComprobante { get; set; } // "Nota de Venta" o "Boleta Electrónica"
         public List<VentaDetalleDTO> Detalles { get; set; } = new List<VentaDetalleDTO>();
     }
 

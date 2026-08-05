@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VidaAnimal.API.Data;
+using VidaAnimal.API.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization(); // Activa los roles en los endpoints
+
+// ============================================
+// INTEGRACIÓN FACTURACIÓN ELECTRÓNICA APIsPERU
+// ============================================
+builder.Services.AddHttpClient<IApisPeruService, ApisPeruService>();
 
 var app = builder.Build();
 

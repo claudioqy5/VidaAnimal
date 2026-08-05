@@ -35,10 +35,17 @@ namespace VidaAnimal.API.Models
         public string? NumeroComprobante { get; set; }
 
         [MaxLength(50)]
-        public string MetodoPago { get; set; } = "Efectivo";
+        public string? MetodoPago { get; set; } = "Efectivo";
 
         [MaxLength(50)]
-        public string Estado { get; set; } = "Completada";
+        public string? Estado { get; set; } = "Completada";
+        
+        // --- Campos SUNAT Facturación Electrónica ---
+        public bool EnviadoSunat { get; set; } = false;
+        public string? SunatStatus { get; set; }
+        public string? SunatXmlUrl { get; set; }
+        public string? SunatPdfUrl { get; set; }
+        public string? SunatCdrUrl { get; set; }
 
         public int? ClienteID { get; set; }
         public virtual Cliente? Cliente { get; set; }

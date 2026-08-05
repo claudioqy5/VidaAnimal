@@ -361,7 +361,7 @@ const mostrarModalVenta = ref(false)
 const lastSaleData = ref(null) // Datos de la última venta para imprimir
 
 const ticket = ref({
-  serie: 'B001',
+  serie: 'N001',
   numero: '',
   clienteID: 0,
   descuento: 0,
@@ -429,10 +429,16 @@ onMounted(() => {
 })
 
 const generarCorrelativo = () => {
-  // Simulacion de generador de numero de boleta aleatorio para esta demo
+  // Número correlativo aleatorio para la demo — en producción vendría del backend
   const r = Math.floor(Math.random() * 900000) + 100000
   ticket.value.numero = r.toString()
 }
+
+// Cambiar la serie automáticamente según el tipo de comprobante
+watch(() => ticket.value.tipoComprobante, (tipo) => {
+  ticket.value.serie = tipo === 'Boleta Electrónica' ? 'B001' : 'N001'
+  generarCorrelativo()
+})
 
 const verificarCumpleanos = () => {
   if (ticket.value.clienteID == 0) {
@@ -691,13 +697,13 @@ const procesarVenta = async () => {
     descuento: Number(ticket.value.descuento) || 0,
     observaciones: ticket.value.observaciones,
     metodoPago: ticket.value.metodoPago,
+    tipoComprobante: ticket.value.tipoComprobante,  // <-- enviado al backend para SUNAT
     detalles: carrito.value.map(item => {
-      // El backend ahora recibe cantidad nominal y unidad de venta, manejando él mismo la división del stock
       return {
         productoID: item.productoID,
         cantidad: item.cantidad,
         precioVentaUnitario: item.precioVentaUnitario,
-        unidadVenta: item.tipoVenta // 'KG', 'SACO' o 'UND'
+        unidadVenta: item.tipoVenta
       }
     })
   }
