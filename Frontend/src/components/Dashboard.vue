@@ -178,7 +178,7 @@
         </div>
 
         <!-- SECCIÓN RANKING (Nombres Completos) -->
-        <div class="sidebar">
+        <div class="ranking-sidebar">
           <div class="card ranking-full">
             <h2 class="card-title-v2">🏆 Ranking {{ periodoLabel }}</h2>
             <div v-if="periodo === 'semana'" class="semana-badge">
