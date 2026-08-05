@@ -93,6 +93,8 @@ namespace VidaAnimal.API.Controllers
 
                 var stats = new {
                     ventasHoy = ventasHoyGroups.Sum(v => v.Total),
+                    ventasBoletaHoy = ventasHoyGroups.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
+                    ventasNotaHoy = ventasHoyGroups.Where(v => v.SerieComprobante == null || !v.SerieComprobante.StartsWith("B")).Sum(v => v.Total),
                     gananciaHoy = detallesHoy.Sum(d => d.Detalle.Ganancia ?? 0) - ventasHoyGroups.Sum(v => v.Descuento),
                     transaccionesHoy = ventasHoyGroups.Count,
                     clientesHoy = detallesHoy.Select(d => d.Detalle.Venta.ClienteID).Distinct().Count(),

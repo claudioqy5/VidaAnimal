@@ -88,17 +88,17 @@
               </div>
             </div>
             <div class="kpi-card k2">
-              <div class="icon-wrap">📃</div>
+              <div class="icon-wrap">🧾</div>
               <div class="kpi-content">
-                <p class="kpi-label">Transacciones</p>
-                <p class="kpi-value">{{ stats.transaccionesHoy || 0 }}</p>
+                <p class="kpi-label">Boletas del Día</p>
+                <p class="kpi-value">S/ {{ formatMoney(stats.ventasBoletaHoy) }}</p>
               </div>
             </div>
             <div class="kpi-card k3">
-              <div class="icon-wrap">👥</div>
+              <div class="icon-wrap">📄</div>
               <div class="kpi-content">
-                <p class="kpi-label">Clientes</p>
-                <p class="kpi-value">{{ stats.clientesHoy || 0 }}</p>
+                <p class="kpi-label">Notas del Día</p>
+                <p class="kpi-value">S/ {{ formatMoney(stats.ventasNotaHoy) }}</p>
               </div>
             </div>
             <div class="kpi-card k4">
