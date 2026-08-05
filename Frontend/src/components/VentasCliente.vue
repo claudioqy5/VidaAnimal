@@ -106,6 +106,9 @@
             <div v-if="v.estado === 'Anulada'" style="color: #E53E3E; font-weight: bold; font-size: 0.7rem; margin-top: 2px;">ANULADA</div>
           </div>
           <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">
+            <!-- Badge SUNAT -->
+            <span v-if="v.enviadoSunat" title="Enviado y aprobado por SUNAT" style="background: #38A169; color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">✅ SUNAT</span>
+            <span v-else-if="v.serieComprobante?.startsWith('B')" title="Boleta pendiente de envío a SUNAT" style="background: #DD6B20; color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">⚠️ SUNAT</span>
             <button class="btn-print" title="Imprimir ticket en impresora térmica" @click.stop="imprimirTicketVenta(v)">🖨️</button>
             <button class="btn-pdf" title="Descargar Comprobante PDF" @click.stop="descargarPDF(v)">📄 PDF</button>
             <span class="expand-icon">{{ expandedVentas.has(v.ventaID) ? '▲' : '▼' }}</span>
@@ -156,6 +159,20 @@
 
             <div class="extra-info" v-if="v.observaciones">
               <p><strong>Nota:</strong> {{ v.observaciones }}</p>
+            </div>
+
+            <!-- SECCIÓN SUNAT -->
+            <div v-if="v.enviadoSunat" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #F0FFF4; border: 1px solid #68D391; border-radius: 8px;">
+              <p style="font-weight: 700; color: #276749; margin-bottom: 0.5rem; font-size: 0.85rem;">✅ Boleta Electrónica enviada a SUNAT</p>
+              <p style="font-size: 0.78rem; color: #2D6A4F; margin-bottom: 0.5rem;">Estado: <strong>{{ v.sunatStatus || 'ACEPTADO' }}</strong></p>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a v-if="v.sunatPdfUrl" :href="v.sunatPdfUrl" target="_blank" style="background: #E53E3E; color: white; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.78rem; font-weight: 600;">📄 Ver PDF Oficial</a>
+                <a v-if="v.sunatXmlUrl" :href="v.sunatXmlUrl" target="_blank" style="background: #3182CE; color: white; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.78rem; font-weight: 600;">📋 Descargar XML</a>
+                <a v-if="v.sunatCdrUrl" :href="v.sunatCdrUrl" target="_blank" style="background: #805AD5; color: white; text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.78rem; font-weight: 600;">📜 CDR SUNAT</a>
+              </div>
+            </div>
+            <div v-else-if="v.serieComprobante?.startsWith('B')" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #FFFAF0; border: 1px solid #F6AD55; border-radius: 8px;">
+              <p style="font-weight: 600; color: #744210; font-size: 0.82rem;">⚠️ Esta boleta no fue enviada a SUNAT correctamente. Revisa la configuración de APIsPERU.</p>
             </div>
             
             <div class="actions-footer" style="margin-top: 1.5rem; text-align: right;">

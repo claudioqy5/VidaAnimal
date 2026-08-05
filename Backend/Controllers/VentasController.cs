@@ -75,6 +75,12 @@ namespace VidaAnimal.API.Controllers
                 v.MetodoPago,
                 v.Estado,
                 v.Observaciones,
+                // Campos SUNAT
+                v.EnviadoSunat,
+                v.SunatStatus,
+                v.SunatXmlUrl,
+                v.SunatPdfUrl,
+                v.SunatCdrUrl,
                 Cajero = v.Usuario == null ? "SISTEMA" : v.Usuario.NombreCompleto,
                 Cliente = v.Cliente == null ? null : new {
                     v.Cliente.ClienteID,
