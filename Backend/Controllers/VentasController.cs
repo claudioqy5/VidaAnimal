@@ -115,12 +115,27 @@ namespace VidaAnimal.API.Controllers
                 int? usuarioId = null;
                 if (int.TryParse(claimUsuarioId, out int uid)) usuarioId = uid;
 
+                // --- GENERAR CORRELATIVO ---
+                string serie = req.TipoComprobante == "Boleta Electrónica" ? "B001" : "N001";
+                
+                // Buscar el último correlativo real (8 dígitos) de esta serie para ignorar los viejos aleatorios
+                var ultimaVentaSerie = await _context.Ventas
+                    .Where(v => v.SerieComprobante == serie && v.NumeroComprobante.Length == 8)
+                    .OrderByDescending(v => v.NumeroComprobante)
+                    .FirstOrDefaultAsync();
+
+                string nuevoNumero = "00000001";
+                if (ultimaVentaSerie != null && int.TryParse(ultimaVentaSerie.NumeroComprobante, out int ultimoNum))
+                {
+                    nuevoNumero = (ultimoNum + 1).ToString("D8");
+                }
+
                 var nuevaVenta = new Venta
                 {
                     ClienteID = req.ClienteID == 0 ? null : req.ClienteID,
                     UsuarioID = usuarioId ?? 1,
-                    SerieComprobante = req.SerieComprobante,
-                    NumeroComprobante = req.NumeroComprobante,
+                    SerieComprobante = serie,
+                    NumeroComprobante = nuevoNumero,
                     Fecha = DateTime.Now,
                     MetodoPago = string.IsNullOrEmpty(req.MetodoPago) ? "Efectivo" : req.MetodoPago,
                     Descuento = req.Descuento,
