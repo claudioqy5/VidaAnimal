@@ -27,6 +27,13 @@ namespace VidaAnimal.API.Services
 
         private async Task<(string? Token, string? Error)> GetTokenAsync()
         {
+            // Si hay un token estático permanente configurado, usarlo directamente
+            var staticToken = _config["ApisPeruConfig:Token"];
+            if (!string.IsNullOrEmpty(staticToken))
+            {
+                return (staticToken, null);
+            }
+
             if (!string.IsNullOrEmpty(_cachedToken) && DateTime.UtcNow < _tokenExpiry)
                 return (_cachedToken, null);
 
@@ -34,7 +41,7 @@ namespace VidaAnimal.API.Services
             var password = _config["ApisPeruConfig:Password"];
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-                return (null, "No se han configurado las credenciales de APIsPERU en appsettings.json.");
+                return (null, "No se han configurado las credenciales ni el Token de APIsPERU en appsettings.json.");
 
             var payload = JsonSerializer.Serialize(new { username, password });
             var response = await _httpClient.PostAsync(
