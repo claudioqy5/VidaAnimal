@@ -477,10 +477,12 @@ watch(periodo, () => {
 .period-switcher button.active { background: white; color: #553C9A; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 .refresh-btn { background: #EDF2F7; border: none; padding: 0.5rem; border-radius: 10px; cursor: pointer; }
 
-.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
 .kpi-card { border-radius: 20px; padding: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 1rem; color: white; border: 1px solid rgba(255,255,255,0.1); }
 .k1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.k2 { background: linear-gradient(135deg, #48BB78 0%, #38A169 100%); }
+.k2 { background: linear-gradient(135deg, #38A169 0%, #276749 100%); }
+.k3 { background: linear-gradient(135deg, #3182CE 0%, #2B6CB0 100%); }
+.k4 { background: linear-gradient(135deg, #D69E2E 0%, #B7791F 100%); }
 .kpi-icon-wrap { font-size: 1.6rem; background: rgba(255,255,255,0.15); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
 .kpi-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin: 0; }
 .kpi-value { font-size: 1.35rem; font-weight: 900; margin: 0; }
