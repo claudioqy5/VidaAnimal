@@ -84,14 +84,41 @@
 
         <!-- Datos del Comprobante Compacto Organizado -->
         <div class="ticket-header-form">
-          <!-- TIPO DE COMPROBANTE ARRIBA -->
-          <div style="margin-bottom: 0.5rem;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: #4A5568; display: block; margin-bottom: 0.2rem;">TIPO DE COMPROBANTE *</label>
-            <select v-model="ticket.tipoComprobante" style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #CBD5E0; font-weight: 700; font-size: 0.85rem; color: #2D3748; background: #F7FAFC; outline: none;">
-              <option value="Nota de Venta">📄 Nota de Venta (Interno)</option>
-              <option value="Boleta Electrónica">🧾 Boleta Electrónica</option>
-              <option value="Factura Electrónica">🏢 Factura Electrónica</option>
-            </select>
+          <!-- FILA 0: TIPO Y DOCUMENTO -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <!-- TIPO DE COMPROBANTE -->
+            <div>
+              <label style="font-size: 0.75rem; font-weight: 700; color: #4A5568; display: block; margin-bottom: 0.2rem;">TIPO COMPROBANTE *</label>
+              <select v-model="ticket.tipoComprobante" style="width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #CBD5E0; font-weight: 700; font-size: 0.85rem; color: #2D3748; background: #F7FAFC; outline: none;">
+                <option value="Nota de Venta">📄 Nota (Interno)</option>
+                <option value="Boleta Electrónica">🧾 Boleta Electrónica</option>
+                <option value="Factura Electrónica">🏢 Factura Electrónica</option>
+              </select>
+            </div>
+            
+            <!-- DATOS DE FACTURACIÓN (DNI/RUC) -->
+            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'">
+              <label style="font-size: 0.75rem; font-weight: 700; color: #4A5568; display: block; margin-bottom: 0.2rem;">{{ ticket.tipoComprobante === 'Factura Electrónica' ? 'RUC *' : 'DNI (Opcional)' }}</label>
+              <div style="display: flex; gap: 0.2rem;">
+                <input 
+                  type="text" 
+                  v-model="ticket.documentoCliente" 
+                  :placeholder="ticket.tipoComprobante === 'Factura Electrónica' ? 'RUC' : 'DNI'" 
+                  style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid #CBD5E0; font-size: 0.85rem; outline: none;"
+                  :maxLength="ticket.tipoComprobante === 'Factura Electrónica' ? 11 : 8"
+                />
+                <button @click.prevent style="padding: 0 0.4rem; border-radius: 6px; border: 1px solid #CBD5E0; background: white; cursor: pointer;">🔍</button>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="ticket.tipoComprobante === 'Factura Electrónica'" style="margin-bottom: 0.5rem;">
+            <input 
+              type="text" 
+              v-model="ticket.razonSocial" 
+              placeholder="Razón Social (Obligatorio)" 
+              style="width: 100%; box-sizing: border-box; padding: 0.4rem 0.5rem; border-radius: 6px; border: 1px solid #CBD5E0; font-size: 0.85rem; outline: none;"
+            />
           </div>
 
           <!-- Fila 1: Serie y Número en paralelo -->
@@ -191,26 +218,7 @@
         <!-- Totales y Cobro Compacto -->
         <div class="ticket-footer" style="padding: clamp(0.5rem, 1.2vh, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem);">
           <div style="display: flex; flex-direction: column; gap: clamp(0.2rem, 0.8vh, 0.5rem);">
-            <!-- Datos de Facturación (Boleta/Factura) -->
-            <div v-if="ticket.tipoComprobante !== 'Nota de Venta'" style="margin-bottom: clamp(0.1rem, 0.5vh, 0.4rem); display: flex; flex-direction: column; gap: 0.3rem; background: #F7FAFC; padding: clamp(0.3rem, 0.8vh, 0.5rem); border-radius: 6px; border: 1px dashed #CBD5E0;">
-              <div style="display: flex; gap: 0.4rem;">
-                <input 
-                  type="text" 
-                  v-model="ticket.documentoCliente" 
-                  :placeholder="ticket.tipoComprobante === 'Factura' ? 'RUC (Obligatorio)' : 'DNI (Opcional)'" 
-                  style="flex: 1; min-width: 0; box-sizing: border-box; padding: clamp(0.25rem, 0.7vh, 0.4rem) 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: clamp(0.75rem, 1.2vh, 0.85rem); outline: none;"
-                  :maxLength="ticket.tipoComprobante === 'Factura' ? 11 : 8"
-                />
-                <button @click.prevent style="padding: 0 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; background: white; cursor: pointer;">🔍</button>
-              </div>
-              <input 
-                v-if="ticket.tipoComprobante === 'Factura'"
-                type="text" 
-                v-model="ticket.razonSocial" 
-                placeholder="Razón Social (Obligatorio)" 
-                style="width: 100%; box-sizing: border-box; padding: clamp(0.25rem, 0.7vh, 0.4rem) 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; font-size: clamp(0.75rem, 1.2vh, 0.85rem); outline: none;"
-              />
-            </div>
+            <!-- Aquí estaba el DNI, ahora movido arriba -->
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #E2E8F0; padding-bottom: 0.2rem; font-size: clamp(0.75rem, 1.2vh, 0.85rem);">
                <span>Subtotal: <b style="color: #475569;">S/ {{ subtotalVenta.toFixed(2) }}</b></span>
@@ -427,9 +435,21 @@ onMounted(() => {
   generarCorrelativo()
 })
 
-const generarCorrelativo = () => {
-  // Ahora el correlativo se genera en el backend automáticamente
-  ticket.value.numero = 'Automático'
+const generarCorrelativo = async () => {
+  ticket.value.numero = 'Cargando...'
+  try {
+    const res = await fetch(`${API_URL}/Ventas/Correlativo/${ticket.value.serie}`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    })
+    const data = await res.json()
+    if (data.success) {
+      ticket.value.numero = data.numero
+    } else {
+      ticket.value.numero = 'Automático'
+    }
+  } catch (error) {
+    ticket.value.numero = 'Automático'
+  }
 }
 
 // Cambiar la serie automáticamente según el tipo de comprobante

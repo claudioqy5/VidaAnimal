@@ -104,6 +104,22 @@ namespace VidaAnimal.API.Controllers
             return Ok(new { success = true, data = ventas });
         }
 
+        [HttpGet("Correlativo/{serie}")]
+        public async Task<IActionResult> GetSiguienteCorrelativo(string serie)
+        {
+            var ultimaVenta = await _context.Ventas
+                .Where(v => v.SerieComprobante == serie && v.NumeroComprobante.Length == 8)
+                .OrderByDescending(v => v.NumeroComprobante)
+                .FirstOrDefaultAsync();
+
+            string nuevoNumero = "00000001";
+            if (ultimaVenta != null && int.TryParse(ultimaVenta.NumeroComprobante, out int ultimoNum))
+            {
+                nuevoNumero = (ultimoNum + 1).ToString("D8");
+            }
+            return Ok(new { success = true, numero = nuevoNumero });
+        }
+
 
         [HttpPost]
 
