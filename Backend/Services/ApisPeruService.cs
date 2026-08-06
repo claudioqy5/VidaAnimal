@@ -71,21 +71,25 @@ namespace VidaAnimal.API.Services
 
                 var ruc = _config["ApisPeruConfig:Ruc"] ?? "";
 
-                // Construir los items de la boleta
-                var details = venta.VentaDetalles.Select(d => new
-                {
-                    unidad = "NIU",           // Unidad de medida (NIU = Unidad)
-                    cantidad = (double)d.Cantidad,
-                    descripcion = d.Producto?.Nombre ?? "PRODUCTO",
-                    valorUnitario = (double)Math.Round(d.PrecioVentaUnitario, 2),
-                    precioUnitario = (double)Math.Round(d.PrecioVentaUnitario, 2),
-                    // Código de afectación IGV 20 = Exonerado (para Nuevo RUS)
-                    tipAfeIgv = "20",
-                    igv = 0.0,
-                    totalImpuestos = 0.0,
-                    subtotal = (double)Math.Round(d.PrecioVentaUnitario * d.Cantidad, 2),
-                    total = (double)Math.Round(d.PrecioVentaUnitario * d.Cantidad, 2),
-                    mtoValorVenta = (double)Math.Round(d.PrecioVentaUnitario * d.Cantidad, 2),
+                // Construir los items de la boleta alineado con OpenAPI de APIsPERU
+                var details = venta.VentaDetalles.Select(d => {
+                    var valorVenta = (double)Math.Round(d.PrecioVentaUnitario * d.Cantidad, 2);
+                    var precioUnitario = (double)Math.Round(d.PrecioVentaUnitario, 2);
+                    return new
+                    {
+                        codProducto = d.ProductoId.ToString(),
+                        unidad = "NIU",
+                        cantidad = (double)d.Cantidad,
+                        descripcion = d.Producto?.Nombre ?? "PRODUCTO",
+                        mtoValorUnitario = precioUnitario,
+                        mtoPrecioUnitario = precioUnitario,
+                        mtoValorVenta = valorVenta,
+                        mtoBaseIgv = valorVenta,
+                        porcentajeIgv = 0.0,
+                        igv = 0.0,
+                        totalImpuestos = 0.0,
+                        tipAfeIgv = "20" // Exonerado
+                    };
                 }).ToList();
 
                 // Total de la boleta
@@ -104,7 +108,7 @@ namespace VidaAnimal.API.Services
                     {
                         tipoDoc = tipoDoc,
                         numDoc = doc,
-                        rzSocial = venta.Cliente.NombreCompleto ?? "CONSUMIDOR FINAL"
+                        rznSocial = venta.Cliente.NombreCompleto ?? "CONSUMIDOR FINAL" // rznSocial según OpenAPI
                     };
                 }
                 else
@@ -113,27 +117,33 @@ namespace VidaAnimal.API.Services
                     {
                         tipoDoc = "0",
                         numDoc = "00000000",
-                        rzSocial = "CONSUMIDOR FINAL"
+                        rznSocial = "CONSUMIDOR FINAL" // rznSocial según OpenAPI
                     };
                 }
 
                 var boletaPayload = new
                 {
                     ublVersion = "2.1",
+                    tipoOperacion = "0101", // Venta Interna
                     tipoDoc = "03",        // 03 = Boleta de Venta
                     serie = venta.SerieComprobante ?? "B001",
                     correlativo = venta.NumeroComprobante ?? "1",
-                    fechaEmision = venta.Fecha.ToString("yyyy-MM-dd"),
-                    moneda = "PEN",
+                    fechaEmision = venta.Fecha.ToString("yyyy-MM-dd") + "T" + venta.Fecha.ToString("HH:mm:ss") + "-05:00",
+                    formaPago = new
+                    {
+                        moneda = "PEN",
+                        tipo = "Contado"
+                    },
+                    tipoMoneda = "PEN", // tipoMoneda según OpenAPI
                     client = buyerData,
                     company = new
                     {
                         ruc = ruc,
-                        razonSocial = "VIDA ANIMAL",
+                        razonSocial = "BELITH RETIS BARTOLOME", // Debe coincidir con la razón social del RUC
                         nombreComercial = "Vida Animal",
                         address = new
                         {
-                            ubigueo = "150101",  // Lima - reemplazar por Aucayacu si disponible
+                            ubigueo = "150101",
                             departamento = "Huanuco",
                             provincia = "Leoncio Prado",
                             distrito = "Jose Crespo Y Castillo",
@@ -147,7 +157,7 @@ namespace VidaAnimal.API.Services
                     valorVenta = totalVenta,
                     subTotal = totalVenta,
                     mtoImpVenta = totalVenta,
-                    details,
+                    details = details
                 };
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
