@@ -77,7 +77,7 @@ namespace VidaAnimal.API.Services
                     var precioUnitario = (double)Math.Round(d.PrecioVentaUnitario, 2);
                     return new
                     {
-                        codProducto = d.ProductoId.ToString(),
+                        codProducto = d.ProductoID.ToString(),
                         unidad = "NIU",
                         cantidad = (double)d.Cantidad,
                         descripcion = d.Producto?.Nombre ?? "PRODUCTO",
