@@ -95,10 +95,15 @@ namespace VidaAnimal.API.Services
                 object buyerData;
                 if (venta.Cliente != null && !string.IsNullOrEmpty(venta.Cliente.DocumentoIdentidad))
                 {
+                    string doc = venta.Cliente.DocumentoIdentidad.Trim();
+                    string tipoDoc = "0"; // Otros por defecto
+                    if (doc.Length == 8) tipoDoc = "1"; // DNI
+                    else if (doc.Length == 11) tipoDoc = "6"; // RUC
+
                     buyerData = new
                     {
-                        tipoDoc = "1",  // 1 = DNI
-                        numDoc = venta.Cliente.DocumentoIdentidad,
+                        tipoDoc = tipoDoc,
+                        numDoc = doc,
                         rzSocial = venta.Cliente.NombreCompleto ?? "CONSUMIDOR FINAL"
                     };
                 }
@@ -106,8 +111,8 @@ namespace VidaAnimal.API.Services
                 {
                     buyerData = new
                     {
-                        tipoDoc = "-",
-                        numDoc = "-",
+                        tipoDoc = "0",
+                        numDoc = "00000000",
                         rzSocial = "CONSUMIDOR FINAL"
                     };
                 }
