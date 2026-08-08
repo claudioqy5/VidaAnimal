@@ -42,30 +42,17 @@ public class YapeController : ControllerBase
         if (string.IsNullOrWhiteSpace(titulo) && string.IsNullOrWhiteSpace(texto))
             return BadRequest("Payload vacío.");
 
-        // Extraer el monto con Regex: busca patrones como "S/ 20.50" o "S/20.50" o "s/ 5.00"
-        var montoMatch = Regex.Match(texto, @"[Ss]\/\s?(\d+(?:[.,]\d{1,2})?)");
+        // Extraer el monto con Regex flexible: "S/ 1", "S/1.00", "S/ 20.50", etc.
+        var montoMatch = Regex.Match(texto + " " + titulo, @"S[/\.]?\s*(\d+(?:[.,]\d{1,2})?)");
         string monto = montoMatch.Success ? montoMatch.Groups[1].Value.Replace(",", ".") : "0";
-
-        // Extraer el nombre del remitente
-        // Patrón: "Juan te yapeó" → extrae "Juan"
-        // Patrón: "Te yapearon ... de María Celina." → extrae "María Celina"
-        string remitente = "Alguien";
-        var remitenteMatch1 = Regex.Match(texto, @"^([A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+(?:\s[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+)*)\s+te\s+yape[oó]");
-        var remitenteMatch2 = Regex.Match(texto, @"de\s+([A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+(?:\s[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+)*)[\.\!]?$");
-
-        if (remitenteMatch1.Success)
-            remitente = remitenteMatch1.Groups[1].Value;
-        else if (remitenteMatch2.Success)
-            remitente = remitenteMatch2.Groups[1].Value;
 
         // Enviar en tiempo real a todos los navegadores conectados
         await _hubContext.Clients.All.SendAsync("YapeNotification", new
         {
-            remitente = remitente,
             monto = monto,
             textoOriginal = texto
         });
 
-        return Ok(new { mensaje = "Notificación enviada a la pantalla.", remitente, monto });
+        return Ok(new { mensaje = "Notificación enviada a la pantalla.", monto });
     }
 }

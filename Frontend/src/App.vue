@@ -34,11 +34,11 @@
     <!-- TOAST DE NOTIFICACIÓN DE YAPE EN TIEMPO REAL -->
     <!-- ========================================== -->
     <transition name="yape-toast">
-      <div v-if="yapeToast.visible" class="yape-toast" :class="{ 'yape-toast--visible': yapeToast.visible }">
+      <div v-if="yapeToast.visible" class="yape-toast">
         <div class="yape-toast-icon">💜</div>
         <div class="yape-toast-body">
-          <p class="yape-toast-title">¡Yape recibido!</p>
-          <p class="yape-toast-text">S/ {{ yapeToast.monto }} de <strong>{{ yapeToast.remitente }}</strong></p>
+          <p class="yape-toast-title">¡Yapeo recibido!</p>
+          <p class="yape-toast-text">S/ <strong>{{ yapeToast.monto }}</strong></p>
         </div>
         <div class="yape-toast-amount">S/ {{ yapeToast.monto }}</div>
       </div>
@@ -145,17 +145,17 @@ const conectarYapeHub = () => {
 
   yapeConnection.on('YapeNotification', (data) => {
     // 1. Mostrar el toast visual
-    yapeToast.value = { visible: true, remitente: data.remitente, monto: data.monto }
+    yapeToast.value = { visible: true, monto: data.monto }
     clearTimeout(yapeToastTimer)
     yapeToastTimer = setTimeout(() => { yapeToast.value.visible = false }, 6000)
 
     // 2. Leer en voz alta usando Web Speech API
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel() // Cancela cualquier voz previa
+      window.speechSynthesis.cancel()
       const montoNum = parseFloat(data.monto)
       const soles = Math.floor(montoNum)
       const centimos = Math.round((montoNum - soles) * 100)
-      let textoVoz = `Yape recibido de ${data.remitente} por ${soles} sol${soles !== 1 ? 'es' : ''}`
+      let textoVoz = `Yapeo de ${soles} sol${soles !== 1 ? 'es' : ''}`
       if (centimos > 0) textoVoz += ` con ${centimos} céntimo${centimos !== 1 ? 's' : ''}`
       const utterance = new SpeechSynthesisUtterance(textoVoz)
       utterance.lang = 'es-PE'
