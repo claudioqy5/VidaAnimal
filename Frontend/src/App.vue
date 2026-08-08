@@ -30,6 +30,20 @@
     <!-- Chat Bot Global -->
     <ChatIA />
 
+    <!-- ========================================== -->
+    <!-- TOAST DE NOTIFICACIÓN DE YAPE EN TIEMPO REAL -->
+    <!-- ========================================== -->
+    <transition name="yape-toast">
+      <div v-if="yapeToast.visible" class="yape-toast" :class="{ 'yape-toast--visible': yapeToast.visible }">
+        <div class="yape-toast-icon">💜</div>
+        <div class="yape-toast-body">
+          <p class="yape-toast-title">¡Yape recibido!</p>
+          <p class="yape-toast-text">S/ {{ yapeToast.monto }} de <strong>{{ yapeToast.remitente }}</strong></p>
+        </div>
+        <div class="yape-toast-amount">S/ {{ yapeToast.monto }}</div>
+      </div>
+    </transition>
+
     <!-- Pantalla Completa de Aniversario de Amor (Aparece los 22 de cada mes) -->
     <div v-if="mostrarAniversario" class="fullscreen-love-modal">
       <!-- Corazones Flotantes (En el fondo) -->
@@ -91,7 +105,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import * as signalR from '@microsoft/signalr'
 import Login from './components/Login.vue'
 import Sidebar from './components/Sidebar.vue'
 import Dashboard from './components/Dashboard.vue'
@@ -112,6 +127,51 @@ import ChatIA from './components/ChatIA.vue'
 const currentTab = ref('inicio')
 const usuarioLogueado = ref(null)
 const mostrarAniversario = ref(false)
+
+// ==========================================
+// NOTIFICACIONES YAPE EN TIEMPO REAL
+// ==========================================
+const yapeToast = ref({ visible: false, remitente: '', monto: '' })
+let yapeConnection = null
+let yapeToastTimer = null
+
+const conectarYapeHub = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://vidaanimal.helifyferdigital.cloud'
+  yapeConnection = new signalR.HubConnectionBuilder()
+    .withUrl(`${baseUrl}/yapeHub`, { withCredentials: false })
+    .withAutomaticReconnect()
+    .configureLogging(signalR.LogLevel.Warning)
+    .build()
+
+  yapeConnection.on('YapeNotification', (data) => {
+    // 1. Mostrar el toast visual
+    yapeToast.value = { visible: true, remitente: data.remitente, monto: data.monto }
+    clearTimeout(yapeToastTimer)
+    yapeToastTimer = setTimeout(() => { yapeToast.value.visible = false }, 6000)
+
+    // 2. Leer en voz alta usando Web Speech API
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel() // Cancela cualquier voz previa
+      const montoNum = parseFloat(data.monto)
+      const soles = Math.floor(montoNum)
+      const centimos = Math.round((montoNum - soles) * 100)
+      let textoVoz = `Yape recibido de ${data.remitente} por ${soles} sol${soles !== 1 ? 'es' : ''}`
+      if (centimos > 0) textoVoz += ` con ${centimos} céntimo${centimos !== 1 ? 's' : ''}`
+      const utterance = new SpeechSynthesisUtterance(textoVoz)
+      utterance.lang = 'es-PE'
+      utterance.rate = 0.95
+      utterance.pitch = 1.05
+      window.speechSynthesis.speak(utterance)
+    }
+  })
+
+  yapeConnection.start().catch(err => console.warn('[YapeHub] No se pudo conectar:', err))
+}
+
+onUnmounted(() => {
+  if (yapeConnection) yapeConnection.stop()
+  clearTimeout(yapeToastTimer)
+})
 
 // Cargar dinámicamente todas las fotos de la carpeta fotosmesarios
 const fotosModules = import.meta.glob('./assets/fotosmesarios/*.{png,jpg,jpeg,JPG,webp}', { eager: true });
@@ -144,19 +204,22 @@ const primerNombre = computed(() => {
 
 // Al cargar la app, verificamos si hay sesión previa
 onMounted(() => {
-  const userStored = localStorage.getItem('usuario');
-  const tokenStored = localStorage.getItem('jwt_token');
+  const userStored = localStorage.getItem('usuario')
+  const tokenStored = localStorage.getItem('jwt_token')
   
   if (userStored && tokenStored) {
     try {
-      usuarioLogueado.value = JSON.parse(userStored);
-      verificarAniversario();
+      usuarioLogueado.value = JSON.parse(userStored)
+      verificarAniversario()
     } catch (e) {
-      usuarioLogueado.value = null;
+      usuarioLogueado.value = null
     }
   } else {
-    usuarioLogueado.value = null;
+    usuarioLogueado.value = null
   }
+
+  // Conectar al hub de Yape siempre (funciona en cualquier pestaña del sistema)
+  conectarYapeHub()
 })
 
 // Función que se dispara desde el componente Login
@@ -457,4 +520,86 @@ const cerrarSesion = () => {
   85% { opacity: 0.25; } 
   100% { transform: translateY(-20vh) rotate(360deg) scale(1.1); opacity: 0; } 
 }
+
+/* ========================================== */
+/* TOAST DE NOTIFICACIÓN DE YAPE              */
+/* ========================================== */
+.yape-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #6C2D91 0%, #9B2D9B 50%, #C0399C 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(108, 45, 145, 0.5), 0 0 0 1px rgba(255,255,255,0.1) inset;
+  color: #fff;
+  min-width: 280px;
+  max-width: 360px;
+  backdrop-filter: blur(10px);
+}
+
+.yape-toast-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: yape-pulse 1s ease-in-out infinite;
+}
+
+@keyframes yape-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.yape-toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.yape-toast-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  margin: 0 0 0.2rem 0;
+}
+
+.yape-toast-text {
+  font-size: 0.95rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yape-toast-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+}
+
+/* Animación de entrada/salida */
+.yape-toast-enter-active {
+  animation: yape-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.yape-toast-leave-active {
+  animation: yape-slide-out 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes yape-slide-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes yape-slide-out {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
 </style>
+

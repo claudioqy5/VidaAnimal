@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VidaAnimal.API.Data;
 using VidaAnimal.API.Services;
+using VidaAnimal.API.Hubs;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +59,11 @@ builder.Services.AddAuthorization(); // Activa los roles en los endpoints
 // ============================================
 builder.Services.AddHttpClient<IApisPeruService, ApisPeruService>();
 
+// ============================================
+// SIGNALR - NOTIFICACIONES EN TIEMPO REAL
+// ============================================
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Auto-crear la base de datos y tablas si no existen (producción)
@@ -95,5 +101,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Hub de SignalR para notificaciones de Yape en tiempo real
+app.MapHub<YapeHub>("/yapeHub");
 
 app.Run();
