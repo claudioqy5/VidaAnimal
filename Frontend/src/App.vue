@@ -138,7 +138,7 @@ let yapeToastTimer = null
 const conectarYapeHub = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://vidaanimal.helifyferdigital.cloud'
   yapeConnection = new signalR.HubConnectionBuilder()
-    .withUrl(`${baseUrl}/yapeHub`, { withCredentials: false })
+    .withUrl(`${baseUrl}/api/yapeHub`, { withCredentials: false })
     .withAutomaticReconnect()
     .configureLogging(signalR.LogLevel.Warning)
     .build()

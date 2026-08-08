@@ -103,6 +103,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Hub de SignalR para notificaciones de Yape en tiempo real
-app.MapHub<YapeHub>("/yapeHub");
+app.MapHub<YapeHub>("/api/yapeHub");
 
 app.Run();
