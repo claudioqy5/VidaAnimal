@@ -38,10 +38,9 @@ public class YapeController : ControllerBase
             return BadRequest("Payload inválido.");
         }
 
-        // Verificar que sea una notificación de Yape con un monto
-        string textoCompleto = $"{titulo} {texto}".ToLower();
-        if (!textoCompleto.Contains("yape") && !textoCompleto.Contains("yapeo") && !textoCompleto.Contains("yapearon"))
-            return Ok(new { mensaje = "No es una notificación de Yape, ignorado." });
+        // Verificar que el payload no esté vacío
+        if (string.IsNullOrWhiteSpace(titulo) && string.IsNullOrWhiteSpace(texto))
+            return BadRequest("Payload vacío.");
 
         // Extraer el monto con Regex: busca patrones como "S/ 20.50" o "S/20.50" o "s/ 5.00"
         var montoMatch = Regex.Match(texto, @"[Ss]\/\s?(\d+(?:[.,]\d{1,2})?)");
