@@ -42,9 +42,31 @@ public class YapeController : ControllerBase
         if (string.IsNullOrWhiteSpace(titulo) && string.IsNullOrWhiteSpace(texto))
             return BadRequest("Payload vacío.");
 
-        // Extraer el monto con Regex flexible: "S/ 1", "S/1.00", "S/ 20.50", etc.
-        var montoMatch = Regex.Match(texto + " " + titulo, @"S[/\.]?\s*(\d+(?:[.,]\d{1,2})?)");
-        string monto = montoMatch.Success ? montoMatch.Groups[1].Value.Replace(",", ".") : "0";
+        // Extraer el monto con múltiples patrones en cascada
+        string textoCompleto = (texto + " " + titulo).Trim();
+        string monto = "0";
+
+        // Patrón 1: "S/ 5", "S/5.00", "S/ 20.50"
+        var m1 = Regex.Match(textoCompleto, @"S[/\.]\s*(\d+(?:[.,]\d{1,2})?)");
+        if (m1.Success)
+        {
+            monto = m1.Groups[1].Value.Replace(",", ".");
+        }
+        else
+        {
+            // Patrón 2: "por 5", "por 20.50"
+            var m2 = Regex.Match(textoCompleto, @"\bpor\s+(\d+(?:[.,]\d{1,2})?)");
+            if (m2.Success)
+            {
+                monto = m2.Groups[1].Value.Replace(",", ".");
+            }
+            else
+            {
+                // Patrón 3: cualquier número en el texto (último recurso)
+                var m3 = Regex.Match(textoCompleto, @"\b(\d+(?:[.,]\d{1,2})?)\b");
+                if (m3.Success) monto = m3.Groups[1].Value.Replace(",", ".");
+            }
+        }
 
         // Enviar en tiempo real a todos los navegadores conectados
         await _hubContext.Clients.All.SendAsync("YapeNotification", new
@@ -53,6 +75,6 @@ public class YapeController : ControllerBase
             textoOriginal = texto
         });
 
-        return Ok(new { mensaje = "Notificación enviada a la pantalla.", monto });
+        return Ok(new { mensaje = "OK", monto, rawTitulo = titulo, rawTexto = texto });
     }
 }
