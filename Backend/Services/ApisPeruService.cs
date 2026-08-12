@@ -171,11 +171,27 @@ namespace VidaAnimal.API.Services
                 if (!response.IsSuccessStatusCode)
                     return (false, $"Error APIsPERU: {responseBody}", null, null, null, "ERROR");
 
-                var result = JsonDocument.Parse(responseBody);
-                var xmlUrl = result.RootElement.TryGetProperty("xmlUrl", out var x) ? x.GetString() : null;
-                var pdfUrl = result.RootElement.TryGetProperty("pdfUrl", out var p) ? p.GetString() : null;
-                var cdrUrl = result.RootElement.TryGetProperty("cdrUrl", out var c) ? c.GetString() : null;
-                var sunatStatus = result.RootElement.TryGetProperty("sunatDescription", out var s) ? s.GetString() : "ACEPTADO";
+                string? xmlUrl = null, pdfUrl = null, cdrUrl = null, sunatStatus = "ACEPTADO";
+
+                if (result.RootElement.TryGetProperty("links", out var links))
+                {
+                    xmlUrl = links.TryGetProperty("xml", out var x) ? x.GetString() : null;
+                    pdfUrl = links.TryGetProperty("pdf", out var p) ? p.GetString() : null;
+                    cdrUrl = links.TryGetProperty("cdr", out var c) ? c.GetString() : null;
+                }
+                else 
+                {
+                    // Fallback to top-level if the API changes
+                    xmlUrl = result.RootElement.TryGetProperty("xmlUrl", out var x) ? x.GetString() : null;
+                    pdfUrl = result.RootElement.TryGetProperty("pdfUrl", out var p) ? p.GetString() : null;
+                    cdrUrl = result.RootElement.TryGetProperty("cdrUrl", out var c) ? c.GetString() : null;
+                }
+
+                if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) && 
+                    sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
+                {
+                    sunatStatus = cdrRes.TryGetProperty("description", out var d) ? d.GetString() : "ACEPTADO";
+                }
 
                 return (true, "Boleta enviada exitosamente a SUNAT.", xmlUrl, pdfUrl, cdrUrl, sunatStatus);
             }
