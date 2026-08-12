@@ -174,19 +174,30 @@ namespace VidaAnimal.API.Services
                 var result = JsonDocument.Parse(responseBody);
                 string? xmlUrl = null, pdfUrl = null, cdrUrl = null, sunatStatus = "ACEPTADO";
 
+                // Log the full response for debugging - store first 250 chars in a file
+                try { System.IO.File.WriteAllText("/var/www/vida-animal/apisperu_response.log", responseBody); } catch { }
+
+                // Try "links" object first
                 if (result.RootElement.TryGetProperty("links", out var links))
                 {
                     xmlUrl = links.TryGetProperty("xml", out var x) ? x.GetString() : null;
                     pdfUrl = links.TryGetProperty("pdf", out var p) ? p.GetString() : null;
                     cdrUrl = links.TryGetProperty("cdr", out var c) ? c.GetString() : null;
                 }
-                else 
-                {
-                    // Fallback to top-level if the API changes
-                    xmlUrl = result.RootElement.TryGetProperty("xmlUrl", out var x) ? x.GetString() : null;
-                    pdfUrl = result.RootElement.TryGetProperty("pdfUrl", out var p) ? p.GetString() : null;
-                    cdrUrl = result.RootElement.TryGetProperty("cdrUrl", out var c) ? c.GetString() : null;
-                }
+
+                // Fallback: top-level properties (various naming conventions)
+                if (string.IsNullOrEmpty(xmlUrl))
+                    xmlUrl = result.RootElement.TryGetProperty("xmlUrl", out var x2) ? x2.GetString() : 
+                             result.RootElement.TryGetProperty("xml", out var x3) ? x3.GetString() : 
+                             result.RootElement.TryGetProperty("linkXml", out var x4) ? x4.GetString() : null;
+                if (string.IsNullOrEmpty(pdfUrl))
+                    pdfUrl = result.RootElement.TryGetProperty("pdfUrl", out var p2) ? p2.GetString() : 
+                             result.RootElement.TryGetProperty("pdf", out var p3) ? p3.GetString() : 
+                             result.RootElement.TryGetProperty("linkPdf", out var p4) ? p4.GetString() : null;
+                if (string.IsNullOrEmpty(cdrUrl))
+                    cdrUrl = result.RootElement.TryGetProperty("cdrUrl", out var c2) ? c2.GetString() : 
+                             result.RootElement.TryGetProperty("cdr", out var c3) ? c3.GetString() : 
+                             result.RootElement.TryGetProperty("linkCdr", out var c4) ? c4.GetString() : null;
 
                 if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) && 
                     sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
