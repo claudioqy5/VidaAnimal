@@ -171,6 +171,7 @@ namespace VidaAnimal.API.Services
                 if (!response.IsSuccessStatusCode)
                     return (false, $"Error APIsPERU: {responseBody}", null, null, null, "ERROR");
 
+                var result = JsonDocument.Parse(responseBody);
                 string? xmlUrl = null, pdfUrl = null, cdrUrl = null, sunatStatus = "ACEPTADO";
 
                 if (result.RootElement.TryGetProperty("links", out var links))
