@@ -206,7 +206,7 @@ namespace VidaAnimal.API.Services
                         var xmlFileName = $"{rucVal}-03-{serieCorrelativo}.xml";
                         var xmlPath = System.IO.Path.Combine(storageDir, xmlFileName);
                         System.IO.File.WriteAllBytes(xmlPath, xmlBytes);
-                        xmlUrl = $"/api/boleta/descargar/xml/{xmlFileName}";
+                        xmlUrl = $"/api/ventas/descargar/xml/{xmlFileName}";
                     }
                     catch { }
                 }
@@ -234,7 +234,7 @@ namespace VidaAnimal.API.Services
                         var cdrFileName = $"R-{rucVal}-03-{serieCorrelativo}.zip";
                         var cdrPath = System.IO.Path.Combine(storageDir, cdrFileName);
                         System.IO.File.WriteAllBytes(cdrPath, cdrBytes);
-                        cdrUrl = $"/api/boleta/descargar/cdr/{cdrFileName}";
+                        cdrUrl = $"/api/ventas/descargar/cdr/{cdrFileName}";
                     }
                     catch { }
                 }
