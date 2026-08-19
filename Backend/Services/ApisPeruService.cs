@@ -219,9 +219,13 @@ namespace VidaAnimal.API.Services
                     cdrContent = cdrZip.GetString();
                 // A veces viene en sunatResponse.cdr
                 if (string.IsNullOrEmpty(cdrContent) &&
-                    result.RootElement.TryGetProperty("sunatResponse", out var sr) &&
-                    sr.TryGetProperty("cdr", out var srCdr))
-                    cdrContent = srCdr.GetString();
+                    result.RootElement.TryGetProperty("sunatResponse", out var sr))
+                {
+                    if (sr.TryGetProperty("cdr", out var srCdr))
+                        cdrContent = srCdr.GetString();
+                    if (string.IsNullOrEmpty(cdrContent) && sr.TryGetProperty("cdrZip", out var srCdrZip))
+                        cdrContent = srCdrZip.GetString();
+                }
 
                 if (!string.IsNullOrEmpty(cdrContent))
                 {
