@@ -174,33 +174,107 @@ namespace VidaAnimal.API.Services
                 var result = JsonDocument.Parse(responseBody);
                 string? xmlUrl = null, pdfUrl = null, cdrUrl = null, sunatStatus = "ACEPTADO";
 
-                // Log the full response for debugging - store first 250 chars in a file
+                // Log full response for debugging
                 try { System.IO.File.WriteAllText("/var/www/vida-animal/apisperu_response.log", responseBody); } catch { }
 
-                // Try "links" object first
-                if (result.RootElement.TryGetProperty("links", out var links))
+                // Obtener serie y correlativo para nombrar los archivos
+                var serieCorrelativo = $"{venta.SerieComprobante ?? "B001"}-{(venta.NumeroComprobante ?? "1").PadLeft(8, '0')}";
+                var rucVal = _config["ApisPeruConfig:Ruc"] ?? "00000000000";
+                var storageDir = "/var/www/vida-animal/comprobantes";
+                try { System.IO.Directory.CreateDirectory(storageDir); } catch { }
+
+                // ── 1. Extraer XML firmado ──────────────────────────────────────────
+                // ApisPeru free devuelve el XML firmado en el campo "xml" (base64 o texto plano)
+                string? xmlContent = null;
+                if (result.RootElement.TryGetProperty("xml", out var xmlProp))
+                    xmlContent = xmlProp.GetString();
+                // También puede venir en "xmlSigned" o "document"
+                if (string.IsNullOrEmpty(xmlContent) && result.RootElement.TryGetProperty("xmlSigned", out var xmlSigned))
+                    xmlContent = xmlSigned.GetString();
+                if (string.IsNullOrEmpty(xmlContent) && result.RootElement.TryGetProperty("document", out var docProp))
+                    xmlContent = docProp.GetString();
+
+                if (!string.IsNullOrEmpty(xmlContent))
                 {
-                    xmlUrl = links.TryGetProperty("xml", out var x) ? x.GetString() : null;
-                    pdfUrl = links.TryGetProperty("pdf", out var p) ? p.GetString() : null;
-                    cdrUrl = links.TryGetProperty("cdr", out var c) ? c.GetString() : null;
+                    try
+                    {
+                        // Intentar decodificar base64, si falla guardar como texto
+                        byte[] xmlBytes;
+                        try { xmlBytes = Convert.FromBase64String(xmlContent); }
+                        catch { xmlBytes = Encoding.UTF8.GetBytes(xmlContent); }
+
+                        var xmlFileName = $"{rucVal}-03-{serieCorrelativo}.xml";
+                        var xmlPath = System.IO.Path.Combine(storageDir, xmlFileName);
+                        System.IO.File.WriteAllBytes(xmlPath, xmlBytes);
+                        xmlUrl = $"/api/boleta/descargar/xml/{xmlFileName}";
+                    }
+                    catch { }
                 }
 
-                // Fallback: top-level properties (various naming conventions)
-                if (string.IsNullOrEmpty(xmlUrl))
-                    xmlUrl = result.RootElement.TryGetProperty("xmlUrl", out var x2) ? x2.GetString() : 
-                             result.RootElement.TryGetProperty("xml", out var x3) ? x3.GetString() : 
-                             result.RootElement.TryGetProperty("linkXml", out var x4) ? x4.GetString() : null;
-                if (string.IsNullOrEmpty(pdfUrl))
-                    pdfUrl = result.RootElement.TryGetProperty("pdfUrl", out var p2) ? p2.GetString() : 
-                             result.RootElement.TryGetProperty("pdf", out var p3) ? p3.GetString() : 
-                             result.RootElement.TryGetProperty("linkPdf", out var p4) ? p4.GetString() : null;
-                if (string.IsNullOrEmpty(cdrUrl))
-                    cdrUrl = result.RootElement.TryGetProperty("cdrUrl", out var c2) ? c2.GetString() : 
-                             result.RootElement.TryGetProperty("cdr", out var c3) ? c3.GetString() : 
-                             result.RootElement.TryGetProperty("linkCdr", out var c4) ? c4.GetString() : null;
+                // ── 2. Extraer CDR (Constancia de Recepción) ───────────────────────
+                string? cdrContent = null;
+                if (result.RootElement.TryGetProperty("cdr", out var cdrProp))
+                    cdrContent = cdrProp.GetString();
+                if (string.IsNullOrEmpty(cdrContent) && result.RootElement.TryGetProperty("cdrZip", out var cdrZip))
+                    cdrContent = cdrZip.GetString();
+                // A veces viene en sunatResponse.cdr
+                if (string.IsNullOrEmpty(cdrContent) &&
+                    result.RootElement.TryGetProperty("sunatResponse", out var sr) &&
+                    sr.TryGetProperty("cdr", out var srCdr))
+                    cdrContent = srCdr.GetString();
 
-                if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) && 
-                    sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
+                if (!string.IsNullOrEmpty(cdrContent))
+                {
+                    try
+                    {
+                        byte[] cdrBytes;
+                        try { cdrBytes = Convert.FromBase64String(cdrContent); }
+                        catch { cdrBytes = Encoding.UTF8.GetBytes(cdrContent); }
+
+                        var cdrFileName = $"R-{rucVal}-03-{serieCorrelativo}.zip";
+                        var cdrPath = System.IO.Path.Combine(storageDir, cdrFileName);
+                        System.IO.File.WriteAllBytes(cdrPath, cdrBytes);
+                        cdrUrl = $"/api/boleta/descargar/cdr/{cdrFileName}";
+                    }
+                    catch { }
+                }
+
+                // ── 3. Fallback: buscar URLs directas si ApisPeru las devuelve ─────
+                if (string.IsNullOrEmpty(xmlUrl))
+                {
+                    if (result.RootElement.TryGetProperty("links", out var links))
+                        xmlUrl = links.TryGetProperty("xml", out var lx) ? lx.GetString() : null;
+                    xmlUrl ??= result.RootElement.TryGetProperty("xmlUrl", out var xu) ? xu.GetString() : null;
+                    xmlUrl ??= result.RootElement.TryGetProperty("linkXml", out var lxu) ? lxu.GetString() : null;
+                }
+                if (string.IsNullOrEmpty(pdfUrl))
+                {
+                    if (result.RootElement.TryGetProperty("links", out var links2))
+                        pdfUrl = links2.TryGetProperty("pdf", out var lp) ? lp.GetString() : null;
+                    pdfUrl ??= result.RootElement.TryGetProperty("pdfUrl", out var pu) ? pu.GetString() : null;
+                    pdfUrl ??= result.RootElement.TryGetProperty("linkPdf", out var lpu) ? lpu.GetString() : null;
+                }
+                if (string.IsNullOrEmpty(cdrUrl))
+                {
+                    if (result.RootElement.TryGetProperty("links", out var links3))
+                        cdrUrl = links3.TryGetProperty("cdr", out var lc) ? lc.GetString() : null;
+                    cdrUrl ??= result.RootElement.TryGetProperty("cdrUrl", out var cu) ? cu.GetString() : null;
+                    cdrUrl ??= result.RootElement.TryGetProperty("linkCdr", out var lcu) ? lcu.GetString() : null;
+                }
+
+                // ── 4. Estado SUNAT ────────────────────────────────────────────────
+                // Nuevo formato: cdrResponse directo en el root
+                if (result.RootElement.TryGetProperty("cdrResponse", out var cdrResponse))
+                {
+                    var desc = cdrResponse.TryGetProperty("description", out var d) ? d.GetString() : null;
+                    var code = cdrResponse.TryGetProperty("code", out var c) ? c.GetString() : null;
+                    if (code == "0")
+                        sunatStatus = desc ?? "La Boleta ha sido aceptada";
+                    else
+                        sunatStatus = desc ?? "ACEPTADO";
+                }
+                else if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) &&
+                         sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
                 {
                     sunatStatus = cdrRes.TryGetProperty("description", out var d) ? d.GetString() : "ACEPTADO";
                 }

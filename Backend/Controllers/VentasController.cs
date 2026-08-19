@@ -366,6 +366,29 @@ namespace VidaAnimal.API.Controllers
                 return StatusCode(500, new { success = false, mensaje = "Error al anular venta: " + innermost.Message });
             }
         }
+        [AllowAnonymous]
+        [HttpGet("descargar/xml/{fileName}")]
+        public IActionResult DescargarXml(string fileName)
+        {
+            var safeName = System.IO.Path.GetFileName(fileName);
+            var filePath = System.IO.Path.Combine("/var/www/vida-animal/comprobantes", safeName);
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(new { mensaje = "Archivo XML no encontrado." });
+            var bytes = System.IO.File.ReadAllBytes(filePath);
+            return File(bytes, "application/xml", safeName);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("descargar/cdr/{fileName}")]
+        public IActionResult DescargarCdr(string fileName)
+        {
+            var safeName = System.IO.Path.GetFileName(fileName);
+            var filePath = System.IO.Path.Combine("/var/www/vida-animal/comprobantes", safeName);
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(new { mensaje = "Archivo CDR no encontrado." });
+            var bytes = System.IO.File.ReadAllBytes(filePath);
+            return File(bytes, "application/zip", safeName);
+        }
     }
 
     public class VentaRequestDTO
