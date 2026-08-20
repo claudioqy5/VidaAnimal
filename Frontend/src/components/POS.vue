@@ -361,7 +361,7 @@ const selectedEspecie = ref('')
 const categorias = ref([])
 const especies = ref([])
 const currentPage = ref(1)
-const itemsPerPage = 48
+const itemsPerPage = 15
 
 // Carrito y Estado de Venta
 const carrito = ref([])
