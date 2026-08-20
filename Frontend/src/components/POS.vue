@@ -361,7 +361,7 @@ const selectedEspecie = ref('')
 const categorias = ref([])
 const especies = ref([])
 const currentPage = ref(1)
-const itemsPerPage = 12
+const itemsPerPage = 48
 
 // Carrito y Estado de Venta
 const carrito = ref([])
@@ -860,7 +860,7 @@ const imprimirUltimaVenta = () => {
 .page-indicator { font-size: 0.9rem; font-weight: 700; color: #718096; }
 
 /* Grilla Productos */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
+.products-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); align-content: flex-start; gap: 1.25rem; overflow-y: auto; padding-right: 0.5rem; }
 .products-grid::-webkit-scrollbar { width: 6px; }
 .products-grid::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 10px; }
 
