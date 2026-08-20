@@ -28,8 +28,16 @@
       <!-- PANEL IZQUIERDO: Buscador y Catálogo Visual -->
       <div class="panel-catalogo">
         <!-- Buscador -->
-        <div class="search-bar">
-          <input type="text" v-model="busqueda" placeholder="🔍 Buscar por nombre, código o categoría..." class="search-input" />
+        <div class="search-bar" style="display: flex; gap: 0.5rem; align-items: center;">
+          <input type="text" v-model="busqueda" placeholder="🔍 Buscar por nombre, código..." class="search-input" style="flex: 2;" />
+          <select v-model="selectedCategoria" class="search-input" style="flex: 1; padding: 0.75rem;">
+            <option value="">Todas las Categorías</option>
+            <option v-for="c in categorias" :key="c.categoriaID" :value="c.categoriaID">{{ c.nombre }}</option>
+          </select>
+          <select v-model="selectedEspecie" class="search-input" style="flex: 1; padding: 0.75rem;">
+            <option value="">Todas las Especies</option>
+            <option v-for="e in especies" :key="e.especieID" :value="e.especieID">{{ e.nombre }}</option>
+          </select>
         </div>
 
         <!-- Grilla de productos (12 por página) -->
@@ -348,6 +356,10 @@ const errorGlobal = ref('')
 const successGlobal = ref('')
 
 const busqueda = ref('')
+const selectedCategoria = ref('')
+const selectedEspecie = ref('')
+const categorias = ref([])
+const especies = ref([])
 const currentPage = ref(1)
 const itemsPerPage = 12
 
@@ -404,6 +416,16 @@ const cargarDatos = async () => {
         const dataC = await resC.json();
         if (dataC.success) clientes.value = dataC.data;
     }
+    
+    try {
+      const resCat = await fetch(`${API_URL}/Clasificacion/categorias`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      const dataCat = await resCat.json();
+      if (dataCat.success) categorias.value = dataCat.data;
+      
+      const resEsp = await fetch(`${API_URL}/Clasificacion/especies`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      const dataEsp = await resEsp.json();
+      if (dataEsp.success) especies.value = dataEsp.data;
+    } catch(e) {}
 
     const dataP = await resP.json()
     if (dataP.success) {
@@ -523,12 +545,25 @@ const guardarNuevoCliente = async () => {
 }
 
 const productosFiltrados = computed(() => {
-  if (busqueda.value.trim() === '') return productos.value
-  const palabras = busqueda.value.toLowerCase().split(/\s+/).filter(w => w.length > 0)
-  return productos.value.filter(p => {
-    const texto = `${p.nombre ?? ''} ${p.codigo ?? ''}`.toLowerCase()
-    return palabras.every(palabra => texto.includes(palabra))
-  })
+  let filtrados = productos.value;
+  
+  if (selectedCategoria.value !== '') {
+    filtrados = filtrados.filter(p => p.categoriaID === selectedCategoria.value);
+  }
+  
+  if (selectedEspecie.value !== '') {
+    filtrados = filtrados.filter(p => p.especies && p.especies.some(e => e.especieID === selectedEspecie.value));
+  }
+  
+  if (busqueda.value.trim() !== '') {
+    const palabras = busqueda.value.toLowerCase().split(/\s+/).filter(w => w.length > 0)
+    filtrados = filtrados.filter(p => {
+      const texto = `${p.nombre ?? ''} ${p.codigo ?? ''}`.toLowerCase()
+      return palabras.every(palabra => texto.includes(palabra))
+    })
+  }
+  
+  return filtrados;
 })
 
 const productosPaginados = computed(() => {
