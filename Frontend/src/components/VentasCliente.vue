@@ -35,6 +35,15 @@
         </div>
 
         <div class="filter-group">
+          <label>Comprobante:</label>
+          <select v-model="selectedTipoComprobante" class="select-input">
+            <option value="">Todos</option>
+            <option value="B">🧾 Boleta Electrónica</option>
+            <option value="N">📄 Nota de Venta</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
           <label>Ordenar por:</label>
           <select v-model="orderBy" class="select-input">
             <option value="fecha_desc">📌 Fecha: Recientes primero</option>
@@ -250,6 +259,7 @@ const adminPassword = ref('');
 const ventaToAnular = ref(null);
 const loadingAnular = ref(false);
 const selectedMetodoPago = ref('');
+const selectedTipoComprobante = ref('');
 const selectedClienteID = ref('');
 const selectedFecha = ref(getTodayInFormat());
 const orderBy = ref('fecha_desc');
@@ -423,6 +433,9 @@ const ventasOrdenadas = computed(() => {
   let list = [...ventas.value];
   if (selectedMetodoPago.value) {
     list = list.filter(v => (v.metodoPago || 'Efectivo').toLowerCase() === selectedMetodoPago.value.toLowerCase());
+  }
+  if (selectedTipoComprobante.value) {
+    list = list.filter(v => v.serieComprobante?.startsWith(selectedTipoComprobante.value));
   }
 
   return list.sort((a, b) => {
