@@ -102,23 +102,26 @@ const emit = defineEmits(['go-home'])
         </div>
         
         <div class="form-row">
-          <div class="form-group">
-            <label>Serie del Comprobante</label>
-            <input 
-              v-model="serie" 
-              type="text" 
-              placeholder="Ej: B001" 
-              maxlength="4"
-              @input="serie = serie.toUpperCase()"
-            />
-          </div>
-          <div class="form-group">
-            <label>Número del Comprobante</label>
-            <input 
-              v-model="numero" 
-              type="text" 
-              placeholder="Ej: 00000034"
-            />
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Serie y Número del Comprobante</label>
+            <div class="serie-numero-group">
+              <input 
+                v-model="serie" 
+                type="text" 
+                placeholder="B001" 
+                maxlength="4"
+                @input="serie = serie.toUpperCase()"
+                class="input-serie"
+              />
+              <span class="separator">-</span>
+              <input 
+                v-model="numero" 
+                type="text" 
+                placeholder="00000034"
+                @keyup.enter="consultar"
+                class="input-numero"
+              />
+            </div>
           </div>
         </div>
 
@@ -305,6 +308,28 @@ const emit = defineEmits(['go-home'])
 .form-group input:focus,
 .form-group select:focus {
   border-color: #f59e0b;
+}
+
+.serie-numero-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-serie {
+  width: 100px !important;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.separator {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.input-numero {
+  flex: 1;
 }
 
 .form-group input::placeholder {
