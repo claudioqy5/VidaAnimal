@@ -134,12 +134,13 @@ export const generateA4PDF = async (venta) => {
         bodyStyles: { fontSize: 8, halign: 'center', lineColor: lineColor, lineWidth: 0.2 },
         margin: { left: 15, right: 15 },
         didDrawPage: function (data) {
-            // Draw rounded border
-            const x = data.settings.margin.left;
-            const y = data.cursor.y - data.table.height;
-            const w = data.table.width;
-            const h = data.table.height;
+            // Draw rounded border safely
             const rx = 2;
+            const x = data.settings.margin.left;
+            const y = data.pageNumber === 1 ? data.settings.startY : data.settings.margin.top;
+            const w = doc.internal.pageSize.getWidth() - data.settings.margin.left - data.settings.margin.right;
+            const h = data.cursor.y - y;
+            if (!h || isNaN(h)) return;
             doc.setFillColor(255, 255, 255);
             doc.rect(x-0.2, y-0.2, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y-0.2, rx+0.2, rx+0.2, 'F');
             doc.rect(x-0.2, y + h - rx, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y + h - rx, rx+0.2, rx+0.2, 'F');
@@ -182,11 +183,12 @@ export const generateA4PDF = async (venta) => {
         },
         margin: { left: 15, right: 15 },
         didDrawPage: function (data) {
-            const x = data.settings.margin.left;
-            const y = data.cursor.y - data.table.height;
-            const w = data.table.width;
-            const h = data.table.height;
             const rx = 2;
+            const x = data.settings.margin.left;
+            const y = data.pageNumber === 1 ? data.settings.startY : data.settings.margin.top;
+            const w = doc.internal.pageSize.getWidth() - data.settings.margin.left - data.settings.margin.right;
+            const h = data.cursor.y - y;
+            if (!h || isNaN(h)) return;
             doc.setFillColor(255, 255, 255);
             doc.rect(x-0.2, y-0.2, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y-0.2, rx+0.2, rx+0.2, 'F');
             doc.rect(x-0.2, y + h - rx, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y + h - rx, rx+0.2, rx+0.2, 'F');

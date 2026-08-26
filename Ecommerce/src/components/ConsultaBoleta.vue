@@ -108,7 +108,7 @@ const emit = defineEmits(['go-home'])
               <input 
                 v-model="serie" 
                 type="text" 
-                placeholder="B001" 
+                placeholder="B00X" 
                 maxlength="4"
                 @input="serie = serie.toUpperCase()"
                 class="input-serie"
@@ -117,7 +117,7 @@ const emit = defineEmits(['go-home'])
               <input 
                 v-model="numero" 
                 type="text" 
-                placeholder="00000034"
+                placeholder="000000XX"
                 @keyup.enter="consultar"
                 class="input-numero"
               />
@@ -129,7 +129,7 @@ const emit = defineEmits(['go-home'])
               v-model="montoTotal" 
               type="number" 
               step="0.01"
-              placeholder="Ej: 185.00"
+              placeholder="Ej: 123.00"
               @keyup.enter="consultar"
             />
           </div>
