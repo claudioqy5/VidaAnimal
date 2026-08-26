@@ -45,21 +45,26 @@ const formatDate = (fecha) => {
     return `${d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })} / ${d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 };
 
+import logoUrl from '../assets/logovidaanimal.png';
+
 const loadLogo = async () => {
-    try {
-        const res = await fetch('/logo.jpg');
-        if (res.ok) {
-            const blob = await res.blob();
-            return await new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(blob);
-            });
-        }
-    } catch (e) {
-        console.error("Error cargando el logo", e);
-    }
-    return null;
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = (e) => {
+            console.error("Error cargando el logo", e);
+            resolve(null);
+        };
+        img.src = logoUrl;
+    });
 };
 
 export const generateA4PDF = async (venta) => {
@@ -81,7 +86,7 @@ export const generateA4PDF = async (venta) => {
 
     // Dibujar Logo si existe
     if (logoBase64) {
-        doc.addImage(logoBase64, 'JPEG', 15, 12, 30, 30);
+        doc.addImage(logoBase64, 'PNG', 15, 12, 30, 30);
     }
 
     // Cabecera Empresa
@@ -285,7 +290,7 @@ export const generateTicketPDF = async (venta) => {
     // Cargar logo
     const logoBase64 = await loadLogo();
     if (logoBase64) {
-        doc.addImage(logoBase64, 'JPEG', 25, y, 30, 30);
+        doc.addImage(logoBase64, 'PNG', 25, y, 30, 30);
         y += 32;
     } else {
         y += 5;
