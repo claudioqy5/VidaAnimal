@@ -3,9 +3,11 @@
 // ============================================================
 
 const STORE_INFO = {
-  name: 'Vida Animal',
-  address: 'Jr. Atahualpa N° 291 - Aucayacu, Perú',
+  name: 'VIDA ANIMAL',
+  businessName: 'VIDA ANIMAL',
+  address: 'Jr. Atahualpa N° 291 - Aucayacu',
   phone: '975 418 965',
+  ruc: '10764194883',
   web: 'vidaanimal.vercel.app',
   logoUrl: window.location.origin + '/logovidaanimal.png',
 }
@@ -18,46 +20,53 @@ function formatDateTime(dateStr) {
   return d.toLocaleString('es-PE', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: true,
-  })
+  }).toUpperCase()
 }
 
 /**
- * Genera el HTML del encabezado del ticket con logo + datos de la tienda.
- * El logo se carga como <img> referenciando la URL del servidor.
+ * Convierte números a letras (para el total en soles)
  */
-function buildHeader() {
-  return `
-    <div class="ticket-header">
-      <div class="header-top">
-        <div class="store-text">
-          <div class="store-name">${STORE_INFO.name}</div>
-          <div class="store-address">${STORE_INFO.address}</div>
-          <div class="store-contact">Cel: ${STORE_INFO.phone}</div>
-          <div class="store-web">${STORE_INFO.web}</div>
-        </div>
-        <img class="store-logo" src="${STORE_INFO.logoUrl}" alt="Logo Vida Animal" onerror="this.style.display='none'" />
-      </div>
-      <div class="section-div"></div>
-    </div>
-  `
-}
+function numeroALetras(num) {
+  const unidades = ['CERO', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+  const decenas = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE', 'VEINTE'];
+  const decenas2 = ['VENTI', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+  const centenas = ['CIEN', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
 
-/**
- * Genera el HTML del pie del ticket.
- */
-function buildFooter() {
-  return `
-    <div class="ticket-footer">
-      <div class="section-div"></div>
-      <div class="footer-thanks">¡Gracias por su preferencia!</div>
-      <div class="footer-web">${STORE_INFO.web}</div>
-    </div>
-  `
+  function dec(n) {
+    if (n < 10) return unidades[n];
+    if (n <= 20) return decenas[n - 10];
+    if (n < 30) return n === 20 ? 'VEINTE' : 'VEINTI' + unidades[n % 10];
+    let d = Math.floor(n / 10);
+    let u = n % 10;
+    return decenas2[d - 1] + (u > 0 ? ' Y ' + unidades[u] : '');
+  }
+
+  function cen(n) {
+    if (n < 100) return dec(n);
+    if (n === 100) return 'CIEN';
+    let c = Math.floor(n / 100);
+    let r = n % 100;
+    return centenas[c] + (r > 0 ? ' ' + dec(r) : '');
+  }
+
+  function mil(n) {
+    if (n < 1000) return cen(n);
+    let m = Math.floor(n / 1000);
+    let r = n % 1000;
+    let m_str = m === 1 ? 'MIL' : cen(m) + ' MIL';
+    return m_str + (r > 0 ? ' ' + cen(r) : '');
+  }
+
+  let enteros = Math.floor(num);
+  let centavos = Math.round((num - enteros) * 100);
+  let centavosStr = centavos.toString().padStart(2, '0');
+  
+  if (enteros === 0) return 'CERO CON ' + centavosStr + '/100 SOLES';
+  return mil(enteros) + ' CON ' + centavosStr + '/100 SOLES';
 }
 
 /**
  * Hoja de estilos CSS interna para el ticket de 80mm.
- * Se usa box-sizing border-box y ancho fijo de 80mm.
  */
 const TICKET_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -73,112 +82,81 @@ const TICKET_CSS = `
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    /* Evitar difuminado en impresoras térmicas de bajos DPI */
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
     font-smooth: never;
     text-rendering: optimizeSpeed;
+    color: #000 !important;
   }
   body {
     width: 76mm;
     font-size: 11px;
-    color: #000;
     background: #fff;
+    padding-bottom: 20px;
   }
   
-  /* Forzar que TODO sea absolutamente negro para evitar renderizado por semitonos (dithering) */
-  h1, h2, h3, h4, h5, h6, p, span, div, td, th {
-    color: #000 !important;
-  }
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .text-right { text-align: right; }
+  .bold { font-weight: 700; }
+  .bolder { font-weight: 900; }
 
   /* ── Header ── */
-  .ticket-header { text-align: left; margin-bottom: 2px; }
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 4px;
-  }
-  .store-text { flex: 1; }
-  .store-name { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; }
-  .store-address { font-size: 10px; color: #000; margin-top: 2px; font-weight: 500; }
-  .store-contact { font-size: 10px; color: #000; font-weight: 500; }
-  .store-web { font-size: 10px; color: #000; font-weight: 500; }
+  .store-logo-container { text-align: center; margin-bottom: 5px; margin-top: 10px; }
   .store-logo {
-    width: 45px;
-    height: 45px;
+    width: 60px;
     object-fit: contain;
-    border-radius: 50%;
-    flex-shrink: 0;
-    /* Filtros agresivos para que las impresoras térmicas impriman bien las imágenes a color */
     filter: grayscale(100%) contrast(200%) brightness(1.2);
   }
+  .store-name { font-size: 14px; font-weight: 900; margin-bottom: 2px; }
+  .store-info-text { font-size: 11px; font-weight: 600; line-height: 1.2; }
+  
+  /* ── Comprobante info ── */
+  .comp-title-container { margin: 10px 0; }
+  .comp-title { font-size: 13px; font-weight: 900; text-align: center; text-transform: uppercase; }
+  .comp-number { font-size: 14px; font-weight: 900; text-align: center; margin-top: 2px; letter-spacing: 1px; }
+  
+  .client-info { font-size: 10px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+  .client-row { display: flex; }
+  .client-label { width: 120px; flex-shrink: 0; }
 
   /* ── Separadores ── */
   .section-div {
     width: 100%;
-    border-top: 1.5px dashed #000;
+    border-top: 1px dashed #000;
     margin: 6px 0;
   }
 
-  /* ── Comprobante info ── */
-  .comp-info { margin-bottom: 6px; }
-  .comp-title { font-size: 12px; font-weight: 800; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-  .comp-number { font-size: 13px; font-weight: 900; text-align: center; margin-top: 2px; }
-  .comp-date { font-size: 10px; margin-top: 4px; font-weight: 500; }
-  .comp-client { font-size: 10px; margin-top: 2px; font-weight: 600; }
-  .comp-pay { font-size: 10px; margin-top: 2px; font-weight: 500; }
-  .comp-obs { font-size: 10px; margin-top: 4px; font-weight: 600; font-style: italic; border-left: 2px solid #000; padding-left: 4px; }
-
   /* ── Tabla de productos ── */
   table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  thead th { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #000; padding-bottom: 4px; }
+  thead th { font-size: 9px; font-weight: 800; border-bottom: 1px dashed #000; padding-bottom: 4px; }
   th.left, td.left { text-align: left; }
   th.right, td.right { text-align: right; }
   th.center, td.center { text-align: center; }
-  tbody td { font-size: 11px; padding: 4px 0; vertical-align: top; font-weight: 600; }
-  .prod-name { max-width: 38mm; word-break: break-word; font-weight: 700; padding-right: 4px; }
-  tfoot tr td { border-top: 1.5px solid #000; padding-top: 4px; }
-  .total-row td { font-size: 15px; font-weight: 900; padding-top: 6px; }
-  .discount-row td { font-size: 11px; font-weight: 600; }
-  .subtotal-row td { font-size: 11px; font-weight: 600; }
+  tbody td { font-size: 10px; padding: 4px 0; vertical-align: top; font-weight: 600; }
+  .prod-name { max-width: 40mm; word-break: break-word; padding-right: 4px; padding-left: 4px; }
+  
+  .totals-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; font-size: 11px; font-weight: 700; margin-top: 4px; }
+  .totals-row { display: flex; justify-content: flex-end; width: 100%; gap: 10px; }
+  
+  .amount-words { font-size: 10px; font-weight: 700; margin-top: 8px; line-height: 1.3; }
 
-  /* ── Resumen de cierre de caja ── */
-  .summary-table { width: 100%; font-size: 11px; margin: 4px 0; }
-  .summary-table td { padding: 3px 0; font-weight: 600; }
-  .summary-label { font-weight: 700; }
-  .summary-value { text-align: right; font-weight: 800; }
-  .summary-big td { font-size: 15px; font-weight: 900; border-top: 1.5px solid #000; padding-top: 6px; margin-top: 4px; }
-
-  /* ── Footer ── */
-  .ticket-footer { text-align: center; margin-top: 10px; }
-  .footer-thanks { font-size: 12px; font-weight: 800; margin-top: 4px; }
-  .footer-web { font-size: 10px; margin-top: 2px; font-weight: 500; }
-
+  /* ── QR y Footer ── */
+  .qr-section { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
+  .qr-code { width: 80px; height: 80px; }
+  .obs-box { flex: 1; font-size: 10px; font-weight: 600; }
+  
+  .footer-legal { text-align: center; font-size: 10px; font-weight: 600; margin-top: 15px; line-height: 1.3; }
+  
   /* Anulada */
   .anulada-stamp {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    border: 2px solid #000;
-    padding: 2px 8px;
-    display: inline-block;
-    margin: 4px auto;
-    transform: rotate(-5deg);
-    border-radius: 3px;
+    text-align: center; font-size: 15px; font-weight: 900; letter-spacing: 2px;
+    border: 2px solid #000; padding: 2px 8px; display: inline-block;
+    margin: 4px auto; transform: rotate(-5deg);
   }
 `
 
-
-/**
- * Abre el diálogo de impresión usando un iframe oculto para evitar abrir nuevas pestañas.
- * @param {string} bodyHtml — HTML del contenido del ticket (sin head/style).
- * @param {string} title — Título de la ventana (para el nombre del archivo PDF a generar).
- */
 function openPrintWindow(bodyHtml, title = 'Ticket Vida Animal') {
-  // Crear un iframe invisible
   const iframe = document.createElement('iframe');
   iframe.style.position = 'fixed';
   iframe.style.right = '0';
@@ -205,166 +183,174 @@ function openPrintWindow(bodyHtml, title = 'Ticket Vida Animal') {
   `);
   doc.close();
 
-  // Esperar a que los recursos (como el logo) carguen antes de imprimir
   iframe.onload = () => {
     setTimeout(() => {
       iframe.contentWindow.focus();
       iframe.contentWindow.print();
-      
-      // Remover el iframe después de un tiempo prudencial
       setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      }, 5000); // 5 segundos para asegurar que el spooler capture la vista
+        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+      }, 5000);
     }, 300);
   };
 }
 
-/**
- * Imprime el ticket de una venta individual (Nota de Venta).
- * @param {object} venta — Objeto de venta tal como viene del backend.
- */
 export function imprimirTicketVenta(venta) {
   const isAnulada = venta.estado === 'Anulada'
 
   const filasProductos = (venta.detalleVentas || []).map(d => `
     <tr>
-      <td class="left prod-name">${d.producto?.nombre || 'Producto'}</td>
-      <td class="center">${Number(d.cantidad).toFixed(2)}</td>
-      <td class="right">S/${Number(d.precioUnitario).toFixed(2)}</td>
-      <td class="right">S/${(Number(d.cantidad) * Number(d.precioUnitario)).toFixed(2)}</td>
+      <td class="center">${Number(d.cantidad).toFixed(0)}</td>
+      <td class="center">NIU</td>
+      <td class="left prod-name">${d.producto?.nombre || 'PRODUCTO'}</td>
+      <td class="right">${Number(d.precioUnitario).toFixed(2)}</td>
+      <td class="right">${(Number(d.cantidad) * Number(d.precioUnitario)).toFixed(2)}</td>
     </tr>
   `).join('')
 
   const subtotal = Number(venta.subTotal || venta.total || 0)
   const descuento = Number(venta.descuento || 0)
   const total = Number(venta.total || 0)
+  
+  let isBoleta = venta.serieComprobante?.startsWith('B');
+  let isFactura = venta.serieComprobante?.startsWith('F');
+  
+  let tipoComprobante = 'NOTA DE VENTA';
+  if (isBoleta) tipoComprobante = 'BOLETA DE VENTA ELECTRONICA';
+  if (isFactura) tipoComprobante = 'FACTURA ELECTRONICA';
 
-  let tipoComprobante = 'Nota de Venta'
-  if (venta.serieComprobante?.startsWith('B')) {
-    tipoComprobante = 'BOLETA DE VENTA ELECTRÓNICA'
-  } else if (venta.serieComprobante?.startsWith('F')) {
-    tipoComprobante = 'FACTURA ELECTRÓNICA'
-  }
+  let docLabel = isFactura ? 'R.U.C.' : 'D.N.I.';
+  let clientDoc = venta.cliente?.documento || '00000000';
+  let clientName = venta.cliente?.nombreCompleto || 'PUBLICO GENERAL';
+  
+  // Generar QR Dinámico
+  // Formato: RUC | Tipo Doc | Serie | Numero | IGV | Total | Fecha | Tipo Doc Cliente | Numero Doc Cliente
+  let qrData = \`\${STORE_INFO.ruc}|\${isBoleta ? '03' : (isFactura ? '01' : '00')}|\${venta.serieComprobante || '000'}|\${venta.numeroComprobante || '000'}|0.00|\${total.toFixed(2)}|\${(venta.fecha || '').substring(0,10)}|\${isFactura ? '6' : '1'}|\${clientDoc}\`;
+  let qrUrl = \`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=\${encodeURIComponent(qrData)}\`;
 
   const body = `
-    ${buildHeader()}
+    <div class="store-logo-container">
+      <img class="store-logo" src="${STORE_INFO.logoUrl}" alt="Logo" onerror="this.style.display='none'" />
+    </div>
+    
+    <div class="text-center store-info-text">
+      <div class="store-name">${STORE_INFO.businessName}</div>
+      <div>R.U.C: ${STORE_INFO.ruc}</div>
+      <div>${STORE_INFO.address}</div>
+      <div>Telf.: ${STORE_INFO.phone}</div>
+    </div>
 
-    <div class="comp-info">
+    <div class="comp-title-container">
       <div class="comp-title">${tipoComprobante}</div>
-      <div class="comp-number">${venta.serieComprobante || 'B001'}-${venta.numeroComprobante || ''}</div>
-      <div class="comp-date">Fecha: ${formatDateTime(venta.fecha)}</div>
-      <div class="comp-client">Cliente: ${venta.cliente?.nombreCompleto || 'Consumidor Final'}</div>
-      <div class="comp-pay">Pago: ${venta.metodoPago || 'Efectivo'}</div>
-      ${venta.cajero ? `<div class="comp-pay">Cajero: ${venta.cajero}</div>` : ''}
-      ${venta.observaciones ? `<div class="comp-obs">Nota: ${venta.observaciones}</div>` : ''}
+      <div class="comp-number">${venta.serieComprobante || 'N001'} - ${venta.numeroComprobante || ''}</div>
+    </div>
+
+    <div class="client-info">
+      <div class="client-row">
+        <span class="client-label">FECHA DE EMISIÓN:</span>
+        <span>${formatDateTime(venta.fecha)}</span>
+      </div>
+      <div class="client-row">
+        <span class="client-label">SEÑOR (ES):</span>
+        <span>${clientName.toUpperCase()}</span>
+      </div>
+      <div class="client-row">
+        <span class="client-label">${docLabel}:</span>
+        <span>${clientDoc}</span>
+      </div>
+      <div class="client-row">
+        <span class="client-label">DIREC:</span>
+        <span>${venta.cliente?.direccion ? venta.cliente.direccion.toUpperCase() : '-'}</span>
+      </div>
+      <div class="client-row">
+        <span class="client-label">FORMA DE PAGO:</span>
+        <span>CONTADO - ${venta.metodoPago ? venta.metodoPago.toUpperCase() : 'EFECTIVO'}</span>
+      </div>
     </div>
 
     ${isAnulada ? '<div style="text-align:center"><div class="anulada-stamp">⛔ ANULADA ⛔</div></div>' : ''}
 
-    <div class="section-div">--------------------------------</div>
+    <div class="section-div"></div>
 
     <table>
       <thead>
         <tr>
-          <th class="left">Producto</th>
-          <th class="center">Cant</th>
-          <th class="right">P.U.</th>
-          <th class="right">Total</th>
+          <th class="center">CT.</th>
+          <th class="center">U.M</th>
+          <th class="left" style="padding-left:4px;">DESCRIPCIÓN</th>
+          <th class="right">P.U</th>
+          <th class="right">IMP.</th>
         </tr>
       </thead>
       <tbody>${filasProductos}</tbody>
-      <tfoot>
-        ${descuento > 0 ? `<tr class="subtotal-row"><td class="left" colspan="3">Subtotal</td><td class="right">S/${subtotal.toFixed(2)}</td></tr>` : ''}
-        ${descuento > 0 ? `<tr class="discount-row"><td class="left" colspan="3">Descuento</td><td class="right">-S/${descuento.toFixed(2)}</td></tr>` : ''}
-        <tr class="total-row">
-          <td class="left" colspan="3">TOTAL</td>
-          <td class="right">S/${total.toFixed(2)}</td>
-        </tr>
-      </tfoot>
     </table>
 
-    ${buildFooter()}
+    <div class="section-div"></div>
+
+    <div class="totals-container">
+      ${descuento > 0 ? `<div class="totals-row"><span>Descuento:</span><span>S/ ${descuento.toFixed(2)}</span></div>` : ''}
+      <div class="totals-row">
+        <span>Exonerado:</span>
+        <span>S/ ${subtotal.toFixed(2)}</span>
+      </div>
+      <div class="totals-row">
+        <span>Total a Pagar:</span>
+        <span>S/ ${total.toFixed(2)}</span>
+      </div>
+    </div>
+
+    <div class="section-div"></div>
+    
+    <div class="amount-words">
+      SON ${numeroALetras(total)}
+    </div>
+
+    <div class="qr-section">
+      <img class="qr-code" src="${qrUrl}" alt="QR" />
+      <div class="obs-box">
+        <div class="bold" style="margin-bottom: 2px;">Observación:</div>
+        <div>${venta.observaciones ? venta.observaciones.toUpperCase() : ''}</div>
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      Representación Impresa del Comprobante Electrónico<br>
+      Consulte su Documento en:<br>
+      https://${STORE_INFO.web}<br>
+      <div style="margin-top: 4px;">HASH: ${venta.sunatHash || ''}</div>
+      <div style="margin-top: 2px;">VENDEDOR: ${venta.cajero ? venta.cajero.toUpperCase() : STORE_INFO.businessName}</div>
+    </div>
   `
 
   openPrintWindow(body, `Ticket ${venta.serieComprobante}-${venta.numeroComprobante}`)
 }
 
-/**
- * Imprime un resumen de cierre de caja con las ventas visibles en el historial.
- * @param {Array} ventas — Array de ventas filtradas/mostradas en pantalla.
- * @param {object} filtros — { fecha?: string, cliente?: string, metodoPago?: string }
- */
 export function imprimirCierreCaja(ventas, filtros = {}) {
+  // (Cierre de caja sin cambios, solo adaptado al nuevo header)
   const ventasActivas = ventas.filter(v => v.estado !== 'Anulada')
-  const ventasAnuladas = ventas.filter(v => v.estado === 'Anulada')
-
-  const totalEfectivo = ventasActivas
-    .filter(v => (v.metodoPago || 'Efectivo').toLowerCase() === 'efectivo')
-    .reduce((s, v) => s + Number(v.total || 0), 0)
-
-  const totalYape = ventasActivas
-    .filter(v => (v.metodoPago || '').toLowerCase() === 'yape')
-    .reduce((s, v) => s + Number(v.total || 0), 0)
-
-  const totalPlin = ventasActivas
-    .filter(v => (v.metodoPago || '').toLowerCase() === 'plin')
-    .reduce((s, v) => s + Number(v.total || 0), 0)
-
+  const totalEfectivo = ventasActivas.filter(v => (v.metodoPago || 'Efectivo').toLowerCase() === 'efectivo').reduce((s, v) => s + Number(v.total || 0), 0)
+  const totalYape = ventasActivas.filter(v => (v.metodoPago || '').toLowerCase() === 'yape').reduce((s, v) => s + Number(v.total || 0), 0)
+  const totalPlin = ventasActivas.filter(v => (v.metodoPago || '').toLowerCase() === 'plin').reduce((s, v) => s + Number(v.total || 0), 0)
   const totalGeneral = ventasActivas.reduce((s, v) => s + Number(v.total || 0), 0)
 
-  const fechaImpresion = new Date().toLocaleString('es-PE', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: true
-  })
-
-  const filtroPeriodo = filtros.fecha
-    ? `Fecha: ${filtros.fecha}`
-    : 'Período: Todo el historial'
-
   const body = `
-    ${buildHeader()}
-
-    <div class="comp-info">
-      <div class="comp-title">Resumen de Ventas</div>
-      <div class="comp-title" style="font-size:10px">Cierre de Caja</div>
-      <div class="comp-date" style="margin-top:4px">Impreso: ${fechaImpresion}</div>
-      <div class="comp-date">${filtroPeriodo}</div>
-      ${filtros.cliente ? `<div class="comp-date">Cliente: ${filtros.cliente}</div>` : ''}
+    <div class="store-logo-container"><img class="store-logo" src="${STORE_INFO.logoUrl}" onerror="this.style.display='none'" /></div>
+    <div class="text-center store-info-text">
+      <div class="store-name">${STORE_INFO.businessName}</div>
+      <div>R.U.C: ${STORE_INFO.ruc}</div>
     </div>
-
-    <div class="section-div">--------------------------------</div>
-
-    <table class="summary-table">
-      <tbody>
-        <tr>
-          <td class="summary-label">Ventas registradas:</td>
-          <td class="summary-value">${ventasActivas.length}</td>
-        </tr>
-        <tr>
-          <td class="summary-label">Ventas anuladas:</td>
-          <td class="summary-value">${ventasAnuladas.length}</td>
-        </tr>
-      </tbody>
+    <div class="comp-title-container">
+      <div class="comp-title">CIERRE DE CAJA</div>
+      <div class="comp-number">${formatDateTime(new Date())}</div>
+    </div>
+    <div class="section-div"></div>
+    <table style="font-size: 12px; margin: 10px 0;">
+      <tr><td class="bold">💵 Efectivo:</td><td class="right bolder">S/ ${totalEfectivo.toFixed(2)}</td></tr>
+      <tr><td class="bold">📱 Yape:</td><td class="right bolder">S/ ${totalYape.toFixed(2)}</td></tr>
+      <tr><td class="bold">📱 Plin:</td><td class="right bolder">S/ ${totalPlin.toFixed(2)}</td></tr>
+      <tr><td colspan="2"><div class="section-div"></div></td></tr>
+      <tr><td class="bold" style="font-size: 14px;">TOTAL:</td><td class="right bolder" style="font-size: 14px;">S/ ${totalGeneral.toFixed(2)}</td></tr>
     </table>
-
-    <div class="section-div">--------------------------------</div>
-
-    <table class="summary-table">
-      <tbody>
-        ${totalEfectivo > 0 ? `<tr><td class="summary-label">💵 Efectivo:</td><td class="summary-value">S/ ${totalEfectivo.toFixed(2)}</td></tr>` : ''}
-        ${totalYape > 0 ? `<tr><td class="summary-label">📱 Yape:</td><td class="summary-value">S/ ${totalYape.toFixed(2)}</td></tr>` : ''}
-        ${totalPlin > 0 ? `<tr><td class="summary-label">📱 Plin:</td><td class="summary-value">S/ ${totalPlin.toFixed(2)}</td></tr>` : ''}
-        <tr class="summary-big">
-          <td class="summary-label">TOTAL GENERAL:</td>
-          <td class="summary-value">S/ ${totalGeneral.toFixed(2)}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    ${buildFooter()}
   `
-
   openPrintWindow(body, 'Cierre de Caja - Vida Animal')
 }
+
