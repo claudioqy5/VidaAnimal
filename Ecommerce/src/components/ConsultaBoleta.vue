@@ -1,11 +1,13 @@
 <script setup>
 import { ref } from 'vue'
 import api from '../utils/api.js'
+import { generateA4PDF, generateTicketPDF } from '../utils/pdfGenerator.js'
 
 const tipoDoc = ref('Boleta')
 const serie = ref('B001')
 const numero = ref('')
 const fechaEmision = ref('')
+const montoTotal = ref('')
 const loading = ref(false)
 const resultado = ref(null)
 const error = ref('')
@@ -14,15 +16,21 @@ const consultar = async () => {
   error.value = ''
   resultado.value = null
 
-  if (!tipoDoc.value || !serie.value || !numero.value || !fechaEmision.value) {
-    error.value = 'Debe ingresar el tipo, serie, número y fecha de emisión.'
+  if (!tipoDoc.value || !serie.value || !numero.value || !fechaEmision.value || !montoTotal.value) {
+    error.value = 'Debe ingresar el tipo, serie, número, fecha de emisión y monto total.'
     return
   }
 
   loading.value = true
   try {
     const res = await api.get('/ecommerce/ConsultaBoleta', {
-      params: { tipoDoc: tipoDoc.value, serie: serie.value.trim(), numero: numero.value.trim(), fechaEmision: fechaEmision.value }
+      params: { 
+        tipoDoc: tipoDoc.value, 
+        serie: serie.value.trim(), 
+        numero: numero.value.trim(), 
+        fechaEmision: fechaEmision.value,
+        montoTotal: montoTotal.value
+      }
     })
     if (res.data.success) {
       resultado.value = res.data.data
@@ -46,6 +54,18 @@ const formatFecha = (fecha) => {
   const d = new Date(fecha)
   return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
     ' ' + d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })
+}
+
+const descargarA4 = async () => {
+  if (resultado.value) {
+    await generateA4PDF(resultado.value);
+  }
+}
+
+const descargarTicketLocal = () => {
+  if (resultado.value) {
+    generateTicketPDF(resultado.value);
+  }
 }
 
 const emit = defineEmits(['go-home'])
@@ -98,6 +118,18 @@ const emit = defineEmits(['go-home'])
               v-model="numero" 
               type="text" 
               placeholder="Ej: 00000034"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Monto Total (S/)</label>
+            <input 
+              v-model="montoTotal" 
+              type="number" 
+              step="0.01"
+              placeholder="Ej: 185.00"
               @keyup.enter="consultar"
             />
           </div>
@@ -179,14 +211,20 @@ const emit = defineEmits(['go-home'])
 
         <!-- Botones de descarga -->
         <div class="resultado-descargas">
-          <a v-if="resultado.sunatPdfUrl" :href="resultado.sunatPdfUrl" target="_blank" class="btn-download pdf">
-            Descargar PDF
-          </a>
+          <!-- Opciones Locales -->
+          <button @click="descargarA4" class="btn-download local-a4">
+            📄 Descargar A4
+          </button>
+          <button @click="descargarTicketLocal" class="btn-download local-ticket">
+            🧾 Descargar Ticket
+          </button>
+
+          <!-- Opciones SUNAT (Solo visibles si fueron aceptadas) -->
           <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
-            Descargar XML
+            📋 XML SUNAT
           </a>
           <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
-            Descargar CDR
+            📜 CDR SUNAT
           </a>
         </div>
       </div>
@@ -202,7 +240,7 @@ const emit = defineEmits(['go-home'])
 <style scoped>
 .consulta-wrapper {
   min-height: 80vh;
-  padding: 120px 20px 60px;
+  padding: 20vh 20px 60px;
   background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 120px), #ffffff;
 }
 
@@ -448,7 +486,8 @@ const emit = defineEmits(['go-home'])
   opacity: 0.9;
 }
 
-.btn-download.pdf { background: #dc2626; }
+.btn-download.local-a4 { background: #0ea5e9; }
+.btn-download.local-ticket { background: #f59e0b; }
 .btn-download.xml { background: #2563eb; }
 .btn-download.cdr { background: #7c3aed; }
 

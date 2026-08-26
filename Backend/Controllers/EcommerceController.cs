@@ -66,10 +66,10 @@ namespace VidaAnimal.API.Controllers
             return Ok(new { success = true, data = especies });
         }
         [HttpGet("ConsultaBoleta")]
-        public async Task<IActionResult> ConsultaBoleta([FromQuery] string tipoDoc, [FromQuery] string serie, [FromQuery] string numero, [FromQuery] DateTime? fechaEmision)
+        public async Task<IActionResult> ConsultaBoleta([FromQuery] string tipoDoc, [FromQuery] string serie, [FromQuery] string numero, [FromQuery] DateTime? fechaEmision, [FromQuery] decimal? montoTotal)
         {
-            if (string.IsNullOrWhiteSpace(tipoDoc) || string.IsNullOrWhiteSpace(serie) || string.IsNullOrWhiteSpace(numero) || !fechaEmision.HasValue)
-                return BadRequest(new { success = false, message = "Debe proporcionar tipo de documento, serie, número y fecha de emisión." });
+            if (string.IsNullOrWhiteSpace(tipoDoc) || string.IsNullOrWhiteSpace(serie) || string.IsNullOrWhiteSpace(numero) || !fechaEmision.HasValue || !montoTotal.HasValue)
+                return BadRequest(new { success = false, message = "Debe proporcionar tipo de documento, serie, número, fecha de emisión y monto total." });
 
             // Normalizar: quitar espacios
             serie = serie.Trim().ToUpper();
@@ -79,7 +79,7 @@ namespace VidaAnimal.API.Controllers
                 .Include(v => v.VentaDetalles)
                     .ThenInclude(d => d.Producto)
                 .Include(v => v.Cliente)
-                .Where(v => v.SerieComprobante == serie && v.NumeroComprobante == numero && v.Fecha.Date == fechaEmision.Value.Date);
+                .Where(v => v.SerieComprobante == serie && v.NumeroComprobante == numero && v.Fecha.Date == fechaEmision.Value.Date && v.Total == montoTotal.Value);
 
             // Filtro adicional por si acaso según el tipo seleccionado (aunque la serie ya dice qué es)
             if (tipoDoc == "Boleta") {
