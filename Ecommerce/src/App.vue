@@ -9,6 +9,7 @@ import AboutSection from './components/AboutSection.vue'
 import AppFooter from './components/AppFooter.vue'
 import WhatsAppFloat from './components/WhatsAppFloat.vue'
 import AppCart from './components/AppCart.vue'
+import ConsultaBoleta from './components/ConsultaBoleta.vue'
 
 // --- LÓGICA DEL CARRITO ---
 const cart = ref(JSON.parse(localStorage.getItem('vida_animal_cart') || '[]'))
@@ -67,6 +68,11 @@ const globalSearch = ref('')
 const activeView = ref('home') 
 const showSoonModal = ref(false) // Control para la ventana de "Pronto"
 
+// Detectar ruta /consultaboleta al cargar
+if (window.location.pathname === '/consultaboleta') {
+  activeView.value = 'consultaboleta'
+}
+
 // Al buscar en el header, forzamos la vista de catálogo
 watch(globalSearch, (newVal) => {
   if (newVal.length > 0) {
@@ -98,6 +104,7 @@ const goHome = () => {
   selectedSpecies.value = ''
   selectedCategory.value = ''
   globalSearch.value = ''
+  window.history.pushState({}, '', '/')
   window.scrollTo(0, 0)
 }
 
@@ -367,6 +374,9 @@ const mobileFilter = (species, category) => {
           @clear-filters="globalSearch = ''; selectedSpecies = ''; selectedCategory = ''"
        />
     </main>
+
+    <!-- Consulta de Boleta Electrónica -->
+    <ConsultaBoleta v-if="activeView === 'consultaboleta'" @go-home="goHome" />
 
     <!-- Modal de "Pronto" -->
     <Teleport to="body">
