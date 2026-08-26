@@ -102,7 +102,7 @@ const emit = defineEmits(['go-home'])
         </div>
         
         <div class="form-row">
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group">
             <label>Serie y Número del Comprobante</label>
             <div class="serie-numero-group">
               <input 
@@ -123,9 +123,6 @@ const emit = defineEmits(['go-home'])
               />
             </div>
           </div>
-        </div>
-
-        <div class="form-row">
           <div class="form-group">
             <label>Monto Total (S/)</label>
             <input 
