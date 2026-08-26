@@ -45,28 +45,55 @@ const formatDate = (fecha) => {
     return `${d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })} / ${d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 };
 
+const loadLogo = async () => {
+    try {
+        const res = await fetch('/logo.jpg');
+        if (res.ok) {
+            const blob = await res.blob();
+            return await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        }
+    } catch (e) {
+        console.error("Error cargando el logo", e);
+    }
+    return null;
+};
+
 export const generateA4PDF = async (venta) => {
     const doc = new jsPDF('p', 'mm', 'a4');
     const width = doc.internal.pageSize.getWidth();
     
+    // Cargar logo
+    const logoBase64 = await loadLogo();
+
     // Configuraciones de empresa
     const EMPRESA = "VIDA ANIMAL";
     const RUC = "10764194883";
-    const DIR = "JR. ATAHUALPA N° 291 - AUCAYACU";
+    const DIR = "Jr. Atahualpa N° 291 - Aucayacu";
+    const DIR2 = "José Crespo y Castillo, Leoncio Prado, Huánuco";
     const TEL = "975 418 965";
     
     const docType = venta.serieComprobante?.startsWith('F') ? 'FACTURA' : 'BOLETA';
     const numDoc = `${venta.serieComprobante} - ${venta.numeroComprobante}`;
 
+    // Dibujar Logo si existe
+    if (logoBase64) {
+        doc.addImage(logoBase64, 'JPEG', 15, 12, 30, 30);
+    }
+
     // Cabecera Empresa
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text(EMPRESA, 105, 20, { align: "center" });
+    doc.text(EMPRESA, 105, 18, { align: "center" });
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(DIR, 105, 26, { align: "center" });
-    doc.text(`Telf.: ${TEL}`, 105, 31, { align: "center" });
+    doc.text(DIR, 105, 24, { align: "center" });
+    doc.text(DIR2, 105, 29, { align: "center" });
+    doc.text(`Telf.: ${TEL}`, 105, 34, { align: "center" });
 
     // Recuadro RUC (Derecha superior)
     doc.roundedRect(135, 12, 65, 25, 2, 2);
@@ -92,14 +119,29 @@ export const generateA4PDF = async (venta) => {
     doc.text(venta.metodoPago || 'CONTADO - EFECTIVO', 40, 60);
 
     // Tabla Info Adicional (Fecha, moneda)
+    const lineColor = [150, 160, 170];
     autoTable(doc, {
         startY: 65,
         head: [["FECHA DE EMISIÓN", "CONDICIÓN DE PAGO", "TIPO DE MONEDA", "CAJERO"]],
-        body: [[formatDate(venta.fecha), venta.metodoPago || 'EFECTIVO', 'Soles', venta.cajero || 'SISTEMA']],
+        body: [[formatDate(venta.fecha), venta.metodoPago || 'EFECTIVO', 'Soles', (venta.cajero || 'SISTEMA').toUpperCase()]],
         theme: 'grid',
-        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontSize: 8, halign: 'center', fontStyle: 'bold' },
-        bodyStyles: { fontSize: 8, halign: 'center' },
-        margin: { left: 15, right: 15 }
+        headStyles: { fillColor: [240, 245, 250], textColor: [0, 0, 0], fontSize: 8, halign: 'center', fontStyle: 'bold', lineColor: lineColor, lineWidth: 0.2 },
+        bodyStyles: { fontSize: 8, halign: 'center', lineColor: lineColor, lineWidth: 0.2 },
+        margin: { left: 15, right: 15 },
+        didDrawPage: function (data) {
+            // Draw rounded border
+            const x = data.settings.margin.left;
+            const y = data.cursor.y - data.table.height;
+            const w = data.table.width;
+            const h = data.table.height;
+            const rx = 2;
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x-0.2, y-0.2, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y-0.2, rx+0.2, rx+0.2, 'F');
+            doc.rect(x-0.2, y + h - rx, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y + h - rx, rx+0.2, rx+0.2, 'F');
+            doc.setDrawColor(lineColor[0], lineColor[1], lineColor[2]);
+            doc.setLineWidth(0.2);
+            doc.roundedRect(x, y, w, h, rx, rx, 'S');
+        }
     });
 
     // Tabla Productos
@@ -124,8 +166,8 @@ export const generateA4PDF = async (venta) => {
         head: [tableColumn],
         body: tableRows,
         theme: 'grid',
-        headStyles: { fillColor: [220, 230, 240], textColor: [0, 0, 0], fontSize: 8, halign: 'center', fontStyle: 'bold' },
-        bodyStyles: { fontSize: 8 },
+        headStyles: { fillColor: [220, 230, 240], textColor: [0, 0, 0], fontSize: 8, halign: 'center', fontStyle: 'bold', lineColor: lineColor, lineWidth: 0.2 },
+        bodyStyles: { fontSize: 8, lineColor: lineColor, lineWidth: 0.2 },
         columnStyles: {
             0: { halign: 'center', cellWidth: 15 },
             1: { halign: 'center', cellWidth: 20 },
@@ -133,17 +175,33 @@ export const generateA4PDF = async (venta) => {
             4: { halign: 'right', cellWidth: 20 },
             5: { halign: 'right', cellWidth: 25 }
         },
-        margin: { left: 15, right: 15 }
+        margin: { left: 15, right: 15 },
+        didDrawPage: function (data) {
+            const x = data.settings.margin.left;
+            const y = data.cursor.y - data.table.height;
+            const w = data.table.width;
+            const h = data.table.height;
+            const rx = 2;
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x-0.2, y-0.2, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y-0.2, rx+0.2, rx+0.2, 'F');
+            doc.rect(x-0.2, y + h - rx, rx+0.2, rx+0.2, 'F'); doc.rect(x + w - rx, y + h - rx, rx+0.2, rx+0.2, 'F');
+            doc.setDrawColor(lineColor[0], lineColor[1], lineColor[2]);
+            doc.setLineWidth(0.2);
+            doc.roundedRect(x, y, w, h, rx, rx, 'S');
+        }
     });
 
     let finalY = doc.lastAutoTable.finalY;
 
-    // Total en Letras
-    doc.setDrawColor(200);
+    // Total en Letras (Caja redondeada debajo de la tabla)
+    doc.setDrawColor(lineColor[0], lineColor[1], lineColor[2]);
     doc.setFillColor(245, 245, 245);
-    doc.rect(15, finalY, width - 30, 6, 'FD');
+    doc.setLineWidth(0.2);
+    // Para que quede exacto debajo de la tabla
+    doc.roundedRect(15, finalY, doc.internal.pageSize.width - 30, 6, 2, 2, 'FD');
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
     doc.text(`SON: ${numeroALetras(venta.total)}`, 17, finalY + 4);
 
     finalY += 10;
@@ -153,16 +211,39 @@ export const generateA4PDF = async (venta) => {
     const qrDataUrl = await QRCode.toDataURL(qrText, { margin: 0, width: 35 });
     doc.addImage(qrDataUrl, 'PNG', 15, finalY, 35, 35);
 
-    // Notas y Enlace
+    // Observacion box
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(0, 102, 204); // Blue color for "Observación:"
+    doc.text("Observación:", 57, finalY + 5);
+    doc.setTextColor(0, 0, 0);
+    doc.setDrawColor(0, 102, 204);
+    doc.roundedRect(55, finalY + 1, 75, 7, 2, 2);
+
+    // Consulte su documento
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("Consulte su documento electrónico en:", 55, finalY + 5);
+    doc.text("Consulte su documento electrónico en:", 55, finalY + 13);
     doc.setTextColor(0, 0, 255);
-    doc.text("https://vidaanimal.vercel.app/consultaboleta", 55, finalY + 10);
+    doc.text("https://vidaanimal.vercel.app/consultaboleta", 55, finalY + 17);
     doc.setTextColor(0, 0, 0);
+
+    // HASH and VENDEDOR
+    doc.setFont("helvetica", "bold");
+    doc.text("HASH:", 55, finalY + 22);
+    doc.setFont("helvetica", "normal");
+    // Si la BD tuviera Hash, lo pondríamos aquí, por defecto dejamos un guion si no hay.
+    doc.text(venta.hashSunat || "-", 70, finalY + 22);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("VENDEDOR:", 55, finalY + 27);
+    doc.setFont("helvetica", "normal");
+    doc.text((venta.cajero || "SISTEMA").toUpperCase(), 77, finalY + 27);
     
     // Recuadro de Resumen
     const resumenX = 135;
+    doc.setDrawColor(lineColor[0], lineColor[1], lineColor[2]);
+    doc.setLineWidth(0.2);
     doc.roundedRect(resumenX, finalY, 60, 30, 2, 2);
     
     doc.setFont("helvetica", "normal");
@@ -188,17 +269,27 @@ export const generateA4PDF = async (venta) => {
     doc.save(`Venta_${venta.serieComprobante}-${venta.numeroComprobante}.pdf`);
 };
 
-export const generateTicketPDF = (venta) => {
+export const generateTicketPDF = async (venta) => {
     // Ticket de 80mm de ancho. (80mm es aprox 3.15 pulgadas. usaremos mm)
     const doc = new jsPDF('p', 'mm', [80, 250]); 
     const EMPRESA = "VIDA ANIMAL";
     const RUC = "10764194883";
-    const DIR = "JR. ATAHUALPA N° 291 - AUCAYACU";
+    const DIR = "Jr. Atahualpa N° 291 - Aucayacu";
+    const DIR2 = "José Crespo y Castillo, Huánuco"; // Shorter for ticket
     const TEL = "Telf.: 975 418 965";
     const docType = venta.serieComprobante?.startsWith('F') ? 'FACTURA' : 'BOLETA';
     const numDoc = `${venta.serieComprobante} - ${venta.numeroComprobante}`;
     
-    let y = 10;
+    let y = 5;
+
+    // Cargar logo
+    const logoBase64 = await loadLogo();
+    if (logoBase64) {
+        doc.addImage(logoBase64, 'JPEG', 25, y, 30, 30);
+        y += 32;
+    } else {
+        y += 5;
+    }
     
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -209,10 +300,15 @@ export const generateTicketPDF = (venta) => {
     doc.setFont("helvetica", "normal");
     doc.text(`RUC: ${RUC}`, 40, y, { align: "center" });
     y += 5;
+    doc.setFontSize(8);
     doc.text(DIR, 40, y, { align: "center" });
-    y += 5;
+    y += 4;
+    doc.text(DIR2, 40, y, { align: "center" });
+    y += 4;
     doc.text(TEL, 40, y, { align: "center" });
     y += 8;
+    
+    doc.setFontSize(9);
     
     doc.setFont("helvetica", "bold");
     doc.text(`${docType} ELECTRÓNICA`, 40, y, { align: "center" });

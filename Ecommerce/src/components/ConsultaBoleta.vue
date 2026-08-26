@@ -62,9 +62,9 @@ const descargarA4 = async () => {
   }
 }
 
-const descargarTicketLocal = () => {
+const descargarTicketLocal = async () => {
   if (resultado.value) {
-    generateTicketPDF(resultado.value);
+    await generateTicketPDF(resultado.value);
   }
 }
 
@@ -211,21 +211,25 @@ const emit = defineEmits(['go-home'])
 
         <!-- Botones de descarga -->
         <div class="resultado-descargas">
-          <!-- Opciones Locales -->
-          <button @click="descargarA4" class="btn-download local-a4">
-            📄 Descargar A4
-          </button>
-          <button @click="descargarTicketLocal" class="btn-download local-ticket">
-            🧾 Descargar Ticket
-          </button>
-
           <!-- Opciones SUNAT (Solo visibles si fueron aceptadas) -->
-          <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
-            📋 XML SUNAT
-          </a>
-          <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
-            📜 CDR SUNAT
-          </a>
+          <div class="sunat-buttons" v-if="resultado.sunatXmlUrl || resultado.sunatCdrUrl">
+            <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
+              📋 XML SUNAT
+            </a>
+            <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
+              📜 CDR SUNAT
+            </a>
+          </div>
+
+          <!-- Opciones Locales -->
+          <div class="local-buttons">
+            <button @click="descargarA4" class="btn-download minimalist">
+              📄 Descargar A4
+            </button>
+            <button @click="descargarTicketLocal" class="btn-download minimalist">
+              🧾 Descargar Ticket
+            </button>
+          </div>
         </div>
       </div>
 
@@ -486,30 +490,50 @@ const emit = defineEmits(['go-home'])
 /* Descargas */
 .resultado-descargas {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1rem;
   margin-top: 1.5rem;
+  align-items: center;
+}
+
+.sunat-buttons,
+.local-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
   justify-content: center;
 }
 
 .btn-download {
-  padding: 0.7rem 1.2rem;
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: white;
   text-decoration: none;
-  color: #ffffff;
-  transition: all 0.3s;
-  display: inline-flex;
-  align-items: center;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-download:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-.btn-download.local-a4 { background: #0ea5e9; }
-.btn-download.local-ticket { background: #f59e0b; }
+.btn-download.minimalist {
+  background: transparent;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.btn-download.minimalist:hover {
+  background: #f5f5f5;
+  border-color: #999;
+  opacity: 1;
+}
+
 .btn-download.xml { background: #2563eb; }
 .btn-download.cdr { background: #7c3aed; }
 
