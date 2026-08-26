@@ -241,11 +241,18 @@ export function imprimirTicketVenta(venta) {
   const descuento = Number(venta.descuento || 0)
   const total = Number(venta.total || 0)
 
+  let tipoComprobante = 'Nota de Venta'
+  if (venta.serieComprobante?.startsWith('B')) {
+    tipoComprobante = 'BOLETA DE VENTA ELECTRÓNICA'
+  } else if (venta.serieComprobante?.startsWith('F')) {
+    tipoComprobante = 'FACTURA ELECTRÓNICA'
+  }
+
   const body = `
     ${buildHeader()}
 
     <div class="comp-info">
-      <div class="comp-title">Nota de Venta</div>
+      <div class="comp-title">${tipoComprobante}</div>
       <div class="comp-number">${venta.serieComprobante || 'B001'}-${venta.numeroComprobante || ''}</div>
       <div class="comp-date">Fecha: ${formatDateTime(venta.fecha)}</div>
       <div class="comp-client">Cliente: ${venta.cliente?.nombreCompleto || 'Consumidor Final'}</div>

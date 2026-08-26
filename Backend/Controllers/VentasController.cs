@@ -304,6 +304,11 @@ namespace VidaAnimal.API.Controllers
             if (venta == null) return NotFound(new { success = false, mensaje = "Venta no encontrada." });
             if (venta.Estado == "Anulada") return BadRequest(new { success = false, mensaje = "La venta ya está anulada." });
 
+            // Bloquear anulación de Boletas Electrónicas (requiere Nota de Crédito SUNAT, no implementado)
+            if (!string.IsNullOrEmpty(venta.SerieComprobante) && venta.SerieComprobante.StartsWith("B"))
+                return BadRequest(new { success = false, mensaje = "Las Boletas Electrónicas no pueden anularse directamente. Para revertir una boleta es necesario emitir una Nota de Crédito Electrónica, función que aún no está habilitada en el sistema." });
+
+
             var claimUsuarioId = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
             int? usuarioId = null;
             if (int.TryParse(claimUsuarioId, out int uid)) usuarioId = uid;

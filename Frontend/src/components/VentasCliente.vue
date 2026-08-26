@@ -191,9 +191,16 @@
             </div>
             
             <div class="actions-footer" style="margin-top: 1.5rem; text-align: right;">
-              <button class="btn-anular" v-if="v.estado !== 'Anulada'" @click.stop="anularVenta(v)">
-                ⛔ Anular Boleta y Devolver Stock
-              </button>
+              <template v-if="v.estado !== 'Anulada'">
+                <!-- Boletas: bloquear anulación (requiere Nota de Crédito, no implementada aún) -->
+                <button v-if="v.serieComprobante?.startsWith('B')" class="btn-anular btn-anular-bloqueado" @click.stop="anularVenta(v)">
+                  🔒 No se puede anular una Boleta
+                </button>
+                <!-- Notas de Venta: permitir anulación normal -->
+                <button v-else class="btn-anular" @click.stop="anularVenta(v)">
+                  ⛔ Anular Nota y Devolver Stock
+                </button>
+              </template>
               <div v-else class="anulado-badge">🚫 ESTA VENTA FUE ANULADA - STOCK DEVUELTO</div>
             </div>
           </div>
@@ -386,6 +393,17 @@ const fetchVentas = async () => {
 };
 
 const anularVenta = (venta) => {
+  // Bloquear anulación de Boletas Electrónicas (requiere Nota de Crédito SUNAT, no implementada aún)
+  if (venta.serieComprobante?.startsWith('B')) {
+    alert(
+      '🔒 Esta acción no está disponible.\n\n' +
+      'Las Boletas Electrónicas enviadas a SUNAT no pueden anularse directamente.\n' +
+      'Para revertir una boleta es necesario emitir una Nota de Crédito Electrónica, ' +
+      'función que aún no ha sido habilitada en este sistema.\n\n' +
+      'Si necesitas corregir un error, por favor contacta al administrador.'
+    );
+    return;
+  }
   ventaToAnular.value = venta;
   adminPassword.value = '';
   showAnularModal.value = true;
@@ -623,6 +641,8 @@ onMounted(async () => {
 .expand-icon { color: #CBD5E0; font-size: 0.8rem; }
 .btn-anular { background: #FFF5F5; color: #E53E3E; border: 1px solid #FEB2B2; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
 .btn-anular:hover { background: #FED7D7; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(229, 62, 62, 0.2); }
+.btn-anular-bloqueado { background: #F7FAFC; color: #A0AEC0; border: 1px dashed #CBD5E0; cursor: not-allowed; }
+.btn-anular-bloqueado:hover { background: #EDF2F7; transform: none; box-shadow: none; }
 .anulado-badge { color: #E53E3E; font-weight: 800; font-size: 0.9rem; padding: 0.5rem; background: #FFF5F5; border-radius: 8px; border: 1px dashed #FC8181; display: inline-block; }
 .is-anulada { background: #FAFAFA; opacity: 0.8; border-color: #FED7D7; }
 .is-anulada:hover { border-color: #FC8181; }
