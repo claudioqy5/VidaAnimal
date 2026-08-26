@@ -101,7 +101,7 @@ namespace VidaAnimal.API.Controllers
                     fecha = venta.Fecha,
                     cliente = venta.Cliente != null ? new {
                         nombre = venta.Cliente.NombreCompleto,
-                        documento = venta.Cliente.Documento
+                        documento = venta.Cliente.DocumentoIdentidad
                     } : null,
                     total = venta.Total,
                     subTotal = venta.SubTotal,
