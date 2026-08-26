@@ -54,16 +54,15 @@ const emit = defineEmits(['go-home'])
     <div class="consulta-container">
       <!-- Header -->
       <div class="consulta-header">
-        <div class="header-icon">📄</div>
         <h1>Consulta de Documentos Electrónicos</h1>
         <p>Busque y verifique su boleta de venta electrónica</p>
       </div>
 
       <!-- Formulario -->
-      <div class="consulta-form glass-card">
+      <div class="consulta-form light-card">
         <div class="form-row">
           <div class="form-group">
-            <label>📋 Serie del Comprobante</label>
+            <label>Serie del Comprobante</label>
             <input 
               v-model="serie" 
               type="text" 
@@ -73,7 +72,7 @@ const emit = defineEmits(['go-home'])
             />
           </div>
           <div class="form-group">
-            <label>🔢 Número del Comprobante</label>
+            <label>Número del Comprobante</label>
             <input 
               v-model="numero" 
               type="text" 
@@ -84,21 +83,20 @@ const emit = defineEmits(['go-home'])
         </div>
 
         <button class="btn-consultar" @click="consultar" :disabled="loading">
-          <span v-if="!loading">🔍 VER DOCUMENTO</span>
-          <span v-else>⏳ Buscando...</span>
+          <span v-if="!loading">VER DOCUMENTO</span>
+          <span v-else>Buscando...</span>
         </button>
       </div>
 
       <!-- Error -->
       <div v-if="error" class="error-card">
-        <span class="error-icon">⚠️</span>
         <p>{{ error }}</p>
       </div>
 
       <!-- Resultado -->
-      <div v-if="resultado" class="resultado-card glass-card">
+      <div v-if="resultado" class="resultado-card light-card">
         <div class="resultado-header">
-          <div class="status-badge success">✅ BOLETA ACEPTADA POR SUNAT</div>
+          <div class="status-badge success">BOLETA ACEPTADA POR SUNAT</div>
           <p class="status-detail">Estado: <strong>{{ resultado.sunatStatus || 'ACEPTADO' }}</strong></p>
         </div>
 
@@ -161,20 +159,20 @@ const emit = defineEmits(['go-home'])
         <!-- Botones de descarga -->
         <div class="resultado-descargas">
           <a v-if="resultado.sunatPdfUrl" :href="resultado.sunatPdfUrl" target="_blank" class="btn-download pdf">
-            📄 Descargar PDF
+            Descargar PDF
           </a>
           <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
-            📋 Descargar XML
+            Descargar XML
           </a>
           <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
-            📜 Descargar CDR
+            Descargar CDR
           </a>
         </div>
       </div>
 
       <!-- Volver al inicio -->
       <button class="btn-volver" @click="$emit('go-home')">
-        ← Volver al catálogo
+        Volver al catálogo
       </button>
     </div>
   </div>
@@ -184,7 +182,7 @@ const emit = defineEmits(['go-home'])
 .consulta-wrapper {
   min-height: 100vh;
   padding: 120px 20px 60px;
-  background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 50%, #1a0a0a 100%);
+  background: #ffffff;
 }
 
 .consulta-container {
@@ -197,29 +195,22 @@ const emit = defineEmits(['go-home'])
   margin-bottom: 2rem;
 }
 
-.header-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-}
-
 .consulta-header h1 {
   font-size: 1.8rem;
-  font-weight: 800;
-  color: #fff;
+  font-weight: 500;
+  color: #333333;
   margin-bottom: 0.5rem;
 }
 
 .consulta-header p {
-  color: rgba(255,255,255,0.6);
+  color: #666666;
   font-size: 1rem;
 }
 
-.glass-card {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
+.light-card {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   padding: 2rem;
 }
 
@@ -232,51 +223,48 @@ const emit = defineEmits(['go-home'])
 
 .form-group label {
   display: block;
-  color: rgba(255,255,255,0.8);
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: #555555;
+  font-size: 0.9rem;
+  font-weight: 400;
   margin-bottom: 0.5rem;
 }
 
 .form-group input {
   width: 100%;
   padding: 0.8rem 1rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.08);
-  color: #fff;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  color: #333333;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   outline: none;
   transition: border 0.3s;
 }
 
 .form-group input:focus {
   border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
 .form-group input::placeholder {
-  color: rgba(255,255,255,0.3);
+  color: #999999;
 }
 
 .btn-consultar {
   width: 100%;
   padding: 1rem;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 800;
+  border-radius: 6px;
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
-  letter-spacing: 1px;
 }
 
 .btn-consultar:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  background: #d97706;
 }
 
 .btn-consultar:disabled {
@@ -288,22 +276,18 @@ const emit = defineEmits(['go-home'])
 .error-card {
   margin-top: 1.5rem;
   padding: 1.2rem;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-
-.error-icon {
-  font-size: 1.5rem;
 }
 
 .error-card p {
-  color: #fca5a5;
-  font-weight: 600;
+  color: #b91c1c;
+  font-weight: 400;
   font-size: 0.95rem;
+  margin: 0;
 }
 
 /* Resultado */
@@ -320,20 +304,19 @@ const emit = defineEmits(['go-home'])
 .status-badge {
   display: inline-block;
   padding: 0.5rem 1.5rem;
-  border-radius: 20px;
-  font-weight: 800;
+  border-radius: 4px;
+  font-weight: 500;
   font-size: 0.9rem;
-  letter-spacing: 0.5px;
 }
 
 .status-badge.success {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .status-detail {
-  color: rgba(255,255,255,0.6);
+  color: #666666;
   font-size: 0.85rem;
   margin-top: 0.5rem;
 }
@@ -352,15 +335,15 @@ const emit = defineEmits(['go-home'])
 }
 
 .info-label {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.5);
-  font-weight: 500;
+  font-size: 0.85rem;
+  color: #777777;
+  font-weight: 400;
 }
 
 .info-value {
   font-size: 0.95rem;
-  color: #fff;
-  font-weight: 700;
+  color: #333333;
+  font-weight: 500;
 }
 
 /* Tabla */
@@ -375,21 +358,19 @@ const emit = defineEmits(['go-home'])
 
 .resultado-tabla th {
   text-align: left;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.5);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555555;
   padding: 0.6rem 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border-bottom: 1px solid #dddddd;
 }
 
 .resultado-tabla td {
   padding: 0.6rem 0.5rem;
-  color: #fff;
+  color: #333333;
   font-size: 0.9rem;
-  font-weight: 600;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-weight: 400;
+  border-bottom: 1px solid #eeeeee;
 }
 
 .resultado-tabla .center { text-align: center; }
@@ -398,24 +379,24 @@ const emit = defineEmits(['go-home'])
 /* Totales */
 .resultado-total {
   padding: 1rem 0;
-  border-top: 1px dashed rgba(255,255,255,0.15);
+  border-top: 1px dashed #cccccc;
 }
 
 .total-row {
   display: flex;
   justify-content: space-between;
   padding: 0.3rem 0;
-  color: rgba(255,255,255,0.7);
+  color: #555555;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .total-final {
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: #f59e0b;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333333;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid #dddddd;
   margin-top: 0.3rem;
 }
 
@@ -430,29 +411,23 @@ const emit = defineEmits(['go-home'])
 
 .btn-download {
   padding: 0.7rem 1.2rem;
-  border-radius: 10px;
+  border-radius: 6px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   text-decoration: none;
-  color: #fff;
+  color: #ffffff;
   transition: all 0.3s;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
 }
 
 .btn-download:hover {
-  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
-.btn-download.pdf { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-.btn-download.pdf:hover { box-shadow: 0 6px 20px rgba(220,38,38,0.4); }
-
-.btn-download.xml { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-.btn-download.xml:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
-
-.btn-download.cdr { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
-.btn-download.cdr:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+.btn-download.pdf { background: #dc2626; }
+.btn-download.xml { background: #2563eb; }
+.btn-download.cdr { background: #7c3aed; }
 
 /* Volver */
 .btn-volver {
@@ -460,18 +435,19 @@ const emit = defineEmits(['go-home'])
   margin: 2rem auto 0;
   padding: 0.7rem 2rem;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.7);
-  border-radius: 10px;
+  border: 1px solid #cccccc;
+  color: #555555;
+  border-radius: 6px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .btn-volver:hover {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  border-color: #999999;
+  color: #333333;
+  background: #f9f9f9;
 }
 
 @media (max-width: 600px) {
