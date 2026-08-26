@@ -117,7 +117,7 @@ const emit = defineEmits(['go-home'])
               <input 
                 v-model="numero" 
                 type="text" 
-                placeholder="000000XX"
+                placeholder="000000123"
                 @keyup.enter="consultar"
                 class="input-numero"
               />

@@ -92,22 +92,22 @@ export const generateA4PDF = async (venta) => {
     // Cabecera Empresa
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text(EMPRESA, 105, 18, { align: "center" });
+    doc.text(EMPRESA, 90, 18, { align: "center" });
     
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.text(DIR, 105, 24, { align: "center" });
-    doc.text(DIR2, 105, 29, { align: "center" });
-    doc.text(`Telf.: ${TEL}`, 105, 34, { align: "center" });
+    doc.text(DIR, 90, 24, { align: "center" });
+    doc.text(DIR2, 90, 29, { align: "center" });
+    doc.text(`Telf.: ${TEL}`, 90, 34, { align: "center" });
 
     // Recuadro RUC (Derecha superior)
-    doc.roundedRect(135, 12, 65, 25, 2, 2);
+    doc.roundedRect(135, 12, 60, 25, 2, 2);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text(`R.U.C. ${RUC}`, 167.5, 18, { align: "center" });
-    doc.text(`${docType} DE VENTA`, 167.5, 24, { align: "center" });
-    doc.text(`ELECTRÓNICA`, 167.5, 29, { align: "center" });
-    doc.text(numDoc, 167.5, 34, { align: "center" });
+    doc.text(`R.U.C. ${RUC}`, 165, 18, { align: "center" });
+    doc.text(`${docType} DE VENTA`, 165, 24, { align: "center" });
+    doc.text(`ELECTRÓNICA`, 165, 29, { align: "center" });
+    doc.text(numDoc, 165, 34, { align: "center" });
 
     // Datos Cliente
     doc.setFontSize(9);
