@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import api from '../utils/api.js'
 
+const tipoDoc = ref('Boleta')
 const serie = ref('B001')
 const numero = ref('')
+const fechaEmision = ref('')
 const loading = ref(false)
 const resultado = ref(null)
 const error = ref('')
@@ -12,15 +14,15 @@ const consultar = async () => {
   error.value = ''
   resultado.value = null
 
-  if (!serie.value || !numero.value) {
-    error.value = 'Debe ingresar la serie y el número del comprobante.'
+  if (!tipoDoc.value || !serie.value || !numero.value || !fechaEmision.value) {
+    error.value = 'Debe ingresar el tipo, serie, número y fecha de emisión.'
     return
   }
 
   loading.value = true
   try {
     const res = await api.get('/ecommerce/ConsultaBoleta', {
-      params: { serie: serie.value.trim(), numero: numero.value.trim() }
+      params: { tipoDoc: tipoDoc.value, serie: serie.value.trim(), numero: numero.value.trim(), fechaEmision: fechaEmision.value }
     })
     if (res.data.success) {
       resultado.value = res.data.data
@@ -60,6 +62,25 @@ const emit = defineEmits(['go-home'])
 
       <!-- Formulario -->
       <div class="consulta-form light-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo de Documento</label>
+            <select v-model="tipoDoc">
+              <option value="Boleta">Boleta</option>
+              <option value="Factura">Factura</option>
+              <option value="NotaDebito">Nota Débito</option>
+              <option value="NotaCredito">Nota Crédito</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha de Emisión</label>
+            <input 
+              v-model="fechaEmision" 
+              type="date" 
+            />
+          </div>
+        </div>
+        
         <div class="form-row">
           <div class="form-group">
             <label>Serie del Comprobante</label>
@@ -180,9 +201,9 @@ const emit = defineEmits(['go-home'])
 
 <style scoped>
 .consulta-wrapper {
-  min-height: 100vh;
+  min-height: 80vh;
   padding: 120px 20px 60px;
-  background: #ffffff;
+  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 120px), #ffffff;
 }
 
 .consulta-container {
@@ -229,7 +250,8 @@ const emit = defineEmits(['go-home'])
   margin-bottom: 0.5rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 0.8rem 1rem;
   border-radius: 6px;
@@ -242,7 +264,8 @@ const emit = defineEmits(['go-home'])
   transition: border 0.3s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   border-color: #f59e0b;
 }
 

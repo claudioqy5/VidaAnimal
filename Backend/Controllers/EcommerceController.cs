@@ -66,26 +66,32 @@ namespace VidaAnimal.API.Controllers
             return Ok(new { success = true, data = especies });
         }
         [HttpGet("ConsultaBoleta")]
-        public async Task<IActionResult> ConsultaBoleta([FromQuery] string serie, [FromQuery] string numero)
+        public async Task<IActionResult> ConsultaBoleta([FromQuery] string tipoDoc, [FromQuery] string serie, [FromQuery] string numero, [FromQuery] DateTime? fechaEmision)
         {
-            if (string.IsNullOrWhiteSpace(serie) || string.IsNullOrWhiteSpace(numero))
-                return BadRequest(new { success = false, message = "Debe proporcionar serie y número del comprobante." });
+            if (string.IsNullOrWhiteSpace(tipoDoc) || string.IsNullOrWhiteSpace(serie) || string.IsNullOrWhiteSpace(numero) || !fechaEmision.HasValue)
+                return BadRequest(new { success = false, message = "Debe proporcionar tipo de documento, serie, número y fecha de emisión." });
 
             // Normalizar: quitar espacios
             serie = serie.Trim().ToUpper();
             numero = numero.Trim();
 
-            var venta = await _context.Ventas
+            var query = _context.Ventas
                 .Include(v => v.VentaDetalles)
                     .ThenInclude(d => d.Producto)
                 .Include(v => v.Cliente)
-                .FirstOrDefaultAsync(v => 
-                    v.SerieComprobante == serie && 
-                    v.NumeroComprobante == numero &&
-                    v.SerieComprobante!.StartsWith("B")); // Solo boletas
+                .Where(v => v.SerieComprobante == serie && v.NumeroComprobante == numero && v.Fecha.Date == fechaEmision.Value.Date);
+
+            // Filtro adicional por si acaso según el tipo seleccionado (aunque la serie ya dice qué es)
+            if (tipoDoc == "Boleta") {
+                query = query.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("B"));
+            } else if (tipoDoc == "Factura") {
+                query = query.Where(v => v.SerieComprobante != null && v.SerieComprobante.StartsWith("F"));
+            }
+
+            var venta = await query.FirstOrDefaultAsync();
 
             if (venta == null)
-                return NotFound(new { success = false, message = "No se encontró la boleta con la serie y número proporcionados." });
+                return NotFound(new { success = false, message = "No se encontró el comprobante con los datos proporcionados. Verifique que la fecha, serie y número sean correctos." });
 
             if (!venta.EnviadoSunat)
                 return Ok(new { 
