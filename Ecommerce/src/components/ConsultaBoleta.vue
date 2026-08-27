@@ -56,6 +56,13 @@ const formatFecha = (fecha) => {
     ' ' + d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
+const formatFileUrl = (url) => {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('api/')) return `https://vidaanimal.helifyferdigital.cloud/${url}`;
+  return `https://vidaanimal.helifyferdigital.cloud/api/${url}`;
+}
+
 // Mapea la respuesta de la API pública al formato que espera pdfGenerator.js
 const mapResultadoParaPDF = (r) => ({
   serieComprobante: r.serie,
@@ -236,10 +243,10 @@ const emit = defineEmits(['go-home'])
         <div class="resultado-descargas">
           <!-- Opciones SUNAT (Solo visibles si fueron aceptadas) -->
           <div class="sunat-buttons" v-if="resultado.sunatXmlUrl || resultado.sunatCdrUrl">
-            <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl.startsWith('http') ? resultado.sunatXmlUrl : 'https://' + resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
+            <a v-if="resultado.sunatXmlUrl" :href="formatFileUrl(resultado.sunatXmlUrl)" target="_blank" class="btn-download xml">
               📋 XML SUNAT
             </a>
-            <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl.startsWith('http') ? resultado.sunatCdrUrl : 'https://' + resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
+            <a v-if="resultado.sunatCdrUrl" :href="formatFileUrl(resultado.sunatCdrUrl)" target="_blank" class="btn-download cdr">
               📜 CDR SUNAT
             </a>
           </div>
