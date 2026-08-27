@@ -81,7 +81,9 @@ export const generateA4PDF = async (venta) => {
     const DIR2 = "José Crespo y Castillo, Leoncio Prado, Huánuco";
     const TEL = "975 418 965";
     
-    const docType = venta.serieComprobante?.startsWith('F') ? 'FACTURA' : 'BOLETA';
+    const serie = venta.serieComprobante || '';
+    const docType = serie.startsWith('F') ? 'FACTURA' : serie.startsWith('B') ? 'BOLETA' : 'NOTA DE VENTA';
+    const isElectronica = docType === 'BOLETA' || docType === 'FACTURA';
     const numDoc = `${venta.serieComprobante} - ${venta.numeroComprobante}`;
 
     // Dibujar Logo si existe
@@ -105,15 +107,20 @@ export const generateA4PDF = async (venta) => {
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.text(`R.U.C. ${RUC}`, 165, 18, { align: "center" });
-    doc.text(`${docType} DE VENTA`, 165, 24, { align: "center" });
-    doc.text(`ELECTRÓNICA`, 165, 29, { align: "center" });
-    doc.text(numDoc, 165, 34, { align: "center" });
+    if (isElectronica) {
+        doc.text(`${docType} DE VENTA`, 165, 24, { align: "center" });
+        doc.text(`ELECTRÓNICA`, 165, 29, { align: "center" });
+        doc.text(numDoc, 165, 34, { align: "center" });
+    } else {
+        doc.text(`${docType}`, 165, 25, { align: "center" });
+        doc.text(numDoc, 165, 31, { align: "center" });
+    }
 
     // Datos Cliente
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.text("CLIENTE:", 15, 45);
-    doc.text(docType === "FACTURA" ? "R.U.C.:" : "D.N.I.:", 15, 50);
+    doc.text(docType === "FACTURA" ? "R.U.C.:" : "D.N.I./DOC.:", 15, 50);
     doc.text("DIRECCIÓN:", 15, 55);
     doc.text("TIPO PAGO:", 15, 60);
 
@@ -214,7 +221,9 @@ export const generateA4PDF = async (venta) => {
     finalY += 10;
 
     // Generar QR
-    const qrText = `${RUC}|${docType==='FACTURA'?'01':'03'}|${venta.serieComprobante}|${venta.numeroComprobante}|0.00|${venta.total}|${venta.fecha.split('T')[0]}|${venta.cliente?.documentoIdentidad? '1':'0'}|${venta.cliente?.documentoIdentidad||'-'}`;
+    // Para Notas de Venta, el QR no tiene datos SUNAT oficiales, solo es referencial
+    const tipoSunat = docType === 'FACTURA' ? '01' : docType === 'BOLETA' ? '03' : 'NV';
+    const qrText = `${RUC}|${tipoSunat}|${venta.serieComprobante}|${venta.numeroComprobante}|0.00|${venta.total}|${venta.fecha.split('T')[0]}|${venta.cliente?.documentoIdentidad? '1':'0'}|${venta.cliente?.documentoIdentidad||'-'}`;
     const qrDataUrl = await QRCode.toDataURL(qrText, { margin: 0, width: 35 });
     doc.addImage(qrDataUrl, 'PNG', 15, finalY, 35, 35);
 
@@ -230,10 +239,16 @@ export const generateA4PDF = async (venta) => {
     // Consulte su documento
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("Consulte su documento electrónico en:", 55, finalY + 13);
-    doc.setTextColor(0, 0, 255);
-    doc.text("https://vidaanimal.vercel.app/consultaboleta", 55, finalY + 17);
-    doc.setTextColor(0, 0, 0);
+    if (isElectronica) {
+        doc.text("Consulte su documento electrónico en:", 55, finalY + 13);
+        doc.setTextColor(0, 0, 255);
+        doc.text("https://vidaanimal.vercel.app/consultaboleta", 55, finalY + 17);
+        doc.setTextColor(0, 0, 0);
+    } else {
+        doc.setTextColor(100, 100, 100);
+        doc.text("Documento interno - No declarado ante SUNAT", 55, finalY + 13);
+        doc.setTextColor(0, 0, 0);
+    }
 
     // HASH and VENDEDOR
     doc.setFont("helvetica", "bold");
@@ -284,7 +299,9 @@ export const generateTicketPDF = async (venta) => {
     const DIR = "Jr. Atahualpa N° 291 - Aucayacu";
     const DIR2 = "José Crespo y Castillo, Huánuco"; // Shorter for ticket
     const TEL = "Telf.: 975 418 965";
-    const docType = venta.serieComprobante?.startsWith('F') ? 'FACTURA' : 'BOLETA';
+    const serie = venta.serieComprobante || '';
+    const docType = serie.startsWith('F') ? 'FACTURA' : serie.startsWith('B') ? 'BOLETA' : 'NOTA DE VENTA';
+    const isElectronica = docType === 'BOLETA' || docType === 'FACTURA';
     const numDoc = `${venta.serieComprobante} - ${venta.numeroComprobante}`;
     
     let y = 5;
@@ -318,7 +335,11 @@ export const generateTicketPDF = async (venta) => {
     doc.setFontSize(9);
     
     doc.setFont("helvetica", "bold");
-    doc.text(`${docType} ELECTRÓNICA`, 40, y, { align: "center" });
+    if (isElectronica) {
+        doc.text(`${docType} ELECTRÓNICA`, 40, y, { align: "center" });
+    } else {
+        doc.text(docType, 40, y, { align: "center" });
+    }
     y += 5;
     doc.text(numDoc, 40, y, { align: "center" });
     y += 8;
@@ -376,9 +397,13 @@ export const generateTicketPDF = async (venta) => {
     doc.text(splitLetras, 40, y, { align: "center" });
     y += 10;
     
-    doc.text("Consulte su documento electrónico en:", 40, y, { align: "center" });
-    y += 4;
-    doc.text("https://vidaanimal.vercel.app/consultaboleta", 40, y, { align: "center" });
+    if (isElectronica) {
+        doc.text("Consulte su documento electrónico en:", 40, y, { align: "center" });
+        y += 4;
+        doc.text("https://vidaanimal.vercel.app/consultaboleta", 40, y, { align: "center" });
+    } else {
+        doc.text("Documento interno - No declarado ante SUNAT", 40, y, { align: "center" });
+    }
     
     // Save with precise content height
     doc.save(`Ticket_${numDoc}.pdf`);
