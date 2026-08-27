@@ -310,7 +310,7 @@ export const generateTicketPDF = async (venta) => {
     const logoBase64 = await loadLogo();
     if (logoBase64) {
         doc.addImage(logoBase64, 'PNG', 25, y, 30, 30);
-        y += 32;
+        y += 37;
     } else {
         y += 5;
     }

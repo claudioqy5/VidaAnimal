@@ -319,9 +319,10 @@ export function imprimirTicketVenta(venta) {
 
     // ── Pie legal ──
     '<div class="footer-legal">' +
-      'Representación Impresa del Comprobante Electrónico<br>' +
-      'Consulte su Documento en:<br>' +
-      'https://' + STORE_INFO.web + '<br>' +
+      (isBoleta || isFactura
+        ? 'Representación Impresa del Comprobante Electrónico<br>Consulte su Documento en:<br><strong>https://vidaanimal.vercel.app/consultaboleta</strong><br>'
+        : 'Documento interno - No declarado ante SUNAT<br>'
+      ) +
       '<div style="margin-top: 4px;">HASH: ' + sunatHash + '</div>' +
       '<div style="margin-top: 2px;">VENDEDOR: ' + cajeroName + '</div>' +
     '</div>'
