@@ -88,7 +88,7 @@ export const generateA4PDF = async (venta) => {
 
     // Dibujar Logo si existe
     if (logoBase64) {
-        doc.addImage(logoBase64, 'PNG', 15, 12, 30, 30);
+        doc.addImage(logoBase64, 'PNG', 15, 14, 25, 25);
     }
 
     // Cabecera Empresa
