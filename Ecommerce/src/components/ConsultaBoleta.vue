@@ -56,15 +56,38 @@ const formatFecha = (fecha) => {
     ' ' + d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
+// Mapea la respuesta de la API pública al formato que espera pdfGenerator.js
+const mapResultadoParaPDF = (r) => ({
+  serieComprobante: r.serie,
+  numeroComprobante: r.numero,
+  fecha: r.fecha,
+  total: r.total,
+  subTotal: r.subTotal,
+  descuento: r.descuento || 0,
+  metodoPago: r.metodoPago,
+  cajero: r.cajero || 'SISTEMA',
+  cliente: r.cliente ? {
+    nombreCompleto: r.cliente.nombre,
+    documentoIdentidad: r.cliente.documento,
+    direccion: r.cliente.direccion || null
+  } : null,
+  detalleVentas: (r.detalles || []).map(d => ({
+    cantidad: d.cantidad,
+    precioUnitario: d.precioUnitario,
+    unidadVenta: d.unidadVenta || 'UND',
+    producto: { nombre: d.producto }
+  }))
+})
+
 const descargarA4 = async () => {
   if (resultado.value) {
-    await generateA4PDF(resultado.value);
+    await generateA4PDF(mapResultadoParaPDF(resultado.value));
   }
 }
 
 const descargarTicketLocal = async () => {
   if (resultado.value) {
-    await generateTicketPDF(resultado.value);
+    await generateTicketPDF(mapResultadoParaPDF(resultado.value));
   }
 }
 
