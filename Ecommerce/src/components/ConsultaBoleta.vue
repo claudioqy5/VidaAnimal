@@ -236,10 +236,10 @@ const emit = defineEmits(['go-home'])
         <div class="resultado-descargas">
           <!-- Opciones SUNAT (Solo visibles si fueron aceptadas) -->
           <div class="sunat-buttons" v-if="resultado.sunatXmlUrl || resultado.sunatCdrUrl">
-            <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
+            <a v-if="resultado.sunatXmlUrl" :href="resultado.sunatXmlUrl.startsWith('http') ? resultado.sunatXmlUrl : 'https://' + resultado.sunatXmlUrl" target="_blank" class="btn-download xml">
               📋 XML SUNAT
             </a>
-            <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
+            <a v-if="resultado.sunatCdrUrl" :href="resultado.sunatCdrUrl.startsWith('http') ? resultado.sunatCdrUrl : 'https://' + resultado.sunatCdrUrl" target="_blank" class="btn-download cdr">
               📜 CDR SUNAT
             </a>
           </div>
