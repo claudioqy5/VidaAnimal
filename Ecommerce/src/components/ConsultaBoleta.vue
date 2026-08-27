@@ -59,8 +59,10 @@ const formatFecha = (fecha) => {
 const formatFileUrl = (url) => {
   if (!url) return '#';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('api/')) return `https://vidaanimal.helifyferdigital.cloud/${url}`;
-  return `https://vidaanimal.helifyferdigital.cloud/api/${url}`;
+  // La BD guarda rutas relativas como /api/ventas/descargar/xml/...
+  // Solo hay que añadir el dominio base del backend
+  const base = 'https://vidaanimal.helifyferdigital.cloud';
+  return url.startsWith('/') ? `${base}${url}` : `${base}/${url}`;
 }
 
 // Mapea la respuesta de la API pública al formato que espera pdfGenerator.js
