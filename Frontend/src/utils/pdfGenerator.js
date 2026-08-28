@@ -244,10 +244,6 @@ export const generateA4PDF = async (venta) => {
         doc.setTextColor(0, 0, 255);
         doc.text("https://vidaanimal.vercel.app/consultaboleta", 55, finalY + 17);
         doc.setTextColor(0, 0, 0);
-    } else {
-        doc.setTextColor(100, 100, 100);
-        doc.text("Documento interno - No declarado ante SUNAT", 55, finalY + 13);
-        doc.setTextColor(0, 0, 0);
     }
 
     // HASH and VENDEDOR
@@ -401,8 +397,6 @@ export const generateTicketPDF = async (venta) => {
         doc.text("Consulte su documento electrónico en:", 40, y, { align: "center" });
         y += 4;
         doc.text("https://vidaanimal.vercel.app/consultaboleta", 40, y, { align: "center" });
-    } else {
-        doc.text("Documento interno - No declarado ante SUNAT", 40, y, { align: "center" });
     }
     
     // Save with precise content height
