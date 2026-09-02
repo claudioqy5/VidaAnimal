@@ -582,8 +582,7 @@ background: rgba(38, 19, 19, 0.6);
 
 .nav-links a {
   text-decoration: none;
-  color: white;
-  font-weight: 700;
+  color: white;  
   font-size: 0.85rem;
   letter-spacing: 1.5px;
   transition: all 0.3s;

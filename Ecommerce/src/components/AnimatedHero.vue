@@ -363,6 +363,7 @@ onMounted(() => {
   letter-spacing: 5px;
   text-transform: none; /* Las cursivas se ven mejor en minúsculas/mixtas */
   text-shadow: 0 5px 15px rgba(228, 180, 107, 0.3);
+  font-weight: 100;
 }
 
 .animal {
