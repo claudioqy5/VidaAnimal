@@ -1,5 +1,12 @@
 {
     "rewrites": [
-        { "source": "/(.*)", "destination": "/index.html" }
+        {
+            "source": "/api/:match*",
+            "destination": "https://vidaanimal.helifyferdigital.cloud/api/:match*"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
     ]
 }
