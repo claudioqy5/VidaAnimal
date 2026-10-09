@@ -289,6 +289,62 @@ namespace VidaAnimal.API.Controllers
             }
         }
 
+        [HttpPost("{id}/reenviar-sunat")]
+        public async Task<IActionResult> ReenviarSunat(int id)
+        {
+            var venta = await _context.Ventas
+                .Include(v => v.VentaDetalles).ThenInclude(d => d.Producto)
+                .Include(v => v.Cliente)
+                .FirstOrDefaultAsync(v => v.VentaID == id);
+
+            if (venta == null)
+                return NotFound(new { success = false, mensaje = "Venta no encontrada." });
+
+            if (venta.Estado == "Anulada")
+                return BadRequest(new { success = false, mensaje = "No se puede enviar a SUNAT una venta anulada." });
+
+            if (venta.EnviadoSunat)
+                return BadRequest(new { success = false, mensaje = "Esta boleta ya fue enviada y aprobada por SUNAT previamente." });
+
+            try
+            {
+                var resultado = await _apisPeruService.EnviarBoletaAsync(venta);
+                venta.EnviadoSunat = resultado.Success;
+                venta.SunatStatus = resultado.Success 
+                    ? (resultado.SunatStatus ?? "ACEPTADO") 
+                    : (resultado.Message != null && resultado.Message.Length > 250 ? resultado.Message.Substring(0, 250) : resultado.Message);
+                venta.SunatXmlUrl = resultado.XmlUrl;
+                venta.SunatPdfUrl = resultado.PdfUrl;
+                venta.SunatCdrUrl = resultado.CdrUrl;
+                await _context.SaveChangesAsync();
+
+                if (resultado.Success)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        mensaje = $"Boleta enviada exitosamente a SUNAT: {resultado.SunatStatus}",
+                        sunatStatus = resultado.SunatStatus ?? "ACEPTADO",
+                        sunatPdfUrl = resultado.PdfUrl,
+                        sunatXmlUrl = resultado.XmlUrl,
+                        sunatCdrUrl = resultado.CdrUrl
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        mensaje = $"Error al conectar con APIsPERU/SUNAT: {resultado.Message}"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, mensaje = $"Excepción al reenviar: {ex.Message}" });
+            }
+        }
+
         public class AnularRequest 
         {
             public string Password { get; set; } = string.Empty;

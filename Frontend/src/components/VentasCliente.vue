@@ -188,6 +188,14 @@
             <div v-else-if="v.serieComprobante?.startsWith('B')" style="margin-top: 1rem; padding: 0.75rem 1rem; background: #FFFAF0; border: 1px solid #F6AD55; border-radius: 8px;">
               <p style="font-weight: 600; color: #744210; font-size: 0.82rem;">⚠️ Esta boleta no fue enviada a SUNAT correctamente.</p>
               <p v-if="v.sunatStatus" style="font-size: 0.78rem; color: #9C4221; margin-top: 4px; word-break: break-word;"><b>Respuesta servidor:</b> {{ v.sunatStatus }}</p>
+              <button 
+                @click.stop="reenviarSunat(v)" 
+                :disabled="reenviandoSunatId === v.ventaID" 
+                style="margin-top: 0.6rem; background: #DD6B20; color: white; border: none; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 4px rgba(221,107,32,0.3);"
+              >
+                <span v-if="reenviandoSunatId === v.ventaID">⏳ Reenviando a SUNAT...</span>
+                <span v-else>🚀 Reenviar a SUNAT</span>
+              </button>
             </div>
             
             <div class="actions-footer" style="margin-top: 1.5rem; text-align: right;">
@@ -283,6 +291,38 @@ const toggleVenta = (id) => {
     expandedVentas.value.delete(id);
   } else {
     expandedVentas.value.add(id);
+  }
+};
+
+const reenviandoSunatId = ref(null);
+
+const reenviarSunat = async (v) => {
+  if (!confirm(`¿Deseas intentar reenviar la Boleta ${v.serieComprobante}-${v.numeroComprobante} a la SUNAT?`)) return;
+  reenviandoSunatId.value = v.ventaID;
+  try {
+    const res = await fetch(`${API_BASE}/ventas/${v.ventaID}/reenviar-sunat`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`✅ ${data.mensaje}`);
+      v.enviadoSunat = true;
+      v.sunatStatus = data.sunatStatus;
+      v.sunatPdfUrl = data.sunatPdfUrl;
+      v.sunatXmlUrl = data.sunatXmlUrl;
+      v.sunatCdrUrl = data.sunatCdrUrl;
+    } else {
+      alert(`⚠️ No se pudo enviar a SUNAT: ${data.mensaje || 'Error desconocido'}`);
+      if (data.mensaje) v.sunatStatus = data.mensaje;
+    }
+  } catch (e) {
+    alert(`❌ Error de conexión al intentar reenviar: ${e.message}`);
+  } finally {
+    reenviandoSunatId.value = null;
   }
 };
 
