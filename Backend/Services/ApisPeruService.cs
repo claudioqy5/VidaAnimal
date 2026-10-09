@@ -267,23 +267,52 @@ namespace VidaAnimal.API.Services
                 }
 
                 // ── 4. Estado SUNAT ────────────────────────────────────────────────
-                // Nuevo formato: cdrResponse directo en el root
-                if (result.RootElement.TryGetProperty("cdrResponse", out var cdrResponse))
+                bool isSuccess = true;
+                string returnMessage = "Boleta enviada exitosamente a SUNAT.";
+
+                // Revisar si existe un error explícito de SUNAT
+                if (result.RootElement.TryGetProperty("sunatResponse", out var srObj))
                 {
-                    var desc = cdrResponse.TryGetProperty("description", out var d) ? d.GetString() : null;
-                    var code = cdrResponse.TryGetProperty("code", out var c) ? c.GetString() : null;
-                    if (code == "0")
-                        sunatStatus = desc ?? "La Boleta ha sido aceptada";
-                    else
-                        sunatStatus = desc ?? "ACEPTADO";
-                }
-                else if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) &&
-                         sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
-                {
-                    sunatStatus = cdrRes.TryGetProperty("description", out var d) ? d.GetString() : "ACEPTADO";
+                    if (srObj.TryGetProperty("success", out var sProp) && sProp.ValueKind == JsonValueKind.False)
+                    {
+                        if (srObj.TryGetProperty("error", out var errObj))
+                        {
+                            var errCode = errObj.TryGetProperty("code", out var ec) ? ec.GetString() : "";
+                            var errMsg = errObj.TryGetProperty("message", out var em) ? em.GetString() : "Error en SUNAT";
+                            
+                            // 1033 = El comprobante fue registrado previamente. 
+                            // Lo tratamos como "Éxito" porque significa que ya está aceptado en SUNAT.
+                            if (errCode == "1033")
+                            {
+                                isSuccess = true;
+                                sunatStatus = "ACEPTADO (Registrado previamente)";
+                            }
+                            else
+                            {
+                                isSuccess = false;
+                                returnMessage = $"SUNAT Error {errCode}: {errMsg}";
+                                sunatStatus = returnMessage;
+                            }
+                        }
+                    }
                 }
 
-                return (true, "Boleta enviada exitosamente a SUNAT.", xmlUrl, pdfUrl, cdrUrl, sunatStatus);
+                if (isSuccess && sunatStatus == "ACEPTADO") 
+                {
+                    // Si no fue un error 1033, extraemos el mensaje normal de éxito
+                    if (result.RootElement.TryGetProperty("cdrResponse", out var cdrResponse))
+                    {
+                        var desc = cdrResponse.TryGetProperty("description", out var d) ? d.GetString() : null;
+                        sunatStatus = desc ?? "La Boleta ha sido aceptada";
+                    }
+                    else if (result.RootElement.TryGetProperty("sunatResponse", out var sunatRes) &&
+                             sunatRes.TryGetProperty("cdrResponse", out var cdrRes))
+                    {
+                        sunatStatus = cdrRes.TryGetProperty("description", out var d) ? d.GetString() : "ACEPTADO";
+                    }
+                }
+
+                return (isSuccess, returnMessage, xmlUrl, pdfUrl, cdrUrl, sunatStatus);
             }
             catch (Exception ex)
             {
